@@ -1,0 +1,6 @@
+!!python/object/new:config.Config
+dictitems:
+  token: VktoHo4iNhPvjdioycA20vtK9HSth5sjLdBaZsD6
+  token_expiration: 2018-10-17 16:30:39.763031
+state:
+  filename: ../config.yaml
