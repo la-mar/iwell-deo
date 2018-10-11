@@ -1,25 +1,150 @@
 !!python/object/new:config.Config
 dictitems:
+  cached_at: 2018-10-11 18:33:12.135999
+  client_id: KTDMpqhGyBMhnRDB
+  client_secret: gYFRiXRtMN0fDYTDPUDYOk1RAbPz44Bu
   endpoints:
-    fields: /fields
-    me: /me
-    meter_readings: /wells/{well_id}/meters/{meter_id}/readings
-    meters: /wells/{well_id}/meters
-    production: /wells/{well_id}/production
-    reading_run_tickets: /tanks/{tank_id}/readings/{reading_id}/run-tickets
-    readings: /tanks/{tank_id}/readings
-    run_tickets: /tanks/{tank_id}/readings/{reading_id}/run-tickets/{run_ticket_id}
-    tanks: /tanks
-    token: /oauth2/access-token
-    well_field_values: /wells/{well_id}/fields/{field_id}/values
-    well_fields: /wells/{well_id}/fields
-    well_group_wells: /well-groups/{group_id}/wells
-    well_groups: /well-groups
-    well_notes: /wells/{well_id}/notes
-    well_tanks: /wells/{well_id}/tanks
-    wells: /wells
+    fields:
+      aliases:
+        created_at: created_iwell
+        id: field_id
+        name: field_name
+        order: field_order
+        type: field_type
+        unit: field_unit
+        updated_at: updated_iwell
+      exclude: []
+      normalize: false
+      path: /fields
+    meter_readings:
+      aliases:
+        created_at: created_iwell
+        id: meter_reading_id
+        updated_at: updated_iwell
+      exclude: []
+      normalize: false
+      path: /wells/{well_id}/meters/{meter_id}/readings
+    meters:
+      aliases:
+        created_at: created_iwell
+        date: reading_date
+        id: meter_id
+        name: meter_name
+        order: meter_order
+        type: product_type
+        updated_at: updated_iwell
+      exclude: []
+      normalize: false
+      path: /wells/{well_id}/meters
+    production:
+      aliases:
+        created_at: created_iwell
+        id: production_id
+        production_time: prod_datetime
+        updated_at: updated_iwell
+      exclude:
+      - date
+      normalize: false
+      path: /wells/{well_id}/production
+    run_tickets:
+      aliases:
+        created_at: created_iwell
+        date: reading_date
+        id: run_ticket_id
+        type: product_type
+        updated_at: updated_iwell
+      exclude: []
+      normalize: false
+      path: /tanks/{tank_id}/readings/{reading_id}/run-tickets/{run_ticket_id}
+    tank_readings:
+      aliases:
+        created_at: created_iwell
+        id: reading_id
+        updated_at: updated_iwell
+      exclude: []
+      normalize: false
+      path: /tanks/{tank_id}/readings
+    tanks:
+      aliases:
+        created_at: created_iwell
+        id: tank_id
+        name: tank_name
+        type: tank_type
+        updated_at: updated_iwell
+      exclude: []
+      normalize: false
+      path: /tanks
+    well_field_values:
+      aliases:
+        created_at: created_iwell
+        id: value_id
+        updated_at: updated_iwell
+      exclude: []
+      normalize: false
+      path: /wells/{well_id}/fields/{field_id}/values
+    well_fields:
+      aliases:
+        created_at: created_iwell
+        id: field_id
+        name: field_name
+        order: field_order
+        type: field_type
+        unit: field_unit
+        updated_at: updated_iwell
+      exclude: []
+      normalize: false
+      path: /wells/{well_id}/fields
+    well_group_wells:
+      aliases:
+        created_at: created_iwell
+        id: well_id
+        updated_at: updated_iwell
+      exclude: []
+      normalize: false
+      path: /well-groups/{group_id}/wells
+    well_groups:
+      aliases:
+        created_at: created_iwell
+        id: group_id
+        latest_production_time: group_latest_production_time
+        name: group_name
+        updated_at: updated_iwell
+      exclude:
+      - wells.data
+      normalize: true
+      path: /well-groups
+    well_notes:
+      aliases:
+        created_at: created_iwell
+        id: note_id
+        updated_at: updated_iwell
+      exclude: []
+      normalize: false
+      path: /wells/{well_id}/notes
+    well_tanks:
+      aliases:
+        created_at: created_iwell
+        id: tank_id
+        updated_at: updated_iwell
+      exclude: []
+      normalize: false
+      path: /wells/{well_id}/tanks
+    wells:
+      aliases:
+        alias: well_alias
+        created_at: created_iwell
+        id: well_id
+        name: well_name
+        type: well_type
+        updated_at: updated_iwell
+      exclude: []
+      normalize: false
+      path: /wells
+  password: 7haYrAaFqTwS
   token: VktoHo4iNhPvjdioycA20vtK9HSth5sjLdBaZsD6
   token_expiration: 2018-10-17 16:30:39.763031
+  token_path: /oauth2/access-token
   url: https://api.iwell.info/v1
+  username: data@driftwoodenergy.com
 state:
   filename: ../config.yaml

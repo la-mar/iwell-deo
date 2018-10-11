@@ -23,48 +23,67 @@ from oauthlib.oauth2 import LegacyApplicationClient, TokenExpiredError
 from requests_oauthlib import OAuth2Session
 from config import Config
 
-client_id = "KTDMpqhGyBMhnRDB"
-client_secret = "gYFRiXRtMN0fDYTDPUDYOk1RAbPz44Bu"
-username = 'data@driftwoodenergy.com'
-password = '7haYrAaFqTwS'
+# client_id = "KTDMpqhGyBMhnRDB"
+# client_secret = "gYFRiXRtMN0fDYTDPUDYOk1RAbPz44Bu"
+# username = 'data@driftwoodenergy.com'
+# password = '7haYrAaFqTwS'
 
-url = 'https://api.iwell.info/v1'
-token_path = '/oauth2/access-token'
-# request_path = '/me'
-# wells_path = '/wells'
-
+# _properties['client_id'] = "KTDMpqhGyBMhnRDB"
+# _properties['client_secret'] = "gYFRiXRtMN0fDYTDPUDYOk1RAbPz44Bu"
+# _properties['username'] = 'data@driftwoodenergy.com'
+# _properties['password'] = '7haYrAaFqTwS'
+# _properties['token_path']  = '/oauth2/access-token'
 
 pd.options.display.max_rows = None
 pd.set_option('display.float_format', lambda x: '%.2f' % x)
 pd.set_option('large_repr', 'truncate')
 pd.set_option('precision',2)
 
+# TODO: Move to main?
+_properties = Config('../config.yaml')
+
+endpoints = _properties['endpoints']
+# url = _properties['url']
 
 
-class iWell(object):
-
-	cfg = Config('../config.yaml')
-	paths = cfg['paths']
+class iwell(object):
+	url = _properties['url']
 	
-	def __init__(self, url, tbl):
-
-		self.tbl = tbl
+	def __init__(self, properties: dict):
 		self.df = None
+		self.endpoint = properties
 
-	def reload_config(cls):
-		cfg = Config('../config.yaml')
+	@classmethod
+	def reload_properties(cls):
+		"""refresh property attributes
+		"""
+		_properties = Config('../config.yaml')
 
-	def _getAccessToken(self):
+	@classmethod
+	def cache_properties(cls):
+		"""refresh property attributes
+		"""
+		_properties['cached_at'] = datetime.now()
+
+
+	@classmethod
+	def _getAccessToken(cls):
 		# FIXME: Fetching new token tries to attach to str and fails
 		"""Fetch a new access token from the provider using OAuth2"""
 		# https://requests-oauthlib.readthedocs.io/en/latest/oauth2_workflow.html#backend-application-flow
 		oauth = OAuth2Session(
-			client=LegacyApplicationClient(client_id=client_id))
+			client=LegacyApplicationClient(client_id=_properties['client_id']))
+
 		return oauth.fetch_token(
-			token_url=url+token_path, username=username, password=password, client_id=client_id, client_secret=client_secret
+			token_url= cls.url + _properties['token_path']
+			, username=_properties['username']
+			, password=_properties['password']
+			, client_id=_properties['client_id']
+			, client_secret=_properties['client_secret']
 		)
 
-	def _token_saver(self, response_token):
+	@classmethod
+	def _token_saver(cls, response_token):
 		"""Save response token and token expiration date to configuration file.
 		Arguments:
 			response_token {dict} -- oauth response object
@@ -72,36 +91,59 @@ class iWell(object):
 			str -- response token as string
 		"""
 
-		self.cfg["token"] = response_token["access_token"]
-		self.cfg["token_expiration"] = datetime.utcfromtimestamp(response_token['expires_at'])
+		_properties["token"] = response_token["access_token"]
+		_properties["token_expiration"] = (
+			datetime.utcfromtimestamp(response_token['expires_at']))
+
 		return response_token
 
-	def getAccessToken(self):
+	@classmethod
+	def getAccessToken(cls, force = False):
 		""" Checks if saved token is still valid"""
-		token = self.cfg["token"]
-		expiration = self.cfg["token_expiration"]
+		token = _properties["token"]
+		expiration = _properties["token_expiration"]
 
-		# if expiration date exists and is a datetime
-		if expiration is not None and isinstance(expiration, datetime):
-			# if current time is < time of expiration minus one day
-			if datetime.now() < expiration - timedelta(days=1):
-				# print('Current token is valid.')
-				return token
+		# if force change flag is False
+		if not force:
+			# if expiration date exists and is a datetime
+			if expiration is not None and isinstance(expiration, datetime):
+				# if current time is < time of expiration minus one day
+				if datetime.now() < expiration - timedelta(days=1):
+					# print('Current token is valid.')
+					return token
 
 		# Token wasn't valid. Return new token
 		print('Retrieved new token.')
-		return self._token_saver(self._getAccessToken())
+		return cls._token_saver(cls._getAccessToken())['token']
 
-	def getBearer(self):
+	@classmethod
+	def getBearer(cls):
 		"""Returns bearer authorization string for inclusion
 			in request header.
 		Returns:
 			str -- bearer string
 		"""
 
-		return "Bearer " + self.getAccessToken()
+		return "Bearer " + cls.getAccessToken()
 
-	def request_entity(self, orient='split', njson = False):
+	@classmethod
+	def add_since(endpoint, since = '1980-01-01'):
+		"""Append ?since clause to endpoint string. Default settings pull all data.
+		
+		Arguments:
+			endpoint {str} -- Provider URI or endpoint
+		
+		Keyword Arguments:
+			since {str} -- date string (default: {'1980-01-01'})
+		
+		Returns:
+			[str] -- endpoint appended with since clause.
+							ex: "endpoint?since=32342561"
+		"""
+
+		return endpoint+'?since={}'.format(int(pd.Timestamp(since).timestamp()))
+
+	def request_entity(self, orient='split', njson = False, delta = True):
 		"""Generic vehicle for sending GET requests
 		
 		Keyword Arguments:
@@ -117,42 +159,44 @@ class iWell(object):
 		response = None
 
 		try:
-			response = requests.get(self.url, headers=headers)
+			response = requests.get(self.url+self.endpoint, headers=headers)
 			if response.ok:
 				if njson:
 					self.df = pd.io.json.json_normalize(response.json()['data'])
+					
 				else:
 					self.df = pd.read_json(response.text, orient=orient)
 			else:
 				print('     {path} - {message}'.format(
 					path=response.request.path_url, message=response.json()['error']['message']))
+				self.df = None
 
 		except Exception as e:
-			#TODO: Sentry
+			#TODO: Add Sentry
 			print(e)
 			print('     Entity not retrieved.')
 			self.df = None
 
-	# def entity_to_db(self):
+		finally:
+			return self.df
 
-	# 	if self.df is not None and not self.df.empty:
-	# 		self.df.to_sql(self.tbl, self.engine, if_exists='append', index=false)
+	def parse_response(self):
+		pass
 
-	def add_since(endpoint, since = '1980-01-01'):
-		"""Append ?since clause to endpoint string
-		
-		Arguments:
-			endpoint {str} -- Provider URI or endpoint
-		
-		Keyword Arguments:
-			since {str} -- date string (default: {'1980-01-01'})
-		
-		Returns:
-			[str] -- endpoint appended with since clause.
-							ex: "endpoint?since=32342561"
-		"""
 
-		return endpoint+'?since={}'.format(int(pd.Timestamp(since).timestamp()))
+
+wells = iwell(_properties['wells'])
+
+wells.request_entity()
+
+df = wells.df
+
+iwell.cache_properties()
+
+#? parse_response
+
+df = df.rename{wells.}
+
 
 
 df = pd.DataFrame()
