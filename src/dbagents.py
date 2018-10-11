@@ -1,45 +1,49 @@
 
 import os
-os.getcwd()
-os.chdir('src')
+try:
+    os.chdir('src')
+
+except:
+    pass
+
+finally:
+    os.getcwd()
+
+
 
 from pprint import pprint
-
 import pandas as pd
 import pymssql
 
 from sqlalchemy import *
 from sqlalchemy.orm import *
 from datetime import datetime, timedelta
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.declarative import declarative_base, as_declarative, declared_attr, DeferredReflection
 from sqlalchemy.event import listens_for
 from sqlalchemy.sql import select
 from sqlalchemy.engine.reflection import Inspector
 
 
-# SQLALCHEMY_DATABASE_URI = 'mssql+pymssql://DWENRG-SQL01/DRIFTWOOD_DB'
-# SQLALCHEMY_BINDS = {
-#     'iwell':        'iWell',
-#     'driftwood':      'Driftwood'
-# }
-
+SQLALCHEMY_DATABASE_URI = 'mssql+pymssql://DWENRG-SQL01\\DRIFTWOOD_DB/'
+SQLALCHEMY_BINDS = {
+    'iwell':        'iWell',
+    'driftwood':      'Driftwood'
+}
 
 iwBase =  declarative_base()
+# iwBase =  declarative_base(cls = DeferredReflection)
+# iwBase = automap_base()
 
-
+# TODO: Move to bottom
 class iwell_agent(object):
     global iwBase
-
-    s = 'DWENRG-SQL01\\DRIFTWOOD_DB'
-    db = 'iWell'
-    engine = create_engine('mssql+pymssql://{0}/{1}'.format(s, db))
+    __bind_key__ = 'iwell'
+    engine = create_engine(SQLALCHEMY_DATABASE_URI+SQLALCHEMY_BINDS[__bind_key__])
     Session = sessionmaker(bind=engine)
-    iwBase =  declarative_base(bind=engine)
-    _wells = WELLS()
+    iwBase = declarative_base(bind=engine)
 
-    def get_existing_wells(self):
-        self._wells.retrieve(self._wells, session = self.Session())
-
+    # def __init__(self):
+    #     iwBase.prepare(self.engine)
 
 
 
@@ -48,59 +52,107 @@ class iwell_agent(object):
 
 
 # Class to represent Database Table
+# @as_declarative()
 class WELLS(iwBase):
 
-    __table__ = Table('WELLS', iwBase.metadata, autoload=True)
-
-    # __mapper_args__ = {
-    #     'exclude_properties' : ['updated', 'inserted']
-    # }
-    def __repr__(self):
-        return "<WELLS(\n %s)>" % ([x for x in self.__table__.__dict__.values() 
-                                        if x[0] in self.__table__.primary_key.columns.keys()])
-
-    def get_pks(self):
-        # Return list of primary key column names
-        return self.__table__.primary_key.columns.keys()
-
-    def columns(self):
-        return self.__table__.columns.keys()
-
-    def get_inspector(self):
-        return inspect(self.__table__)
-
-    def get_existing(self, session: Session, well_id: str = None):
-        if well_id:
-            return (session.query(self.__table__))
-        else:
-            return session.query(self.__table__).all()
-
-    def get_last_update(self, session):
-        
-        return session.query(func.max(agent._wells.__table__.c.updated)).first()
-
-    def nrows(self):
-        return self.__table__.count().scalar()
-
+    # https://docs.sqlalchemy.org/en/latest/orm/extensions/declarative/table_config.html
+    __bind_key__ = 'iwell'
+    # __table__ = Table('WELLS', Base.metadata, autoload=True)
     
+    __table_args__ = {'autoload': True}
+    __mapper_args__ = {
+        'exclude_properties' : ['updated', 'inserted']
+    }
+    __tablename__ = 'WELLS'
+    # @declared_attr
+    # def __table__(cls):
+    #     return Table(cls.__name__, iwBase.metadata, autoload=True)
+
+    # @declared_attr
+    # def __tablename__(cls):
+    #     return cls.__name__#.lower()
+
+    # @classmethod
+    # def __repr__(cls):
+    #     return "<"+cls.__name__+"(\n %s)>" % ([x for x in cls.__table__.__dict__.values() 
+    #                                     if x[0] in cls.__table__.primary_key.columns.keys()])
+
+    @classmethod
+    def get_pks(cls):
+        # Return list of primary key column names
+        return cls.__table__.primary_key.columns.keys()
+    @classmethod
+    def columns(cls):
+        return cls.__table__.columns.keys()
+
+    @classmethod
+    def get_inspector(cls):
+        return inspect(cls.__table__)
+
+    @classmethod
+    def get_existing(cls, session: Session, well_id: str = None):
+        if well_id:
+            return (session.query(cls.__table__))
+        else:
+            return session.query(cls.__table__).all()
+
+    @classmethod
+    def get_last_update(cls, session):
+        return session.query(func.max(cls.__table__.c.updated)).first()
+
+    @classmethod
+    def nrows(cls):
+        return cls.__table__.count().scalar()
+
+    @classmethod
+    def load_updates(cls, session: Session, updates: list) -> None:
+            
+        try:
+            session.add_all(updates)
+            # Commit Updates
+            session.commit()
+        except Exception as e:
+            # TODO: Add Sentry
+            session.rollback()
+            session.close()
+            print('Could not load updates')
+            print(e)
+
+    def load_inserts(cls, session: Session, inserts: pd.DataFrame) -> None:
+
+        try:
+            insert_records = []
+            # To dict to pass to sqlalchemy
+            for row in inserts.to_dict('records'):
+                
+                # Create record object and add to dml list
+                insert_records.append(cls(**row))
+            session.add_all(insert_records)
+
+            # Commit Insertions
+            session.commit()
+        except Exception as e:
+            # TODO: Add Sentry
+            session.rollback()
+            session.close()
+            print('Could not load inserts')
+            print(e)
+
 
 agent = iwell_agent()
+# agent = iwell_agent.engine
 
-session = agent.Session()
+session = iwell_agent.Session()
+
+# x = session.query(WELLS).all()
+
+# session.rollback()
+
+# WELLS.get_last_update()
 
 
 
-
-# session = agent.Session()
-type(
-agent._wells.get_existing(session)[0]
-)
-
-
-dir(
-agent._wells.get_existing(session)[0].well_id
-)
-
+#! --------------------------------------------------------------------------- !#
 
 class WELL_NOTES(iwBase):
 

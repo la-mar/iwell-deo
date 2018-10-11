@@ -1,0 +1,25 @@
+!!python/object/new:config.Config
+dictitems:
+  endpoints:
+    fields: /fields
+    me: /me
+    meter_readings: /wells/{well_id}/meters/{meter_id}/readings
+    meters: /wells/{well_id}/meters
+    production: /wells/{well_id}/production
+    reading_run_tickets: /tanks/{tank_id}/readings/{reading_id}/run-tickets
+    readings: /tanks/{tank_id}/readings
+    run_tickets: /tanks/{tank_id}/readings/{reading_id}/run-tickets/{run_ticket_id}
+    tanks: /tanks
+    token: /oauth2/access-token
+    well_field_values: /wells/{well_id}/fields/{field_id}/values
+    well_fields: /wells/{well_id}/fields
+    well_group_wells: /well-groups/{group_id}/wells
+    well_groups: /well-groups
+    well_notes: /wells/{well_id}/notes
+    well_tanks: /wells/{well_id}/tanks
+    wells: /wells
+  token: VktoHo4iNhPvjdioycA20vtK9HSth5sjLdBaZsD6
+  token_expiration: 2018-10-17 16:30:39.763031
+  url: https://api.iwell.info/v1
+state:
+  filename: ../config.yaml

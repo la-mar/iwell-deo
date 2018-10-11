@@ -1,8 +1,13 @@
 
 import os
-os.getcwd()
-# os.chdir('src')
-# os.getcwd()
+try:
+    os.chdir('src')
+
+except:
+    pass
+
+finally:
+    os.getcwd()
 
 import requests  # connect to apis
 import json  # parse json if you need it
@@ -35,23 +40,23 @@ pd.set_option('large_repr', 'truncate')
 pd.set_option('precision',2)
 
 
+
 class iWell(object):
-	# TODO: Add Requestor
-	# TODO: Add database table
-	
+
 	cfg = Config('../config.yaml')
-	s = 'DWENRG-SQL01\\DRIFTWOOD_DB'
-	db = 'iWell'
-	engine = create_engine('mssql+pymssql://{0}/{1}'.format(s, db))
-	df = None
+	paths = cfg['paths']
 	
 	def __init__(self, url, tbl):
-		self.url = url
+
 		self.tbl = tbl
+		self.df = None
+
+	def reload_config(cls):
+		cfg = Config('../config.yaml')
 
 	def _getAccessToken(self):
 		# FIXME: Fetching new token tries to attach to str and fails
-		"""Fetch a new access token from the provider."""
+		"""Fetch a new access token from the provider using OAuth2"""
 		# https://requests-oauthlib.readthedocs.io/en/latest/oauth2_workflow.html#backend-application-flow
 		oauth = OAuth2Session(
 			client=LegacyApplicationClient(client_id=client_id))
@@ -96,40 +101,14 @@ class iWell(object):
 
 		return "Bearer " + self.getAccessToken()
 
-	# @retry(tries = 3)
-	def request_wells(self, all=True, apis=None):
-
-		headers = {
-			'Authorization': self.getBearer()
-		}
-
-		response = None
-
-		try:
-			response = requests.get(wells_url, headers=headers)
-			return pd.read_json(response.text, orient='split')
-
-		except Exception as e:
-			# TODO: Sentry
-			print(e)
-			return None
-
-	def clean_wells(self):
-		"""Wrangling"""
-		pass
-
-	def getWells(self):
-		""" Wrapper for request wells"""
-		pass
-
-	def temp_wells_to_db(self):
-		# FIXME: Will be removed
-		s = 'DWENRG-SQL01\\DRIFTWOOD_DB'
-		db = 'iWell'
-		engine = create_engine('mssql+pymssql://{0}/{1}'.format(s, db))
-		wells.to_sql('WELL_HEADER', engine, if_exists='replace')
-
 	def request_entity(self, orient='split', njson = False):
+		"""Generic vehicle for sending GET requests
+		
+		Keyword Arguments:
+			orient {str} -- specify orientation of resonse records (default: {'split'})
+			njson {bool} -- indicates response is nested. Calls json_normalize instead of read_json (default: {False})
+		"""
+
 
 		headers = {
 			'Authorization': self.getBearer()
@@ -154,10 +133,51 @@ class iWell(object):
 			print('     Entity not retrieved.')
 			self.df = None
 
-	def entity_to_db(self):
-		# FIXME: Will be removed
-		if self.df is not None and not self.df.empty:
-			self.df.to_sql(self.tbl, self.engine, if_exists='append', index=false)
+	# def entity_to_db(self):
+
+	# 	if self.df is not None and not self.df.empty:
+	# 		self.df.to_sql(self.tbl, self.engine, if_exists='append', index=false)
+
+	def add_since(endpoint, since = '1980-01-01'):
+		"""Append ?since clause to endpoint string
+		
+		Arguments:
+			endpoint {str} -- Provider URI or endpoint
+		
+		Keyword Arguments:
+			since {str} -- date string (default: {'1980-01-01'})
+		
+		Returns:
+			[str] -- endpoint appended with since clause.
+							ex: "endpoint?since=32342561"
+		"""
+
+		return endpoint+'?since={}'.format(int(pd.Timestamp(since).timestamp()))
+
+
+df = pd.DataFrame()
+p = wells_path
+tbl = 'WELLS'
+id_name = well_id_name
+
+path = p
+i = iWell(url=url+path, tbl=tbl)
+i.request_entity()
+i.df = i.df.rename(columns={'id': id_name
+							,'name' : 'well_name'
+							,'type' : 'well_type'
+							,'updated_at' : 'updated_iwell'
+							,'created_at' : 'created_iwell'
+							,'alias' : 'well_alias'
+							})
+i.entity_to_db()
+wells = i.df[id_name]
+print('\n{tbl} - {count} records loaded\n'.format(count=len(i.df), tbl=tbl))
+
+
+
+
+
 
 
 if __name__ == '__main__':
@@ -168,7 +188,8 @@ if __name__ == '__main__':
 # wells = i.request_wells()
 # i.temp_wells_to_db()
 
-# FIXME: FIX DATETIME OFFSETS
+
+#FIXME:
 
 # FIXME: ENRICH WITH DEO DATA
 
@@ -177,71 +198,12 @@ if __name__ == '__main__':
 # FIXME: Normalize production across 24 hours
 
 
-# FIXME:
-# FIXME: ADD ?since flag to queries 
-# FIXME:
+
+#!----------------------------------------------------------------------------!#
 
 
-
-def addsince(path, since = '1980-01-01'):
-	return '?since={}'.format(int(pd.Timestamp(since).timestamp()))
-
-url = 'https://api.iwell.info/v1'
-token_path = '/oauth2/access-token'
-request_path = '/me'
-
-wells_path = '/wells'
-wells_path = wells_path + addsince(wells_path)
-
-well_tanks_path = '/well/{well_id}/tanks'
-well_tanks_path = well_tanks_path + addsince(well_tanks_path)
-
-tanks_path = '/tanks'
-tanks_path = tanks_path + addsince(tanks_path)
-
-readings_path = '/tanks/{tank_id}/readings'
-readings_path = readings_path + addsince(readings_path)
-
-reading_run_tickets_path = '/tanks/{tank_id}/readings/{reading_id}/run-tickets'
-reading_run_tickets_path = reading_run_tickets_path + addsince(reading_run_tickets_path)
-
-run_tickets_path = '/tanks/{tank_id}/readings/{reading_id}/run-tickets/{run_ticket_id}'
-
-meters_path = '/wells/{well_id}/meters'
-meters_path = meters_path + addsince(meters_path)
-
-meter_readings_path = '/wells/{well_id}/meters/{meter_id}/readings'
-meter_readings_path = meter_readings_path + addsince(meter_readings_path)
-
-meter_readings_path = '/wells/{well_id}/meters/{meter_id}/readings'
-meter_readings_path = meter_readings_path + addsince(meter_readings_path)
-
-production_path = '/wells/{well_id}/production'
-production_path = production_path + addsince(production_path)
-
-well_groups_path = '/well-groups'
-well_groups_path = well_groups_path + addsince(well_groups_path)
-
-well_group_wells_path = '/well-groups/{group_id}/wells'
-well_group_wells_path = well_group_wells_path + addsince(well_group_wells_path)
-
-fields_path = '/fields'
-fields_path = fields_path + addsince(fields_path)
-
-well_fields_path = '/wells/{well_id}/fields'
-well_fields_path = well_fields_path + addsince(well_fields_path)
-
-well_field_values_path = '/wells/{well_id}/fields/{field_id}/values'
-well_field_values_path = well_field_values_path + addsince(well_field_values_path)
-
-validation_rules_path = '/wells/{well_id}/validation-rules'
-validation_rules_path = validation_rules_path + addsince(validation_rules_path)
-
-well_notes_path = '/wells/{well_id}/notes'
-well_notes_path = well_notes_path + addsince(well_notes_path)
-
-
-
+# def addsince(path, since = '1980-01-01'):
+# 	return '?since={}'.format(int(pd.Timestamp(since).timestamp()))
 
 
 
@@ -285,26 +247,33 @@ i.entity_to_db()
 wells = i.df[id_name]
 print('\n{tbl} - {count} records loaded\n'.format(count=len(i.df), tbl=tbl))
 
-# #! WELL TANKS
-# df = pd.DataFrame()
-# p = well_tanks_path
-# ids = wells
-# tbl = 'WELL_TANKS'
-# refid_name = 'well_id'
+#! WELL TANKS
+df = pd.DataFrame()
+p = '/wells/{well_id}/tanks'
+ids = wells.values.tolist()
+tbl = 'WELL_TANKS'
+id_name = tank_id_name
 
-# for id in ids:
-#     path = p.format(well_id = id)
-#     i = iWell(url = url+path, tbl = tbl)
-#     i.request_entity()
-#     i.df[refid_name] = id
-#     df = df.append(i.df, sort = True)
-#     print('{path} - {count} records'.format(path = path, count = len(i.df)))
+for well_id in ids:
+	path = p.format(well_id=well_id)
+	i = iWell(url=url+path, tbl=tbl)
+	i.request_entity()
+	print(i.df)
+	if i.df is not None and not i.df.empty:
+		i.df[well_id_name] = well_id
+		i.df.rename(columns={'id': 'tank_id'
+							,'created_at' : 'created_iwell'
+							,'updated_at' : 'updated_iwell'
+							}, inplace=True)
+		df = df.append(i.df, sort=True)
+		print('     {path} - {count} records'.format(path=path,
+													count=len(i.df))) if len(i.df) > 0 else None
 
-# i.df = df
-# #? Add handing of Nonetype where DataFrame is expected
-# i.entity_to_db()
-# tank_readings = i.df[['id', refid_name]]
-# print('{tbl} - {count} records loaded'.format(count = len(df), tbl = tbl))
+i.df = df['tank_id','well_id']
+i.entity_to_db()
+tank_readings = i.df[['tank_id', 'well_id']].astype('int')
+print('\n{tbl} - {count} records loaded\n'.format(count=len(df), tbl=tbl))
+
 
 #! -- END WELLS ----------------------------------------------------------------
 
@@ -341,13 +310,14 @@ for tank_id in ids:
 	path = p.format(tank_id=tank_id)
 	i = iWell(url=url+path, tbl=tbl)
 	i.request_entity()
-	i.df[tank_id_name] = tank_id
-	i.df.rename(columns={'id': id_name
-						,'updated_at' : 'updated_iwell'
-						}, inplace=True)
-	df = df.append(i.df, sort=True)
-	print('     {path} - {count} records'.format(path=path,
-												 count=len(i.df))) if len(i.df) > 0 else None
+	if i.df is not None and not i.df.empty:
+		i.df[tank_id_name] = tank_id
+		i.df.rename(columns={'id': id_name
+							,'updated_at' : 'updated_iwell'
+							}, inplace=True)
+		df = df.append(i.df, sort=True)
+		print('     {path} - {count} records'.format(path=path,
+													count=len(i.df))) if len(i.df) > 0 else None
 
 i.df = df
 i.entity_to_db()
@@ -383,29 +353,6 @@ run_tickets = i.df[[id_name, 'tank_id', 'reading_id']].astype('int')
 print('\n{tbl} - {count} records loaded\n'.format(count=len(df), tbl=tbl))
 
 
-# #! RUN_TICKET -- Get Single Run Ticket
-# df = pd.DataFrame()
-# p = run_tickets_path
-# ids = tank_reading_run_tickets.values.tolist()
-# tbl = 'RUN_TICKETS'
-# id_name = run_ticket_id_name
-
-# # run_ticket_id, tank_id, reading_id
-# for run_ticket_id, tank_id, reading_id in ids:
-#     path = p.format(tank_id = tank_id, reading_id = reading_id, run_ticket_id = run_ticket_id)
-#     i = iWell(url = url+path, tbl = tbl)
-#     i.request_entity(orient = 'index')
-#     i.df[tank_id_name] = tank_id
-#     i.df[reading_id_name] = reading_id
-#     i.df.rename(columns = {'id': id_name}, inplace = True)
-#     i.df = i.df.reset_index().drop(columns=['index'])
-#     df = df.append(i.df, sort = True)
-#     print('{path} - {count} records'.format(path = path, count = len(i.df)))
-
-# i.df = df
-# i.entity_to_db()
-# run_tickets = i.df[[id_name, tank_id_name, reading_id_name, run_ticket_id_name]].astype('int')
-# print('{tbl} - {count} records loaded'.format(count=len(df), tbl = tbl))
 
 #! -- END TANKS ----------------------------------------------------------------
 
@@ -824,11 +771,14 @@ print('\n{tbl} - {count} records loaded\n'.format(count=len(df), tbl=tbl))
 
 # r = requests.get(url+path, headers={'Authorization': i.getBearer()})
 # pprint(r.json())
-# i.request_entity(orient = 'index')
+# # i.request_entity(orient = 'index')
 
-# pd.read_json(r.text)
+# # pd.read_json(r.text)
 
 
+# i.url
+
+# r.text
 
 
 # pd.DataFrame(i.df2['wells.data'].values.tolist()[0]).dtypes
