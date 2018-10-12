@@ -51,7 +51,10 @@ class iwell(object):
 	
 	def __init__(self, properties: dict):
 		self.df = None
-		self.endpoint = properties
+		self.endpoint = properties['path']
+		self.aliases = properties['aliases']
+		self.exclusions = properties['exclude']
+		self.njson = properties['normalize']
 
 	@classmethod
 	def reload_properties(cls):
@@ -143,29 +146,44 @@ class iwell(object):
 
 		return endpoint+'?since={}'.format(int(pd.Timestamp(since).timestamp()))
 
-	def request_entity(self, orient='split', njson = False, delta = True):
+	def request_entity(self, delta: datetime = None):
 		"""Generic vehicle for sending GET requests
 		
 		Keyword Arguments:
 			orient {str} -- specify orientation of resonse records (default: {'split'})
-			njson {bool} -- indicates response is nested. Calls json_normalize instead of read_json (default: {False})
+			delta {datetime} -- if None, all data is requested. if datetime is specified, data updated since the specified date will be requested.
 		"""
 
+		# if delta is not a valid datetime, log error and return
+		if delta and not isinstance(delta, datetime):
+			# TODO: Add Sentry
+			print('Invalid function parameter "delta": not a valid datetime')
+			return None
 
+		response = None
 		headers = {
 			'Authorization': self.getBearer()
 		}
 
-		response = None
+		# build uri
+		uri = self.url+self.endpoint
+		# append date limitation, if supplied
+		uri = uri + self.add_since(delta) if delta else uri
 
+		print(uri)
+
+
+		
 		try:
-			response = requests.get(self.url+self.endpoint, headers=headers)
+
+			response = requests.get(uri, headers=headers)
 			if response.ok:
-				if njson:
+
+				if self.njson:
 					self.df = pd.io.json.json_normalize(response.json()['data'])
 					
 				else:
-					self.df = pd.read_json(response.text, orient=orient)
+					self.df = pd.read_json(response.text, orient='split')
 			else:
 				print('     {path} - {message}'.format(
 					path=response.request.path_url, message=response.json()['error']['message']))
@@ -181,42 +199,48 @@ class iwell(object):
 			return self.df
 
 	def parse_response(self):
-		pass
+
+
+		if self.aliases:
+			self.df = self.df.rename(self.aliases)
+
+		if self.exclusions:
+			self.df = self.df.drop(self.exclusions)
 
 
 
-wells = iwell(_properties['wells'])
 
-wells.request_entity()
 
-df = wells.df
+# wells = iwell(_properties['endpoints']['wells'])
 
-iwell.cache_properties()
+# wells.request_entity()
 
-#? parse_response
+# df = wells.df
 
-df = df.rename{wells.}
+# iwell.cache_properties()
 
 
 
-df = pd.DataFrame()
-p = wells_path
-tbl = 'WELLS'
-id_name = well_id_name
 
-path = p
-i = iWell(url=url+path, tbl=tbl)
-i.request_entity()
-i.df = i.df.rename(columns={'id': id_name
-							,'name' : 'well_name'
-							,'type' : 'well_type'
-							,'updated_at' : 'updated_iwell'
-							,'created_at' : 'created_iwell'
-							,'alias' : 'well_alias'
-							})
-i.entity_to_db()
-wells = i.df[id_name]
-print('\n{tbl} - {count} records loaded\n'.format(count=len(i.df), tbl=tbl))
+
+# df = pd.DataFrame()
+# p = wells_path
+# tbl = 'WELLS'
+# id_name = well_id_name
+
+# path = p
+# i = iWell(url=url+path, tbl=tbl)
+# i.request_entity()
+# i.df = i.df.rename(columns={'id': id_name
+# 							,'name' : 'well_name'
+# 							,'type' : 'well_type'
+# 							,'updated_at' : 'updated_iwell'
+# 							,'created_at' : 'created_iwell'
+# 							,'alias' : 'well_alias'
+# 							})
+# i.entity_to_db()
+# wells = i.df[id_name]
+# print('\n{tbl} - {count} records loaded\n'.format(count=len(i.df), tbl=tbl))
 
 
 
