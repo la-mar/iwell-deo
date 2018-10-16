@@ -17,6 +17,7 @@ import pymssql
 
 from sqlalchemy import *
 from sqlalchemy.orm import *
+from sqlalchemy.orm.util import object_state
 from datetime import datetime, timedelta
 from sqlalchemy.ext.declarative import declarative_base, as_declarative, declared_attr, DeferredReflection
 from sqlalchemy.event import listens_for
@@ -62,8 +63,17 @@ class GenericTable(object):
     def get_pks(cls):
         # Return list of primary key column names
         return cls.__table__.primary_key.columns.keys()
+
     @classmethod
-    def columns(cls):
+    def get_pk_cols(cls):
+        pk_cols = []
+        for k, v in WELLS.__table__.c.items():
+            if v.primary_key:
+                pk_cols.append(v)
+        return pk_cols
+
+    @classmethod
+    def cnames(cls):
         return cls.__table__.columns.keys()
 
     @classmethod
@@ -71,11 +81,18 @@ class GenericTable(object):
         return inspect(cls.__table__)
 
     @classmethod
-    def get_existing(cls, well_id: str = None):
+    def get_existing_records(cls, well_id: str = None):
         if well_id:
-            return (cls.session.query(cls.__table__))
+            return (cls.session.query(cls))
         else:
-            return cls.session.query(cls.__table__).all()
+            return cls.session.query(cls).all()
+
+    # FIXME:
+    # @classmethod
+    # def get_existing_ids(cls):
+    #         return cls.session.query(cls.__table__.columns.keys()).all()
+
+
 
     @classmethod
     def get_last_update(cls):

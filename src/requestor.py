@@ -51,6 +51,8 @@ class iwell_api(object):
 	
 	def __init__(self, endpoint_name: str):
 		self.df = None
+		self.in_db = None
+		self.obj = []
 
 		self.endpoint = _properties['endpoints'][endpoint_name]['path']
 		self.aliases = _properties['endpoints'][endpoint_name]['aliases']
@@ -198,11 +200,11 @@ class iwell_api(object):
 	def parse_response(self):
 
 
-		if self.aliases:
-			self.df = self.df.rename(self.aliases)
+		# if self.aliases is not None:
+			self.df = self.df.rename(columns = self.aliases)
 
-		if self.exclusions:
-			self.df = self.df.drop(self.exclusions)
+		# if self.exclusions is not None:
+			self.df = self.df.drop(columns = self.exclusions)
 
 
 
