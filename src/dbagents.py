@@ -37,15 +37,12 @@ iwBase =  declarative_base()
 
 # TODO: Move to bottom
 class iwell_agent(object):
+    # FIXME: Handle failed database connection
     global iwBase
     engine = create_engine(SQLALCHEMY_DATABASE_URI+SQLALCHEMY_BINDS['iwell'])
     session_factory = sessionmaker(bind=engine)
     Session = scoped_session(session_factory)
     iwBase = declarative_base(bind=engine)
-
-    # def __init__(self):
-    #     iwBase.prepare(self.engine)
-
 
 
 class GenericTable(object):
@@ -67,10 +64,15 @@ class GenericTable(object):
     @classmethod
     def get_pk_cols(cls):
         pk_cols = []
-        for k, v in WELLS.__table__.c.items():
+        for k, v in cls.__table__.c.items():
             if v.primary_key:
                 pk_cols.append(v)
         return pk_cols
+
+
+    @classmethod
+    def get_ids(cls):
+        return cls.session.query(cls).with_entities(*cls.get_pk_cols()).all()
 
     @classmethod
     def cnames(cls):
@@ -81,17 +83,45 @@ class GenericTable(object):
         return inspect(cls.__table__)
 
     @classmethod
-    def get_existing_records(cls, well_id: str = None):
-        if well_id:
-            return (cls.session.query(cls))
-        else:
-            return cls.session.query(cls).all()
+    def get_existing_records(cls):
+        return cls.session.query(cls).all()
 
     # FIXME:
     # @classmethod
     # def get_existing_ids(cls):
     #         return cls.session.query(cls.__table__.columns.keys()).all()
+    @classmethod
+    def get_session_state(cls, count = True) -> dict:
+        if cls.session is not None:
+            if count:
+                return {'new' : len(cls.session.new),
+                        'updates' : len(cls.session.dirty),
+                        'deletes' : len(cls.session.deleted)
+                        }
+            else:
+                return {'new' : cls.session.new,
+                        'updates' : cls.session.dirty,
+                        'deletes' : cls.session.deleted
+                        }
 
+    @classmethod
+    def merge_records(cls, df: pd.DataFrame) -> None:
+        """Convert dataframe rows to object instances and merge into session by
+        primary key matching.
+        
+        Arguments:
+            df {pd.DataFrame} -- A dataframe of object attributes
+        
+        Returns:
+            None
+        """
+
+        merged_objects = []
+        for idx, row in df.iterrows():
+            merged_objects.append(cls.session.merge(cls(**row.to_dict())))
+
+        # Add merged objects to session
+        cls.session.add_all(merged_objects)
 
 
     @classmethod
@@ -104,7 +134,6 @@ class GenericTable(object):
 
     @classmethod
     def load_updates(cls, updates: list) -> None:
-            
         try:
             cls.session.add_all(updates)
             # Commit Updates
@@ -136,6 +165,21 @@ class GenericTable(object):
             # cls.session.close()
             print('Could not load inserts')
             print(e)
+
+    @classmethod
+    def persist(cls) -> None:
+        """Propagate changes in session to database. 
+        
+        Returns:
+            None
+        """
+        try:
+            cls.session.commit()
+            pprint(cls.get_session_state())
+        except Exception as e:
+            #TODO: Sentry
+            print(e)
+            cls.session.rollback()
 
 
 class iWellTable(GenericTable):

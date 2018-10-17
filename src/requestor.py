@@ -42,22 +42,25 @@ pd.set_option('precision',2)
 # TODO: Move to main?
 _properties = Config('../config.yaml')
 
+# for k in _properties['endpoints']:
+# 	print(type(k))
+# 	_properties['endpoints'][k]['last_success']=datetime.now() - timedelta(days = 7)
+	
 
-# url = _properties['url']
-# FIXME: Capture last success/failure times
+
 
 class iwell_api(object):
 	url = _properties['url']
 	
 	def __init__(self, endpoint_name: str):
 		self.df = None
-		self.in_db = None
-		self.obj = []
+		self.endpoint_name = endpoint_name
 
 		self.endpoint = _properties['endpoints'][endpoint_name]['path']
 		self.aliases = _properties['endpoints'][endpoint_name]['aliases']
 		self.exclusions = _properties['endpoints'][endpoint_name]['exclude']
 		self.njson = _properties['endpoints'][endpoint_name]['normalize']
+
 
 	@classmethod
 	def reload_properties(cls):
@@ -132,22 +135,66 @@ class iwell_api(object):
 
 		return "Bearer " + cls.getAccessToken()
 
-	@classmethod
-	def add_since(endpoint, since = '1980-01-01'):
+	def add_since(self, since: datetime = None) -> str:
 		"""Append ?since clause to endpoint string. Default settings pull all data.
 		
 		Arguments:
 			endpoint {str} -- Provider URI or endpoint
 		
 		Keyword Arguments:
-			since {str} -- date string (default: {'1980-01-01'})
+			since {datetime} -- datetime object (default: 1420107010)
 		
 		Returns:
 			[str] -- endpoint appended with since clause.
 							ex: "endpoint?since=32342561"
 		"""
+		
+		if since:
+			return '?since={}'.format(int(since.timestamp()))
+		else:
+			return ''
 
-		return endpoint+'?since={}'.format(int(pd.Timestamp(since).timestamp()))
+
+	def get_last_success(self):
+		"""Get last successful runtime of this endpoint
+		
+		Returns:
+			[datetime] -- last successful runtime
+		"""
+
+		return _properties['endpoints'][self.endpoint_name]['last_success']
+
+
+	def set_last_success(self):
+		"""Set last successful runtime of this endpoint
+		
+		Returns:
+			None
+		"""
+
+		_properties['endpoints'][self.endpoint_name]['last_success'] = datetime.now()
+		self.cache_properties()
+
+
+	def get_last_failure(self):
+		"""Get last failed runtime of this endpoint
+		
+		Returns:
+			[datetime] -- last successful runtime
+		"""
+
+		return _properties['endpoints'][self.endpoint_name]['last_failure']
+
+
+	def set_last_failure(self):
+		"""Set last failed runtime of this endpoint
+		
+		Returns:
+			None
+		"""
+		
+		_properties['endpoints'][self.endpoint_name]['last_failure'] = datetime.now()
+		self.cache_properties()
 
 	def request_entity(self, delta: datetime = None):
 		"""Generic vehicle for sending GET requests
@@ -172,7 +219,7 @@ class iwell_api(object):
 		uri = self.url+self.endpoint
 		# append date limitation, if supplied
 		uri = uri + self.add_since(delta) if delta else uri
-		
+		print('{}	({})'.format(uri, delta.isoformat()))
 		try:
 
 			response = requests.get(uri, headers=headers)
@@ -183,22 +230,27 @@ class iwell_api(object):
 					
 				else:
 					self.df = pd.read_json(response.text, orient='split')
+					
+				self.set_last_success()
+				
+				print('		{0} - {1} -- Downloaded {2} records'.format(self.__class__.__name__
+																, self.endpoint_name
+																, self.download_count()
+																))
 			else:
 				print('     {path} - {message}'.format(
 					path=response.request.path_url, message=response.json()['error']['message']))
 				self.df = None
+				self.set_last_failure()
 
 		except Exception as e:
 			#TODO: Add Sentry
 			print(e)
 			print('     Entity not retrieved.')
 			self.df = None
-
-		# finally:
-			# return self.df
+			self.set_last_failure()
 
 	def parse_response(self):
-
 
 		# if self.aliases is not None:
 			self.df = self.df.rename(columns = self.aliases)
@@ -207,7 +259,13 @@ class iwell_api(object):
 			self.df = self.df.drop(columns = self.exclusions)
 
 
-
+	def download_count(self):
+		"""Return rowcount of downloads
+		"""
+		if self.df is not None:
+			return self.df.count().max()
+		else:
+			return 0
 
 
 # wells = iwell(_properties['endpoints']['wells'])
