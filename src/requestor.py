@@ -52,15 +52,20 @@ _properties = Config('../config.yaml')
 class iwell_api(object):
 	url = _properties['url']
 	
+	
 	def __init__(self, endpoint_name: str):
-		self.df = None
+		self.headers = {
+			'Authorization': self.getBearer()
+		}
+		self.df = pd.DataFrame()
 		self.endpoint_name = endpoint_name
+		self.uris = []
 
 		self.endpoint = _properties['endpoints'][endpoint_name]['path']
 		self.aliases = _properties['endpoints'][endpoint_name]['aliases']
 		self.exclusions = _properties['endpoints'][endpoint_name]['exclude']
 		self.njson = _properties['endpoints'][endpoint_name]['normalize']
-
+		self.keys = _properties['endpoints'][endpoint_name]['keys']
 
 	@classmethod
 	def reload_properties(cls):
@@ -73,7 +78,6 @@ class iwell_api(object):
 		"""refresh property attributes
 		"""
 		_properties['cached_at'] = datetime.now()
-
 
 	@classmethod
 	def _getAccessToken(cls):
@@ -211,10 +215,6 @@ class iwell_api(object):
 			return None
 
 		response = None
-		headers = {
-			'Authorization': self.getBearer()
-		}
-
 		# build uri
 		uri = self.url+self.endpoint
 		# append date limitation, if supplied
@@ -222,7 +222,7 @@ class iwell_api(object):
 		print('{}	({})'.format(uri, delta.isoformat()))
 		try:
 
-			response = requests.get(uri, headers=headers)
+			response = requests.get(uri, headers=self.headers)
 			if response.ok:
 
 				if self.njson:
@@ -250,6 +250,54 @@ class iwell_api(object):
 			self.df = None
 			self.set_last_failure()
 
+	def request_uri(self, uri: str):
+		"""Generic vehicle for sending GET requests
+		
+		Keyword Arguments:
+			orient {str} -- specify orientation of resonse records (default: {'split'})
+			delta {datetime} -- if None, all data is requested. if datetime is specified, data updated since the specified date will be requested.
+		"""
+
+		response = None
+		
+		# print('Requesting: {}'.format(uri))
+		try:
+
+			response = requests.get(uri, headers=self.headers)
+			if response.ok:
+
+				if self.njson:
+					self.df = self.df.append(pd.io.json.json_normalize(response.json()['data']))
+					
+				else:
+					self.df = self.df.append(pd.read_json(response.text, orient='split'))
+					
+				self.set_last_success()
+				
+				print('		{0} - {1} -- Downloaded {2} records'.format(self.__class__.__name__
+																, uri.replace(self.url, '')
+																, self.download_count()
+																))
+			else:
+				print('     {obj} - {path} -- {message}'.format( obj = self.__class__.__name__,
+					path=response.request.path_url, message=response.json()['error']['message']))
+				self.set_last_failure()
+				try:
+					self.uris.remove(uri)
+				except Exception as e:
+					print(e)
+
+
+		except Exception as e:
+			#TODO: Add Sentry
+			print(e)
+			print('     Entity not retrieved.')
+			self.set_last_failure()
+
+	def request_uris(self):
+		for uri in self.uris:
+			self.request_uri(uri)
+
 	def parse_response(self):
 
 		# if self.aliases is not None:
@@ -257,7 +305,6 @@ class iwell_api(object):
 
 		# if self.exclusions is not None:
 			self.df = self.df.drop(columns = self.exclusions)
-
 
 	def download_count(self):
 		"""Return rowcount of downloads
@@ -272,11 +319,11 @@ class iwell_api(object):
 
 
 	def keyedkeys(self):
-		return list(self.df[self.aliases['id']].values)
+		return self.df[[self.aliases['id']]].to_dict('records')
 
 
 	def build_uri(self, well_id = None, group_id = None, tank_id = None
-				, run_ticket_id = None, meter_id = None):
+				, run_ticket_id = None, meter_id = None, delta = None):
 		"""Wrapper to build a uri from a set of identifiers
 		
 		Arguments:
@@ -289,13 +336,15 @@ class iwell_api(object):
 		Returns:
 			{str} -- url endpoint
 		"""
-		return self.url+self.enfpoint.format(well_id = well_id
+		uri =  self.url+self.endpoint.format(well_id = well_id
 						, group_id = group_id
 						, tank_id = tank_id
 						, run_ticket_id = run_ticket_id
 						, meter_id = meter_id)
 
-	def build_uris(self, ids: list):
+		self.uris.append(uri+self.add_since(delta) if delta is not None else uri)
+
+	def build_uris(self, ids: list, delta = None):
 		"""Wrapper to build multiple uris from a list of ids
 		
 		Arguments:
@@ -304,7 +353,7 @@ class iwell_api(object):
 		Returns:
 			{list} -- list of populated uri endpoints
 		"""
-		return [self.build_uri(**x) for x in ids]
+		[self.build_uri(**x, delta = delta) for x in ids]
 
 
 

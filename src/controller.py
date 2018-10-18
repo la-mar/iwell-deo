@@ -11,7 +11,7 @@ finally:
 
 from requestor import *
 from dbagents import *
-
+from collections import defaultdict
 
 
 # Setup
@@ -32,8 +32,6 @@ PROD.session = db.Session()
 
 #? Transport
 
-
-
 #** Get wells from iWell
 wells.request_entity(delta= (datetime.now() - timedelta(days = 1)))
 
@@ -49,9 +47,13 @@ WELLS.get_session_state()
 #** Persist changes to database
 WELLS.persist()
 
+prod.df.describe()
+prod.df.dtypes
+prod.build_uris(WELLS.keyedkeys())#, delta = prod.get_last_success())
 
 #** Get wells from iWell
-prod.request_entity(delta= (datetime.now() - timedelta(days = 1)))
+# FIXME: Add well_id when formulating response
+prod.request_uris()
 
 #** Clean up wells from iWell
 prod.parse_response()
@@ -64,7 +66,6 @@ PROD.get_session_state()
 
 #** Persist changes to database
 PROD.persist()
-
 
 # FIXME: Updating on delta is not working
 
@@ -106,13 +107,56 @@ if 1 = 0:
 
 prod.endpoint.format(prod_id = 'XXX', well_id = 1234)
 
-def request_entities(**kwargs):
-    pass
+def build_uri(well_id = None, group_id = None, tank_id = None
+            , run_ticket_id = None, meter_id = None):
+     """Wrapper to build a uri from a set of identifiers
+    
+    Arguments:
+        well_id {str} (optional) --
+        group_id {str} (optional) --
+        tank_id {str} (optional) --
+        run_ticket_id {str} (optional) --
+        meter_id {str} (optional) --
+    
+    Returns:
+        {str} -- uri endpoint
+    """
+    return uri.format(well_id = well_id
+                    , group_id = group_id
+                    , tank_id = tank_id
+                    , run_ticket_id = run_ticket_id
+                    , meter_id = meter_id)
 
-def build_uris(well_ids = []):
-    for well_id in well_ids:
-        uri.format(well_id = well_id)
+def build_uris(ids: list):
+    """Wrapper to build multiple uris from a list of ids
+    
+    Arguments:
+        ids {list} -- list of dicts of identifiers
+    
+    Returns:
+        {list} -- list of populated uri endpoints
+    """
 
+    return [build_uri(**x) for x in ids]
+
+wells.df['well_id'].to_dict('records')
+
+wells.keys()
+
+wells.df[[wells.aliases['id']]].to_dict('records')
+
+query = WELLS.session.query(WELLS).with_entities(*WELLS.get_pk_cols())
+list(pd.read_sql(query.statement, query.session.bind).squeeze().values)
+
+# ids = [{'well_id' : x} for x in wells.keys()]
+
+# x = build_uris(ids)
+# x
+
+
+wells.reload_properties()
+
+wells.endpoint
 
 WELLS.session.query(WELLS).with_entities(*WELLS.get_pk_cols()).all()
 
@@ -122,5 +166,13 @@ PROD.get_ids()
 
 PROD.get_pk_cols()
 
-dir
 
+# [x['path'] for x in _properties['endpoints'].values()]
+
+for k,v in _properties['endpoints'].items():
+    print(k)
+
+for k,v in _properties['endpoints'].items():
+    print(v['path'])
+
+print(', '.join(['{}={!r}'.format(k, v) for k, v in x.items()]))

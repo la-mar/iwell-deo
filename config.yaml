@@ -1,6 +1,6 @@
 !!python/object/new:config.Config
 dictitems:
-  cached_at: 2018-10-16 23:52:38.277619
+  cached_at: 2018-10-18 00:47:51.979110
   client_id: KTDMpqhGyBMhnRDB
   client_secret: gYFRiXRtMN0fDYTDPUDYOk1RAbPz44Bu
   endpoints:
@@ -14,6 +14,7 @@ dictitems:
         unit: field_unit
         updated_at: updated_iwell
       exclude: []
+      keys: null
       last_failure: null
       last_success: 2018-10-09 22:14:16.158805
       normalize: false
@@ -24,6 +25,9 @@ dictitems:
         id: meter_reading_id
         updated_at: updated_iwell
       exclude: []
+      keys: !!python/tuple
+      - well_id
+      - meter_id
       last_failure: null
       last_success: 2018-10-09 22:14:16.164819
       normalize: false
@@ -38,6 +42,7 @@ dictitems:
         type: product_type
         updated_at: updated_iwell
       exclude: []
+      keys: well_id
       last_failure: null
       last_success: 2018-10-09 22:14:16.182865
       normalize: false
@@ -50,8 +55,9 @@ dictitems:
         updated_at: updated_iwell
       exclude:
       - date
-      last_failure: null
-      last_success: 2018-10-09 22:14:16.185372
+      keys: well_id
+      last_failure: 2018-10-18 00:44:29.845369
+      last_success: 2018-10-18 00:47:51.979110
       normalize: false
       path: /wells/{well_id}/production
     run_tickets:
@@ -62,6 +68,10 @@ dictitems:
         type: product_type
         updated_at: updated_iwell
       exclude: []
+      keys: !!python/tuple
+      - tank_id
+      - reading_id
+      - run_ticket_id
       last_failure: null
       last_success: 2018-10-09 22:14:16.186374
       normalize: false
@@ -72,6 +82,7 @@ dictitems:
         id: reading_id
         updated_at: updated_iwell
       exclude: []
+      keys: tank_id
       last_failure: null
       last_success: 2018-10-09 22:14:16.187377
       normalize: false
@@ -84,6 +95,7 @@ dictitems:
         type: tank_type
         updated_at: updated_iwell
       exclude: []
+      keys: null
       last_failure: null
       last_success: 2018-10-09 22:14:16.189884
       normalize: false
@@ -94,6 +106,9 @@ dictitems:
         id: value_id
         updated_at: updated_iwell
       exclude: []
+      keys: !!python/tuple
+      - well_id
+      - field_id
       last_failure: null
       last_success: 2018-10-09 22:14:16.190385
       normalize: false
@@ -108,6 +123,7 @@ dictitems:
         unit: field_unit
         updated_at: updated_iwell
       exclude: []
+      keys: well_id
       last_failure: null
       last_success: 2018-10-09 22:14:16.190886
       normalize: false
@@ -118,6 +134,7 @@ dictitems:
         id: well_id
         updated_at: updated_iwell
       exclude: []
+      keys: group_id
       last_failure: null
       last_success: 2018-10-09 22:14:16.190886
       normalize: false
@@ -131,6 +148,7 @@ dictitems:
         updated_at: updated_iwell
       exclude:
       - wells.data
+      keys: null
       last_failure: null
       last_success: 2018-10-09 22:14:16.190886
       normalize: true
@@ -141,6 +159,7 @@ dictitems:
         id: note_id
         updated_at: updated_iwell
       exclude: []
+      keys: well_id
       last_failure: null
       last_success: 2018-10-09 22:14:16.190886
       normalize: false
@@ -151,6 +170,7 @@ dictitems:
         id: tank_id
         updated_at: updated_iwell
       exclude: []
+      keys: well_id
       last_failure: null
       last_success: 2018-10-09 22:14:16.191388
       normalize: false
@@ -164,8 +184,9 @@ dictitems:
         type: well_type
         updated_at: updated_iwell
       exclude: []
-      last_failure: 2018-10-16 23:05:21.604486
-      last_success: 2018-10-16 23:52:38.277619
+      keys: null
+      last_failure: 2018-10-18 00:22:17.351983
+      last_success: 2018-10-18 00:44:28.678289
       normalize: false
       path: /wells
   password: 7haYrAaFqTwS
