@@ -59,7 +59,7 @@ class iwell_api(object):
 		}
 		self.df = pd.DataFrame()
 		self.endpoint_name = endpoint_name
-		self.uris = []
+		self.uris = {}
 
 		self.endpoint = _properties['endpoints'][endpoint_name]['path']
 		self.aliases = _properties['endpoints'][endpoint_name]['aliases']
@@ -219,7 +219,7 @@ class iwell_api(object):
 		uri = self.url+self.endpoint
 		# append date limitation, if supplied
 		uri = uri + self.add_since(delta) if delta else uri
-		print('{}	({})'.format(uri, delta.isoformat()))
+		print('{}'.format(uri))
 		try:
 
 			response = requests.get(uri, headers=self.headers)
@@ -250,13 +250,17 @@ class iwell_api(object):
 			self.df = None
 			self.set_last_failure()
 
-	def request_uri(self, uri: str):
+	def request_uri(self, uri: str, ids: dict = None):
 		"""Generic vehicle for sending GET requests
 		
 		Keyword Arguments:
 			orient {str} -- specify orientation of resonse records (default: {'split'})
 			delta {datetime} -- if None, all data is requested. if datetime is specified, data updated since the specified date will be requested.
 		"""
+
+		if not ids:
+			ids = {}
+
 
 		response = None
 		
@@ -266,26 +270,39 @@ class iwell_api(object):
 			response = requests.get(uri, headers=self.headers)
 			if response.ok:
 
+				# Append responses to dataframe
 				if self.njson:
-					self.df = self.df.append(pd.io.json.json_normalize(response.json()['data']))
+					response_df = pd.io.json.json_normalize(response.json()['data'])
 					
 				else:
-					self.df = self.df.append(pd.read_json(response.text, orient='split'))
+					response_df = pd.read_json(response.text, orient='split')
 					
-				self.set_last_success()
+				# Add ids as columns to dataframe
+				for id, val in ids.items():
+					if id not in response_df.columns:
+						response_df[id] = val
 				
+				# Append response to object dataframe of responses
+				self.df = self.df.append(response_df, sort = True)
+
+				count = response_df.count().max()
+				count = count if not pd.isna(count) else 0
+
+				self.set_last_success()
+
 				print('		{0} - {1} -- Downloaded {2} records'.format(self.__class__.__name__
 																, uri.replace(self.url, '')
-																, self.download_count()
+																, count
 																))
 			else:
-				print('     {obj} - {path} -- {message}'.format( obj = self.__class__.__name__,
-					path=response.request.path_url, message=response.json()['error']['message']))
+				print('		{obj} - {path} -- {message}'.format(obj = self.__class__.__name__
+												, path=response.request.path_url
+												, message=response.json()['error']['message']))
 				self.set_last_failure()
-				try:
-					self.uris.remove(uri)
-				except Exception as e:
-					print(e)
+			# try:
+			# 	del self.uris[uri]
+			# except Exception as e:
+			# 	print(e)
 
 
 		except Exception as e:
@@ -295,24 +312,43 @@ class iwell_api(object):
 			self.set_last_failure()
 
 	def request_uris(self):
-		for uri in self.uris:
-			self.request_uri(uri)
+		for uri, ids in self.uris.items():
+			self.request_uri(uri, ids)
+		
+		self.downloaded_status()
+		self.uris = {}
 
 	def parse_response(self):
 
 		# if self.aliases is not None:
-			self.df = self.df.rename(columns = self.aliases)
+		self.df = self.df.rename(columns = self.aliases)
+
+		#Fix timezones
+		self.df[list(self.df.select_dtypes('datetime').columns)] = self.df.select_dtypes('datetime').apply(lambda x: x.dt.tz_localize('utc')).apply(lambda x: x.dt.tz_convert('US/Central'))
+
 
 		# if self.exclusions is not None:
+		try:
 			self.df = self.df.drop(columns = self.exclusions)
+		except Exception as e:
+			print(e)
 
-	def download_count(self):
+
+	def downloaded_status(self):
 		"""Return rowcount of downloads
 		"""
+
 		if self.df is not None:
-			return self.df.count().max()
+			n = self.df.count().max()
 		else:
-			return 0
+			n = 0
+
+		print('		{0} - {1} -- Downloaded {2} records'.format(self.__class__.__name__
+															, self.endpoint_name
+															, n
+															))
+		return n
+
 
 	def keys(self):
 		return list(self.df[self.aliases['id']].values)
@@ -336,13 +372,19 @@ class iwell_api(object):
 		Returns:
 			{str} -- url endpoint
 		"""
-		uri =  self.url+self.endpoint.format(well_id = well_id
-						, group_id = group_id
-						, tank_id = tank_id
-						, run_ticket_id = run_ticket_id
-						, meter_id = meter_id)
 
-		self.uris.append(uri+self.add_since(delta) if delta is not None else uri)
+		ids = {
+			'well_id' : well_id
+			, 'group_id' : group_id
+			, 'tank_id' : tank_id
+			, 'run_ticket_id' : run_ticket_id
+			, 'meter_id' : meter_id
+			}
+
+		uri =  self.url+self.endpoint.format(**ids)
+		self.uris[uri] = {id: val for id, val in ids.items() if val is not None}
+		return uri
+
 
 	def build_uris(self, ids: list, delta = None):
 		"""Wrapper to build multiple uris from a list of ids

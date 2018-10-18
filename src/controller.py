@@ -11,7 +11,6 @@ finally:
 
 from requestor import *
 from dbagents import *
-from collections import defaultdict
 
 
 # Setup
@@ -32,8 +31,17 @@ PROD.session = db.Session()
 
 #? Transport
 
+# #** Get wells from iWell
+# wells.request_entity(delta= (datetime.now() - timedelta(days = 1)))
+
+# wells.uris
+
+# wells.build_uris(ids = {})#, delta = wells.get_last_success())
+
+# wells.url
+
 #** Get wells from iWell
-wells.request_entity(delta= (datetime.now() - timedelta(days = 1)))
+wells.request_uri(wells.build_uri())
 
 #** Clean up wells from iWell
 wells.parse_response()
@@ -47,12 +55,13 @@ WELLS.get_session_state()
 #** Persist changes to database
 WELLS.persist()
 
-prod.df.describe()
-prod.df.dtypes
-prod.build_uris(WELLS.keyedkeys())#, delta = prod.get_last_success())
+
 
 #** Get wells from iWell
-# FIXME: Add well_id when formulating response
+
+#** Get wells from iWell
+prod.build_uris(WELLS.keyedkeys(), delta = prod.get_last_success())
+
 prod.request_uris()
 
 #** Clean up wells from iWell
