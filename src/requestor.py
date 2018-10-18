@@ -267,6 +267,46 @@ class iwell_api(object):
 		else:
 			return 0
 
+	def keys(self):
+		return list(self.df[self.aliases['id']].values)
+
+
+	def keyedkeys(self):
+		return list(self.df[self.aliases['id']].values)
+
+
+	def build_uri(self, well_id = None, group_id = None, tank_id = None
+				, run_ticket_id = None, meter_id = None):
+		"""Wrapper to build a uri from a set of identifiers
+		
+		Arguments:
+			well_id {str} (optional) --
+			group_id {str} (optional) --
+			tank_id {str} (optional) --
+			run_ticket_id {str} (optional) --
+			meter_id {str} (optional) --
+		
+		Returns:
+			{str} -- url endpoint
+		"""
+		return self.url+self.enfpoint.format(well_id = well_id
+						, group_id = group_id
+						, tank_id = tank_id
+						, run_ticket_id = run_ticket_id
+						, meter_id = meter_id)
+
+	def build_uris(self, ids: list):
+		"""Wrapper to build multiple uris from a list of ids
+		
+		Arguments:
+			ids {list} -- list of identifiers
+		
+		Returns:
+			{list} -- list of populated uri endpoints
+		"""
+		return [self.build_uri(**x) for x in ids]
+
+
 
 # wells = iwell(_properties['endpoints']['wells'])
 
