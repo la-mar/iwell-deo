@@ -414,28 +414,28 @@ if __name__ == '__main__':
 
 
 
-headers = {
-			'Authorization': iwell_api.getBearer()
-		}
+# headers = {
+# 			'Authorization': iwell_api.getBearer()
+# 		}
 
-response = None
-# build uri
-uri = 'https://api.iwell.info/v1'+'/monitor'
-# append date limitation, if supplied
-# uri = uri + self.add_since(delta) if delta else uri
-print('{}'.format(uri))
+# response = None
+# # build uri
+# uri = 'https://api.iwell.info/v1'+'/monitor'
+# # append date limitation, if supplied
+# # uri = uri + self.add_since(delta) if delta else uri
+# print('{}'.format(uri))
 
-response = requests.get(uri, headers=headers)
-if response.ok:
+# response = requests.get(uri, headers=headers)
+# if response.ok:
 
-	if self.njson:
-		df = pd.io.json.json_normalize(response.json()['data'])
+# 	if self.njson:
+# 		df = pd.io.json.json_normalize(response.json()['data'])
 		
-	else:
-		df = pd.read_json(response.text, orient='split')
+# 	else:
+# 		df = pd.read_json(response.text, orient='split')
 
 
-requests.get(uri, headers=headers).prepare()
+# requests.get(uri, headers=headers).prepare()
 
 
 # wells = iwell(_properties['endpoints']['wells'])
