@@ -130,7 +130,9 @@ class GenericTable(object):
 			None
 		"""
 		
+		# Drop rows with NA in a primary key
 		df = df.dropna(subset = cls.get_pks())
+
 		merged_objects = []
 		for idx, row in df.iterrows():
 			merged_objects.append(cls.session.merge(cls(**row.to_dict())))
@@ -209,7 +211,6 @@ class iWellTable(GenericTable):
 
 
 
-
 # Class to represent Database Table
 # @as_declarative()
 class WELLS(iWellTable, iwBase):
@@ -224,5 +225,62 @@ class PROD(iWellTable, iwBase):
 					'exclude_properties' : _DEFAULT_EXCLUSIONS + ['prod_date', 'prod_year', 'prod_month', 'prod_day'],
 					}
 
+
+class METERS(iWellTable, iwBase):
+
+	__tablename__ = 'METERS'
+
+
+class METER_READINGS(iWellTable, iwBase):
+
+	__tablename__ = 'METER_READINGS'
+
+
+class FIELDS(iWellTable, iwBase):
+
+	__tablename__ = 'FIELDS'
+
+
+class FIELDS_BY_WELL(iWellTable, iwBase):
+
+	__tablename__ = 'FIELDS_BY_WELL'
+
+class FIELD_VALUES(iWellTable, iwBase):
+
+	__tablename__ = 'FIELD_VALUES'
+
+
+class TANKS(iWellTable, iwBase):
+
+	__tablename__ = 'TANKS'
+
+
+class TANK_READINGS(iWellTable, iwBase):
+
+	__tablename__ = 'TANK_READINGS'
+
+
+class WELL_TANKS(iWellTable, iwBase):
+
+	__tablename__ = 'WELL_TANKS'
+
+
+class RUN_TICKETS(iWellTable, iwBase):
+
+	__tablename__ = 'RUN_TICKETS'
+
+
+class WELL_NOTES(iWellTable, iwBase):
+
+	__tablename__ = 'WELL_NOTES'
+
+class WELL_GROUPS(iWellTable, iwBase):
+
+	__tablename__ = 'WELL_GROUPS'
+
+
+class WELL_GROUP_WELLS(iWellTable, iwBase):
+
+	__tablename__ = 'WELL_GROUP_WELLS'
 
 

@@ -323,9 +323,11 @@ class iwell_api(object):
 		# if self.aliases is not None:
 		self.df = self.df.rename(columns = self.aliases)
 
-		#Fix timezones
+		# Fix timezones
 		self.df[list(self.df.select_dtypes('datetime').columns)] = self.df.select_dtypes('datetime').apply(lambda x: x.dt.tz_localize('utc')).apply(lambda x: x.dt.tz_convert('US/Central'))
 
+		# Fill NAs
+		self.df = self.df.fillna(0)
 
 		# if self.exclusions is not None:
 		try:
@@ -359,7 +361,8 @@ class iwell_api(object):
 
 
 	def build_uri(self, well_id = None, group_id = None, tank_id = None
-				, run_ticket_id = None, meter_id = None, delta = None):
+				, run_ticket_id = None, meter_id = None, field_id = None
+				, reading_id = None, note_id = None, delta = None):
 		"""Wrapper to build a uri from a set of identifiers
 		
 		Arguments:
@@ -379,6 +382,9 @@ class iwell_api(object):
 			, 'tank_id' : tank_id
 			, 'run_ticket_id' : run_ticket_id
 			, 'meter_id' : meter_id
+			, 'field_id' : field_id
+			, 'reading_id' : reading_id
+			, 'note_id' : note_id
 			}
 
 		uri =  self.url+self.endpoint.format(**ids)
@@ -397,6 +403,39 @@ class iwell_api(object):
 		"""
 		[self.build_uri(**x, delta = delta) for x in ids]
 
+
+
+
+def main():
+	pass
+
+if __name__ == '__main__':
+	main()
+
+
+
+headers = {
+			'Authorization': iwell_api.getBearer()
+		}
+
+response = None
+# build uri
+uri = 'https://api.iwell.info/v1'+'/monitor'
+# append date limitation, if supplied
+# uri = uri + self.add_since(delta) if delta else uri
+print('{}'.format(uri))
+
+response = requests.get(uri, headers=headers)
+if response.ok:
+
+	if self.njson:
+		df = pd.io.json.json_normalize(response.json()['data'])
+		
+	else:
+		df = pd.read_json(response.text, orient='split')
+
+
+requests.get(uri, headers=headers).prepare()
 
 
 # wells = iwell(_properties['endpoints']['wells'])

@@ -22,25 +22,45 @@ from dbagents import *
 db = iwell_agent()
 wells = iwell_api('wells')
 prod = iwell_api('production')
+meters = iwell_api('meters')
+meter_readings = iwell_api('meter_readings')
+fields = iwell_api('fields')
+fields_by_well = iwell_api('fields_by_well')
+field_values = iwell_api('field_values')
 
+tanks = iwell_api('tanks')
+tank_readings = iwell_api('tank_readings')
+well_tanks = iwell_api('well_tanks')
+run_tickets = iwell_api('run_tickets')
+well_notes = iwell_api('well_notes')
+well_groups = iwell_api('well_groups')
+well_group_wells = iwell_api('well_group_wells')
 
 #**
 WELLS.session = db.Session()
 PROD.session = db.Session()
+METERS.session = db.Session()
+METER_READINGS.session = db.Session()
+FIELDS.session = db.Session()
+FIELDS_BY_WELL.session = db.Session()
+FIELD_VALUES.session = db.Session()
+
+TANKS.session = db.Session()
+TANK_READINGS.session = db.Session()
+WELL_TANKS.session = db.Session()
+RUN_TICKETS.session = db.Session()
+WELL_NOTES.session = db.Session()
+WELL_GROUPS.session = db.Session()
+WELL_GROUP_WELLS.session = db.Session()
+
+# FIXME: Updating on delta is not working
 
 
 #? Transport
 
-# #** Get wells from iWell
-# wells.request_entity(delta= (datetime.now() - timedelta(days = 1)))
+# SECTION: Wells
 
-# wells.uris
-
-# wells.build_uris(ids = {})#, delta = wells.get_last_success())
-
-# wells.url
-
-#** Get wells from iWell
+#** Build URIs
 wells.request_uri(wells.build_uri())
 
 #** Clean up wells from iWell
@@ -57,131 +77,314 @@ WELLS.persist()
 
 
 
-#** Get wells from iWell
+# SECTION: Production
 
-#** Get wells from iWell
+#* Pull
+# Build URIs
 prod.build_uris(WELLS.keyedkeys(), delta = prod.get_last_success())
 
+# Make requests
 prod.request_uris()
 
-#** Clean up wells from iWell
+# Clean up response
 prod.parse_response()
 
-#** Merge records into session
+#* Push
+# Merge records into session
 PROD.merge_records(prod.df)
 
-#** Get affected row counts
+# Get affected row counts
 PROD.get_session_state()
 
-#** Persist changes to database
+# Persist changes to database
 PROD.persist()
 
-# FIXME: Updating on delta is not working
+
+# SECTION: Meters
+
+#* Pull
+# Build URIs
+meters.build_uris(WELLS.keyedkeys(), delta = meters.get_last_success())
+
+# Make requests
+meters.request_uris()
+
+# Clean up response
+meters.parse_response()
+
+#* Push
+# Merge records into session
+METERS.merge_records(meters.df)
+
+# Get affected row counts
+METERS.get_session_state()
+
+# Persist changes to database
+METERS.persist()
 
 
-if 1 = 0:
-    pd.Timestamp(datetime.now()).timestamp()
-    wells.add_since(datetime.now())
-    wells.endpoint +'?since={}'.format(int(pd.Timestamp(datetime.now()).timestamp()))
-    # TODO: START HERE -> Get "merge" method from Flowback
 
-    #TODO: Merge -> load inserts -> load updates
+# SECTION: Meter Readings
 
 
-    wells.df.alias
-    wells.df.updated_at
+#* Pull
+# Build URIs
+meter_readings.build_uris(METERS.keyedkeys(), delta = meter_readings.get_last_success())
+
+# Make requests
+meter_readings.request_uris()
+
+# Clean up response
+meter_readings.parse_response()
+
+#* Push
+# Merge records into session
+METER_READINGS.merge_records(meter_readings.df)
+
+# Get affected row counts
+METER_READINGS.get_session_state()
+
+# Persist changes to database
+METER_READINGS.persist()
 
 
-    headers = {
-                'Authorization': wells.getBearer()
-            }
-    delta = (datetime.now() - timedelta(days = 1))
-    uri = wells.url+wells.endpoint
-    uri = uri + '?since={}'.format(datetime.now().timestamp())
-    r = requests.get(uri, headers=headers)
 
-    '?since={}'.format(int(pd.Timestamp(datetime.now()).timestamp()))
+# SECTION: Fields
 
-    datetime.now().timestamp()
+#* Pull
+# Make requests
+fields.request_uri(fields.build_uri())
 
+# Clean up response
+fields.parse_response()
 
-    r.json()
+#* Push
+# Merge records into session
+FIELDS.merge_records(fields.df)
 
-    r.url
+# Get affected row counts
+FIELDS.get_session_state()
 
-    datetime.now().timestamp()
-    datetime.strptime('1970-01-01', '%Y-%m-%d')
-
-    datetime.fromtimestamp(1539146828)
-
-prod.endpoint.format(prod_id = 'XXX', well_id = 1234)
-
-def build_uri(well_id = None, group_id = None, tank_id = None
-            , run_ticket_id = None, meter_id = None):
-     """Wrapper to build a uri from a set of identifiers
-    
-    Arguments:
-        well_id {str} (optional) --
-        group_id {str} (optional) --
-        tank_id {str} (optional) --
-        run_ticket_id {str} (optional) --
-        meter_id {str} (optional) --
-    
-    Returns:
-        {str} -- uri endpoint
-    """
-    return uri.format(well_id = well_id
-                    , group_id = group_id
-                    , tank_id = tank_id
-                    , run_ticket_id = run_ticket_id
-                    , meter_id = meter_id)
-
-def build_uris(ids: list):
-    """Wrapper to build multiple uris from a list of ids
-    
-    Arguments:
-        ids {list} -- list of dicts of identifiers
-    
-    Returns:
-        {list} -- list of populated uri endpoints
-    """
-
-    return [build_uri(**x) for x in ids]
-
-wells.df['well_id'].to_dict('records')
-
-wells.keys()
-
-wells.df[[wells.aliases['id']]].to_dict('records')
-
-query = WELLS.session.query(WELLS).with_entities(*WELLS.get_pk_cols())
-list(pd.read_sql(query.statement, query.session.bind).squeeze().values)
-
-# ids = [{'well_id' : x} for x in wells.keys()]
-
-# x = build_uris(ids)
-# x
+# Persist changes to database
+FIELDS.persist()
 
 
-wells.reload_properties()
+# SECTION: Fields by Well
 
-wells.endpoint
+#* Pull
+# Build URIs
+fields_by_well.build_uris(WELLS.keyedkeys(), delta = fields_by_well.get_last_success())
 
-WELLS.session.query(WELLS).with_entities(*WELLS.get_pk_cols()).all()
+# Make requests
+fields_by_well.request_uris()
 
-WELLS.get_ids()
+# Clean up response
+fields_by_well.parse_response()
 
-PROD.get_ids()
+#* Push
+# Merge records into session
+FIELDS_BY_WELL.merge_records(fields_by_well.df)
 
-PROD.get_pk_cols()
+# Get affected row counts
+FIELDS_BY_WELL.get_session_state()
+
+# Persist changes to database
+FIELDS_BY_WELL.persist()
 
 
-# [x['path'] for x in _properties['endpoints'].values()]
+# SECTION: Field Values
 
-for k,v in _properties['endpoints'].items():
-    print(k)
+#* Pull
+# Build URIs
+field_values.build_uris(FIELDS_BY_WELL.keyedkeys(), delta = field_values.get_last_success())
 
-for k,v in _properties['endpoints'].items():
-    print(v['path'])
+# Make requests
+field_values.request_uris()
 
-print(', '.join(['{}={!r}'.format(k, v) for k, v in x.items()]))
+# Clean up response
+field_values.parse_response()
+
+#* Push
+# Merge records into session
+FIELD_VALUES.merge_records(field_values.df)
+
+# Get affected row counts
+FIELD_VALUES.get_session_state()
+
+# Persist changes to database
+FIELD_VALUES.persist()
+
+
+field_values.df = field_values.df.fillna(0)
+
+
+FIELD_VALUES.session.rollback()
+
+
+
+# SECTION: Tanks
+
+#* Pull
+# Make requests
+tanks.request_uri(tanks.build_uri())
+
+# Clean up response
+tanks.parse_response()
+
+#* Push
+# Merge records into session
+TANKS.merge_records(tanks.df)
+
+# Get affected row counts
+TANKS.get_session_state()
+
+# Persist changes to database
+TANKS.persist()
+
+
+# SECTION: Tank Readings
+
+#* Pull
+# Build URIs
+tank_readings.build_uris(TANKS.keyedkeys(), delta = tanks.get_last_success())
+
+# Make requests
+tank_readings.request_uris()
+
+# Clean up response
+tank_readings.parse_response()
+
+#* Push
+# Merge records into session
+TANK_READINGS.merge_records(tank_readings.df)
+
+# Get affected row counts
+TANK_READINGS.get_session_state()
+
+# Persist changes to database
+TANK_READINGS.persist()
+
+
+# SECTION: Well Tanks
+
+#* Pull
+# Build URIs
+well_tanks.build_uris(WELLS.keyedkeys(), delta = well_tanks.get_last_success())
+
+# Make requests
+well_tanks.request_uris()
+
+# Clean up response
+well_tanks.parse_response()
+
+#* Push
+# Merge records into session
+WELL_TANKS.merge_records(well_tanks.df)
+
+# Get affected row counts
+WELL_TANKS.get_session_state()
+
+# Persist changes to database
+WELL_TANKS.persist()
+
+# SECTION: Run Tickets
+
+#* Pull
+# Build URIs
+run_tickets.build_uris(TANK_READINGS.keyedkeys(), delta = run_tickets.get_last_success())
+
+# Make requests
+run_tickets.request_uris()
+
+# Clean up response
+run_tickets.parse_response()
+
+#* Push
+# Merge records into session
+RUN_TICKETS.merge_records(run_tickets.df)
+
+# Get affected row counts
+RUN_TICKETS.get_session_state()
+
+# Persist changes to database
+RUN_TICKETS.persist()
+
+
+# SECTION: Well Notes
+
+#* Pull
+# Build URIs
+well_notes.build_uris(WELLS.keyedkeys(), delta = well_notes.get_last_success())
+
+# Make requests
+well_notes.request_uris()
+
+# Clean up response
+well_notes.parse_response()
+
+#* Push
+# Merge records into session
+WELL_NOTES.merge_records(well_notes.df)
+
+# Get affected row counts
+WELL_NOTES.get_session_state()
+
+# Persist changes to database
+WELL_NOTES.persist()
+
+
+# SECTION: Well Groups
+
+#* Pull
+# Make requests
+well_groups.request_uri(well_groups.build_uri())
+
+# Clean up response
+well_groups.parse_response()
+# Extra steps for this one stupid group
+well_groups.df.created_iwell = well_groups.df.created_iwell.apply(pd.datetime.fromtimestamp)
+well_groups.df.updated_iwell = well_groups.df.updated_iwell.apply(pd.datetime.fromtimestamp)
+well_groups.df.group_latest_production_time  = well_groups.df.group_latest_production_time .apply(pd.datetime.fromtimestamp)
+
+
+#* Push
+# Merge records into session
+WELL_GROUPS.merge_records(well_groups.df)
+
+# Get affected row counts
+WELL_GROUPS.get_session_state()
+
+# Persist changes to database
+WELL_GROUPS.persist()
+
+
+
+# SECTION: Well Group Wells
+
+# Build URIs
+well_group_wells.build_uris(WELL_GROUPS.keyedkeys(), delta = well_group_wells.get_last_success())
+
+# Make requests
+well_group_wells.request_uris()
+
+# Clean up response
+well_group_wells.parse_response()
+
+#* Push
+# Merge records into session
+WELL_GROUP_WELLS.merge_records(well_group_wells.df)
+
+# Get affected row counts
+WELL_GROUP_WELLS.get_session_state()
+
+# Persist changes to database
+WELL_GROUP_WELLS.persist()
+
+
+
+
+
+
+
+
+
