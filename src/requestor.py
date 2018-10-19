@@ -140,7 +140,7 @@ class iwell_api(object):
 		return "Bearer " + cls.getAccessToken()
 
 	def add_since(self, since: datetime = None) -> str:
-		"""Append ?since clause to endpoint string. Default settings pull all data.
+		"""Return time filter for api endpoint. Default settings pull all data.
 		
 		Arguments:
 			endpoint {str} -- Provider URI or endpoint
@@ -149,8 +149,8 @@ class iwell_api(object):
 			since {datetime} -- datetime object (default: 1420107010)
 		
 		Returns:
-			[str] -- endpoint appended with since clause.
-							ex: "endpoint?since=32342561"
+			[str] -- since clause
+							ex: "?since=32342561"
 		"""
 		
 		if since:
@@ -388,6 +388,7 @@ class iwell_api(object):
 			}
 
 		uri =  self.url+self.endpoint.format(**ids)
+		uri = uri + self.add_since(since = delta) if delta else uri
 		self.uris[uri] = {id: val for id, val in ids.items() if val is not None}
 		return uri
 
@@ -411,7 +412,7 @@ def main():
 
 if __name__ == '__main__':
 	main()
-
+	
 
 
 # headers = {

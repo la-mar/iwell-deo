@@ -1,6 +1,6 @@
 !!python/object/new:config.Config
 dictitems:
-  cached_at: 2018-10-18 13:30:23.328032
+  cached_at: 2018-10-18 14:29:14.222980
   client_id: KTDMpqhGyBMhnRDB
   client_secret: gYFRiXRtMN0fDYTDPUDYOk1RAbPz44Bu
   endpoints:
@@ -82,8 +82,8 @@ dictitems:
       exclude:
       - date
       keys: well_id
-      last_failure: 2018-10-18 13:29:54.441858
-      last_success: 2018-10-18 13:29:54.621348
+      last_failure: 2018-10-18 14:29:14.030966
+      last_success: 2018-10-18 14:29:14.222980
       normalize: false
       path: /wells/{well_id}/production
     run_tickets:
@@ -99,7 +99,7 @@ dictitems:
       - reading_id
       - run_ticket_id
       last_failure: null
-      last_success: 2018-10-18 13:30:23.328032
+      last_success: 2018-10-18 13:30:28.020085
       normalize: false
       path: /tanks/{tank_id}/readings/{reading_id}/run-tickets
     tank_readings:
@@ -167,7 +167,7 @@ dictitems:
       - alias
       keys: group_id
       last_failure: null
-      last_success: 2018-10-18 12:23:15.261453
+      last_success: 2018-10-18 13:30:29.662902
       normalize: false
       path: /well-groups/{group_id}/wells
     well_groups:
@@ -181,7 +181,7 @@ dictitems:
       - wells.data
       keys: null
       last_failure: null
-      last_success: 2018-10-18 12:14:16.979503
+      last_success: 2018-10-18 13:30:29.499470
       normalize: true
       path: /well-groups
     well_notes:
@@ -191,8 +191,8 @@ dictitems:
         updated_at: updated_iwell
       exclude: []
       keys: well_id
-      last_failure: 2018-10-18 12:11:36.314387
-      last_success: 2018-10-18 12:11:36.491873
+      last_failure: 2018-10-18 13:30:28.855766
+      last_success: 2018-10-18 13:30:29.068327
       normalize: false
       path: /wells/{well_id}/notes
     well_tanks:
@@ -221,7 +221,7 @@ dictitems:
       exclude: []
       keys: null
       last_failure: 2018-10-18 10:37:23.461383
-      last_success: 2018-10-18 13:29:53.794145
+      last_success: 2018-10-18 14:20:39.992067
       normalize: false
       path: /wells
   password: 7haYrAaFqTwS
