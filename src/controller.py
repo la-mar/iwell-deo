@@ -1,17 +1,10 @@
+import logging
+from src.requestor import *
+from src.dbagents import *
 
-import os
-try:
-    os.chdir('src')
+from src.settings import LOAD_TO_DB
 
-except:
-    pass
-
-finally:
-    os.getcwd()
-
-from requestor import *
-from dbagents import *
-
+logger = logging.getLogger(__name__)
 
 # Setup
 
@@ -56,329 +49,381 @@ WELL_GROUP_WELLS.session = db.Session()
 # FIXME: Updating on delta is not working
 
 
-#? Transport
+def find_delta(api, table):
+    d1 = prod.get_last_success()
+    d2 = PROD.get_last_update()[0]
+    return d1 if d1 < d2 else d2
 
-# SECTION: Wells
+def integrate():
 
-#** Build URIs
-wells.request_uri(wells.build_uri())
+    #! Wells
 
-#** Clean up wells from iWell
-wells.parse_response()
+    #** Build URIs
+    wells.request_uri(wells.build_uri())
 
-#** Merge records into session
-WELLS.merge_records(wells.df)
+    #** Clean up wells from iWell
+    wells.parse_response()
 
-#** Get affected row counts
-WELLS.get_session_state()
 
-#** Persist changes to database
-WELLS.persist()
+    if LOAD_TO_DB:
 
+        #** Merge records into session
+        WELLS.merge_records(wells.df)
 
+        #** Get affected row counts
+        WELLS.get_session_state()
 
-# SECTION: Production
+        #** Persist changes to database
+        WELLS.persist()
 
-#* Pull
-# Build URIs
-prod.build_uris(WELLS.keyedkeys(), delta = prod.get_last_success())
 
-# Make requests
-prod.request_uris()
 
-# Clean up response
-prod.parse_response()
+    #! Production
 
-#* Push
-# Merge records into session
-PROD.merge_records(prod.df)
 
-# Get affected row counts
-PROD.get_session_state()
+    #* Pull
+    # Build URIs
+    prod.build_uris(WELLS.keyedkeys(), delta = find_delta(prod, PROD))
 
-# Persist changes to database
-PROD.persist()
+    # Make requests
+    prod.request_uris()
+    prod.uris
+    # Clean up response
+    prod.parse_response()
 
 
-# SECTION: Meters
+    if LOAD_TO_DB:
 
-#* Pull
-# Build URIs
-meters.build_uris(WELLS.keyedkeys(), delta = meters.get_last_success())
+        #* Push
+        # Merge records into session
+        PROD.merge_records(prod.df)
 
-# Make requests
-meters.request_uris()
+        # Get affected row counts
+        PROD.get_session_state()
 
-# Clean up response
-meters.parse_response()
+        # Persist changes to database
+        PROD.persist()
 
-#* Push
-# Merge records into session
-METERS.merge_records(meters.df)
 
-# Get affected row counts
-METERS.get_session_state()
+    #! Meters
 
-# Persist changes to database
-METERS.persist()
+    #* Pull
+    # Build URIs
+    meters.build_uris(WELLS.keyedkeys(), delta = find_delta(meters, METERS))
 
+    # Make requests
+    meters.request_uris()
 
+    # Clean up response
+    meters.parse_response()
 
-# SECTION: Meter Readings
+    if LOAD_TO_DB:
 
+        #* Push
+        # Merge records into session
+        METERS.merge_records(meters.df)
 
-#* Pull
-# Build URIs
-meter_readings.build_uris(METERS.keyedkeys(), delta = meter_readings.get_last_success())
+        # Get affected row counts
+        METERS.get_session_state()
 
-# Make requests
-meter_readings.request_uris()
+        # Persist changes to database
+        METERS.persist()
 
-# Clean up response
-meter_readings.parse_response()
 
-#* Push
-# Merge records into session
-METER_READINGS.merge_records(meter_readings.df)
 
-# Get affected row counts
-METER_READINGS.get_session_state()
+    #! Meter Readings
 
-# Persist changes to database
-METER_READINGS.persist()
 
+    #* Pull
+    # Build URIs
+    meter_readings.build_uris(METERS.keyedkeys(),
+                        delta = find_delta(meter_readings, METER_READINGS))
 
+    # Make requests
+    meter_readings.request_uris()
 
-# SECTION: Fields
+    # Clean up response
+    meter_readings.parse_response()
 
-#* Pull
-# Make requests
-fields.request_uri(fields.build_uri())
+    if LOAD_TO_DB:
 
-# Clean up response
-fields.parse_response()
+        #* Push
+        # Merge records into session
+        METER_READINGS.merge_records(meter_readings.df)
 
-#* Push
-# Merge records into session
-FIELDS.merge_records(fields.df)
+        # Get affected row counts
+        METER_READINGS.get_session_state()
 
-# Get affected row counts
-FIELDS.get_session_state()
+        # Persist changes to database
+        METER_READINGS.persist()
 
-# Persist changes to database
-FIELDS.persist()
 
 
-# SECTION: Fields by Well
+    #! Fields
 
-#* Pull
-# Build URIs
-fields_by_well.build_uris(WELLS.keyedkeys(), delta = fields_by_well.get_last_success())
+    #* Pull
+    # Make requests
+    fields.request_uri(fields.build_uri())
 
-# Make requests
-fields_by_well.request_uris()
+    # Clean up response
+    fields.parse_response()
 
-# Clean up response
-fields_by_well.parse_response()
+    if LOAD_TO_DB:
 
-#* Push
-# Merge records into session
-FIELDS_BY_WELL.merge_records(fields_by_well.df)
+        #* Push
+        # Merge records into session
+        FIELDS.merge_records(fields.df)
 
-# Get affected row counts
-FIELDS_BY_WELL.get_session_state()
+        # Get affected row counts
+        FIELDS.get_session_state()
 
-# Persist changes to database
-FIELDS_BY_WELL.persist()
+        # Persist changes to database
+        FIELDS.persist()
 
 
-# SECTION: Field Values
+    #! Fields by Well
 
-#* Pull
-# Build URIs
-field_values.build_uris(FIELDS_BY_WELL.keyedkeys(), delta = field_values.get_last_success())
+    #* Pull
+    # Build URIs
+    fields_by_well.build_uris(WELLS.keyedkeys(),
+                        delta = find_delta(fields_by_well, FIELDS_BY_WELL))
 
-# Make requests
-field_values.request_uris()
+    # Make requests
+    fields_by_well.request_uris()
 
-# Clean up response
-field_values.parse_response()
+    # Clean up response
+    fields_by_well.parse_response()
 
-#* Push
-# Merge records into session
-FIELD_VALUES.merge_records(field_values.df)
 
-# Get affected row counts
-FIELD_VALUES.get_session_state()
+    if LOAD_TO_DB:
 
-# Persist changes to database
-FIELD_VALUES.persist()
+        #* Push
+        # Merge records into session
+        FIELDS_BY_WELL.merge_records(fields_by_well.df)
 
+        # Get affected row counts
+        FIELDS_BY_WELL.get_session_state()
 
-field_values.df = field_values.df.fillna(0)
+        # Persist changes to database
+        FIELDS_BY_WELL.persist()
 
 
-FIELD_VALUES.session.rollback()
+    #! Field Values
 
+    #* Pull
+    # Build URIs
+    field_values.build_uris(FIELDS_BY_WELL.keyedkeys(),
+                    delta = find_delta(field_values, FIELD_VALUES))
 
+    # Make requests
+    field_values.request_uris()
 
-# SECTION: Tanks
+    # Clean up response
+    field_values.parse_response()
 
-#* Pull
-# Make requests
-tanks.request_uri(tanks.build_uri())
 
-# Clean up response
-tanks.parse_response()
+    if LOAD_TO_DB:
 
-#* Push
-# Merge records into session
-TANKS.merge_records(tanks.df)
+        #* Push
+        # Merge records into session
+        FIELD_VALUES.merge_records(field_values.df)
 
-# Get affected row counts
-TANKS.get_session_state()
+        # Get affected row counts
+        FIELD_VALUES.get_session_state()
 
-# Persist changes to database
-TANKS.persist()
+        # Persist changes to database
+        FIELD_VALUES.persist()
 
 
-# SECTION: Tank Readings
+    # field_values.df = field_values.df.fillna(0)
 
-#* Pull
-# Build URIs
-tank_readings.build_uris(TANKS.keyedkeys(), delta = tanks.get_last_success())
 
-# Make requests
-tank_readings.request_uris()
+    # FIELD_VALUES.session.rollback()
 
-# Clean up response
-tank_readings.parse_response()
 
-#* Push
-# Merge records into session
-TANK_READINGS.merge_records(tank_readings.df)
 
-# Get affected row counts
-TANK_READINGS.get_session_state()
+    #! Tanks
 
-# Persist changes to database
-TANK_READINGS.persist()
+    #* Pull
+    # Make requests
+    tanks.request_uri(tanks.build_uri())
 
+    # Clean up response
+    tanks.parse_response()
 
-# SECTION: Well Tanks
 
-#* Pull
-# Build URIs
-well_tanks.build_uris(WELLS.keyedkeys(), delta = well_tanks.get_last_success())
+    if LOAD_TO_DB:
 
-# Make requests
-well_tanks.request_uris()
+        #* Push
+        # Merge records into session
+        TANKS.merge_records(tanks.df)
 
-# Clean up response
-well_tanks.parse_response()
+        # Get affected row counts
+        TANKS.get_session_state()
 
-#* Push
-# Merge records into session
-WELL_TANKS.merge_records(well_tanks.df)
+        # Persist changes to database
+        TANKS.persist()
 
-# Get affected row counts
-WELL_TANKS.get_session_state()
 
-# Persist changes to database
-WELL_TANKS.persist()
+    #! Tank Readings
 
-# SECTION: Run Tickets
+    #* Pull
+    # Build URIs
+    tank_readings.build_uris(TANKS.keyedkeys(),
+                        delta = find_delta(tank_readings, TANK_READINGS))
 
-#* Pull
-# Build URIs
-run_tickets.build_uris(TANK_READINGS.keyedkeys(), delta = run_tickets.get_last_success())
+    # Make requests
+    tank_readings.request_uris()
 
-# Make requests
-run_tickets.request_uris()
+    # Clean up response
+    tank_readings.parse_response()
 
-# Clean up response
-run_tickets.parse_response()
 
-#* Push
-# Merge records into session
-RUN_TICKETS.merge_records(run_tickets.df)
+    if LOAD_TO_DB:
 
-# Get affected row counts
-RUN_TICKETS.get_session_state()
+        #* Push
+        # Merge records into session
+        TANK_READINGS.merge_records(tank_readings.df)
 
-# Persist changes to database
-RUN_TICKETS.persist()
+        # Get affected row counts
+        TANK_READINGS.get_session_state()
 
+        # Persist changes to database
+        TANK_READINGS.persist()
 
-# SECTION: Well Notes
 
-#* Pull
-# Build URIs
-well_notes.build_uris(WELLS.keyedkeys(), delta = well_notes.get_last_success())
+    #! Well Tanks
 
-# Make requests
-well_notes.request_uris()
+    #* Pull
+    # Build URIs
+    well_tanks.build_uris(WELLS.keyedkeys(),
+                delta = find_delta(well_tanks, WELL_TANKS))
 
-# Clean up response
-well_notes.parse_response()
+    # Make requests
+    well_tanks.request_uris()
 
-#* Push
-# Merge records into session
-WELL_NOTES.merge_records(well_notes.df)
+    # Clean up response
+    well_tanks.parse_response()
 
-# Get affected row counts
-WELL_NOTES.get_session_state()
 
-# Persist changes to database
-WELL_NOTES.persist()
+    if LOAD_TO_DB:
 
+        #* Push
+        # Merge records into session
+        WELL_TANKS.merge_records(well_tanks.df)
 
-# SECTION: Well Groups
+        # Get affected row counts
+        WELL_TANKS.get_session_state()
 
-#* Pull
-# Make requests
-well_groups.request_uri(well_groups.build_uri())
+        # Persist changes to database
+        WELL_TANKS.persist()
 
-# Clean up response
-well_groups.parse_response()
-# Extra steps for this one stupid group
-well_groups.df.created_iwell = well_groups.df.created_iwell.apply(pd.datetime.fromtimestamp)
-well_groups.df.updated_iwell = well_groups.df.updated_iwell.apply(pd.datetime.fromtimestamp)
-well_groups.df.group_latest_production_time  = well_groups.df.group_latest_production_time .apply(pd.datetime.fromtimestamp)
+    # SECTION: Run Tickets
 
+    #* Pull
+    # Build URIs
+    run_tickets.build_uris(TANK_READINGS.keyedkeys(),
+                    delta = find_delta(run_tickets, RUN_TICKETS))
 
-#* Push
-# Merge records into session
-WELL_GROUPS.merge_records(well_groups.df)
+    # Make requests
+    run_tickets.request_uris()
 
-# Get affected row counts
-WELL_GROUPS.get_session_state()
+    # Clean up response
+    run_tickets.parse_response()
 
-# Persist changes to database
-WELL_GROUPS.persist()
 
+    if LOAD_TO_DB:
 
+        #* Push
+        # Merge records into session
+        RUN_TICKETS.merge_records(run_tickets.df)
 
-# SECTION: Well Group Wells
+        # Get affected row counts
+        RUN_TICKETS.get_session_state()
 
-# Build URIs
-well_group_wells.build_uris(WELL_GROUPS.keyedkeys(), delta = well_group_wells.get_last_success())
+        # Persist changes to database
+        RUN_TICKETS.persist()
 
-# Make requests
-well_group_wells.request_uris()
 
-# Clean up response
-well_group_wells.parse_response()
+    #! Well Notes
 
-#* Push
-# Merge records into session
-WELL_GROUP_WELLS.merge_records(well_group_wells.df)
+    #* Pull
+    # Build URIs
+    well_notes.build_uris(WELLS.keyedkeys(),
+                    delta = find_delta(well_notes, WELL_NOTES))
 
-# Get affected row counts
-WELL_GROUP_WELLS.get_session_state()
+    # Make requests
+    well_notes.request_uris()
 
-# Persist changes to database
-WELL_GROUP_WELLS.persist()
+    # Clean up response
+    well_notes.parse_response()
+
+
+    if LOAD_TO_DB:
+
+        #* Push
+        # Merge records into session
+        WELL_NOTES.merge_records(well_notes.df)
+
+        # Get affected row counts
+        WELL_NOTES.get_session_state()
+
+        # Persist changes to database
+        WELL_NOTES.persist()
+
+
+    #! Well Groups
+
+    #* Pull
+    # Make requests
+    well_groups.request_uri(well_groups.build_uri())
+
+    # Clean up response
+    well_groups.parse_response()
+    # Extra steps for this one stupid group
+    well_groups.df.created_iwell = well_groups.df.created_iwell.apply(pd.datetime.fromtimestamp)
+    well_groups.df.updated_iwell = well_groups.df.updated_iwell.apply(pd.datetime.fromtimestamp)
+    well_groups.df.group_latest_production_time  = well_groups.df.group_latest_production_time .apply(pd.datetime.fromtimestamp)
+
+
+    if LOAD_TO_DB:
+
+        #* Push
+        # Merge records into session
+        WELL_GROUPS.merge_records(well_groups.df)
+
+        # Get affected row counts
+        WELL_GROUPS.get_session_state()
+
+        # Persist changes to database
+        WELL_GROUPS.persist()
+
+
+
+    #! Well Group Wells
+
+    # Build URIs
+    well_group_wells.build_uris(WELL_GROUPS.keyedkeys(),
+                        delta = find_delta(well_group_wells, WELL_GROUP_WELLS))
+
+    # Make requests
+    well_group_wells.request_uris()
+
+    # Clean up response
+    well_group_wells.parse_response()
+
+
+    if LOAD_TO_DB:
+
+        #* Push
+        # Merge records into session
+        WELL_GROUP_WELLS.merge_records(well_group_wells.df)
+
+        # Get affected row counts
+        WELL_GROUP_WELLS.get_session_state()
+
+        # Persist changes to database
+        WELL_GROUP_WELLS.persist()
 
 
 

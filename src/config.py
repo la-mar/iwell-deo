@@ -2,22 +2,6 @@ import yaml
 import os
 from pprint import pprint
 
-# config = {} # configuration dictionary
-
-# %% Load Configuration
-
-# with open("Flowback\\config.yaml", 'r') as stream:
-#     try:
-#         config = (yaml.load(stream))
-#     except yaml.YAMLError as exc:
-#         print(exc)
-# pprint(dir(yaml.dump))
-
-# def get_config():
-
-#     pprint(config)
-
-#     return config
 
 class Config(dict):
     """
@@ -48,7 +32,7 @@ class Config(dict):
         with open(self.filename, "w") as f:
             yaml.dump(self, f, default_flow_style=False)
 
-Config()
+# Config()
 
 
 
