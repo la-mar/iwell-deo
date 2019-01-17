@@ -2,7 +2,7 @@ import logging
 from src.requestor import *
 from src.dbagents import *
 
-from src.settings import LOAD_TO_DB
+from src.settings import LOAD_TO_DB, DEFAULT_START
 
 logger = logging.getLogger(__name__)
 
@@ -46,13 +46,19 @@ WELL_NOTES.session = db.Session()
 WELL_GROUPS.session = db.Session()
 WELL_GROUP_WELLS.session = db.Session()
 
-# FIXME: Updating on delta is not working
+
+
+
+
+# FIXME: Updating o)
 
 
 def find_delta(api, table):
     d1 = prod.get_last_success()
     d2 = PROD.get_last_update()[0]
     return d1 if d1 < d2 else d2
+
+
 
 def integrate():
 
@@ -83,11 +89,11 @@ def integrate():
 
     #* Pull
     # Build URIs
-    prod.build_uris(WELLS.keyedkeys(), delta = find_delta(prod, PROD))
+    prod.build_uris(WELLS.keyedkeys(), start = DEFAULT_START)
 
     # Make requests
     prod.request_uris()
-    prod.uris
+    # prod.uris
     # Clean up response
     prod.parse_response()
 
@@ -109,7 +115,7 @@ def integrate():
 
     #* Pull
     # Build URIs
-    meters.build_uris(WELLS.keyedkeys(), delta = find_delta(meters, METERS))
+    meters.build_uris(WELLS.keyedkeys())
 
     # Make requests
     meters.request_uris()
@@ -137,7 +143,7 @@ def integrate():
     #* Pull
     # Build URIs
     meter_readings.build_uris(METERS.keyedkeys(),
-                        delta = find_delta(meter_readings, METER_READINGS))
+                )
 
     # Make requests
     meter_readings.request_uris()
@@ -186,7 +192,7 @@ def integrate():
     #* Pull
     # Build URIs
     fields_by_well.build_uris(WELLS.keyedkeys(),
-                        delta = find_delta(fields_by_well, FIELDS_BY_WELL))
+                )
 
     # Make requests
     fields_by_well.request_uris()
@@ -213,7 +219,7 @@ def integrate():
     #* Pull
     # Build URIs
     field_values.build_uris(FIELDS_BY_WELL.keyedkeys(),
-                    delta = find_delta(field_values, FIELD_VALUES))
+            )
 
     # Make requests
     field_values.request_uris()
@@ -270,7 +276,7 @@ def integrate():
     #* Pull
     # Build URIs
     tank_readings.build_uris(TANKS.keyedkeys(),
-                        delta = find_delta(tank_readings, TANK_READINGS))
+                )
 
     # Make requests
     tank_readings.request_uris()
@@ -297,7 +303,7 @@ def integrate():
     #* Pull
     # Build URIs
     well_tanks.build_uris(WELLS.keyedkeys(),
-                delta = find_delta(well_tanks, WELL_TANKS))
+        )
 
     # Make requests
     well_tanks.request_uris()
@@ -323,7 +329,7 @@ def integrate():
     #* Pull
     # Build URIs
     run_tickets.build_uris(TANK_READINGS.keyedkeys(),
-                    delta = find_delta(run_tickets, RUN_TICKETS))
+            )
 
     # Make requests
     run_tickets.request_uris()
@@ -350,7 +356,7 @@ def integrate():
     #* Pull
     # Build URIs
     well_notes.build_uris(WELLS.keyedkeys(),
-                    delta = find_delta(well_notes, WELL_NOTES))
+            )
 
     # Make requests
     well_notes.request_uris()
@@ -404,7 +410,7 @@ def integrate():
 
     # Build URIs
     well_group_wells.build_uris(WELL_GROUPS.keyedkeys(),
-                        delta = find_delta(well_group_wells, WELL_GROUP_WELLS))
+                )
 
     # Make requests
     well_group_wells.request_uris()

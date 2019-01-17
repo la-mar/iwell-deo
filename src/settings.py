@@ -18,8 +18,8 @@ YAML_CONFIG_PATH = './config/config.yaml'
 LOG_CONFIG_PATH = './config/logging.yaml'
 
 
-
-
+DEFAULT_TIMESTAMP = 21600 # 1970-01-01
+DEFAULT_START = '1970-01-01'
 
 
 

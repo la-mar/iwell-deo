@@ -13,7 +13,7 @@ from src.retry import retry
 from oauthlib.oauth2 import LegacyApplicationClient, TokenExpiredError
 from requests_oauthlib import OAuth2Session
 from src.config import Config
-from src.settings import YAML_CONFIG_PATH, LOGLEVEL
+from src.settings import YAML_CONFIG_PATH, LOGLEVEL, DEFAULT_TIMESTAMP
 
 pd.options.display.max_rows = None
 pd.set_option('display.float_format', lambda x: '%.2f' % x)
@@ -151,13 +151,22 @@ class iwell_api(object):
                             ex: "?since=32342561"
         """
 
+        t = DEFAULT_TIMESTAMP
         if since:
             self.logger.debug(f'Adding time filter: {since.timestamp()}')
+            t = since.timestamp()
 
-            return '?since={}'.format(int(since.timestamp()))
-        else:
-            return ''
+        return '?since={}'.format(int(t))
 
+
+    def add_start(self, start: str):
+        """Example 'https://api.iwell.info/v1/wells/17588/production?start=2015-01-01'
+
+        Arguments:
+            start {str} -- [description]
+        """
+
+        return f'?start={start}'
 
     def get_last_success(self):
         """Get last successful runtime of this endpoint
@@ -365,7 +374,7 @@ class iwell_api(object):
 
     def build_uri(self, well_id = None, group_id = None, tank_id = None
                 , run_ticket_id = None, meter_id = None, field_id = None
-                , reading_id = None, note_id = None, delta = None):
+                , reading_id = None, note_id = None, delta = None, start = None):
 
         """Wrapper to build a uri from a set of identifiers
 
@@ -393,13 +402,17 @@ class iwell_api(object):
 
         self.logger.debug(f'Building uri from keys: {ids}')
         uri =  self.url+self.endpoint.format(**ids)
-        uri = uri + self.add_since(since = delta) if delta else uri
+        if delta:
+            uri = uri + self.add_since(since = delta) # if delta else uri
+
+        if start:
+            uri = uri + self.add_start(start = start)
         self.uris[uri] = {id: val for id, val in ids.items() if val is not None}
         self.logger.debug(f'Built  {uri}')
         return uri
 
 
-    def build_uris(self, ids: list, delta = None):
+    def build_uris(self, ids: list, delta = None, start = None):
         """Wrapper to build multiple uris from a list of ids
 
         Arguments:
@@ -408,6 +421,6 @@ class iwell_api(object):
         Returns:
             {list} -- list of populated uri endpoints
         """
-        [self.build_uri(**x, delta = delta) for x in ids]
+        [self.build_uri(**x, delta = delta, start = start) for x in ids]
 
 

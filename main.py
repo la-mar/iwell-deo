@@ -1,5 +1,7 @@
 
 
+# TODO: Add configuration for complete pull
+
 import logging
 import os
 import sys
@@ -39,3 +41,25 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
+
+
+
+
+
+
+
+
+
+prod = iwell_api('production')
+
+
+
+
+prod.request_uri('https://api.iwell.info/v1/wells/17588/production?start=2015-01-01', {'well_id': '17588'})
+
+
+{'https://api.iwell.info/v1/wells/17588/production?since=21600': {'well_id': '17588'}}

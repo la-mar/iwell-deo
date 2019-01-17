@@ -175,7 +175,7 @@ class GenericTable(object):
         """
         try:
             cls.session.commit()
-            logger.exception(f'Persisted to {cls.__tablename__}')
+            logger.info(f'Persisted to {cls.__tablename__}')
         except Exception as e:
             logger.exception(f'Records not persisted. {e}')
             cls.session.rollback()
