@@ -25,6 +25,8 @@ logging.getLogger('requests.packages.urllib3').setLevel(logging.WARNING)
 
 _properties = Config(YAML_CONFIG_PATH)
 
+def save_properties():
+    _properties.save()
 
 #! FIX YAML
 
@@ -153,8 +155,10 @@ class iwell_api(object):
 
         t = DEFAULT_TIMESTAMP
         if since:
-            self.logger.debug(f'Adding time filter: {since.timestamp()}')
+            self.logger.debug(f'Adding time filter: {since.timestamp()} ({since})')
             t = since.timestamp()
+        else:
+            self.logger.debug(f'Adding time filter: {t} ({datetime.fromtimestamp(t)})')
 
         return '?since={}'.format(int(t))
 
@@ -310,7 +314,7 @@ class iwell_api(object):
 
                 self.set_last_success()
                 if count > 0:
-                    self.logger.info(f'GET {uri.replace(self.url, "")}  ({count} records)')
+                    self.logger.info(f'GET {uri.replace(self.url, "")} ({count} records)')
 
             else:
                 self.logger.exception(f'GET {response.request.path_url.replace(self.url, "")} (Error) {response.json()["error"]["message"]}')

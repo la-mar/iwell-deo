@@ -1,6 +1,6 @@
 !!python/object/new:src.config.Config
 dictitems:
-  cached_at: 2019-01-17 17:18:01.607582
+  cached_at: 2019-01-18 10:40:12.493338
   client_id: KTDMpqhGyBMhnRDB
   client_secret: gYFRiXRtMN0fDYTDPUDYOk1RAbPz44Bu
   endpoints:
@@ -12,7 +12,7 @@ dictitems:
       exclude: []
       keys: null
       last_failure: 2018-10-18 11:34:47.046800
-      last_success: 2019-01-17 16:48:02.189443
+      last_success: 2019-01-18 10:37:52.809885
       normalize: false
       path: /wells/{well_id}/fields/{field_id}/values
     fields:
@@ -27,7 +27,7 @@ dictitems:
       exclude: []
       keys: null
       last_failure: null
-      last_success: 2019-01-17 16:47:57.216540
+      last_success: 2019-01-18 10:37:51.517833
       normalize: false
       path: /fields
     fields_by_well:
@@ -42,7 +42,7 @@ dictitems:
       exclude: []
       keys: null
       last_failure: 2018-10-18 13:29:57.447666
-      last_success: 2019-01-17 16:47:59.095389
+      last_success: 2019-01-18 10:37:52.042066
       normalize: false
       path: /wells/{well_id}/fields
     meter_readings:
@@ -55,7 +55,7 @@ dictitems:
       - well_id
       - meter_id
       last_failure: 2018-10-18 11:03:54.492051
-      last_success: 2019-01-17 16:47:38.091345
+      last_success: 2019-01-18 10:37:48.577734
       normalize: false
       path: /wells/{well_id}/meters/{meter_id}/readings
     meters:
@@ -70,7 +70,7 @@ dictitems:
       exclude: []
       keys: well_id
       last_failure: 2018-10-18 13:29:55.186960
-      last_success: 2019-01-17 16:47:34.233314
+      last_success: 2019-01-18 10:37:47.250794
       normalize: false
       path: /wells/{well_id}/meters
     production:
@@ -83,7 +83,7 @@ dictitems:
       - date
       keys: well_id
       last_failure: 2018-10-18 14:29:14.030966
-      last_success: 2019-01-17 17:18:01.607582
+      last_success: 2019-01-18 10:37:46.809183
       normalize: false
       path: /wells/{well_id}/production
     run_tickets:
@@ -99,7 +99,7 @@ dictitems:
       - reading_id
       - run_ticket_id
       last_failure: 2019-01-17 17:02:12.201587
-      last_success: 2019-01-17 17:04:33.029595
+      last_success: 2019-01-18 10:40:06.279733
       normalize: false
       path: /tanks/{tank_id}/readings/{reading_id}/run-tickets
     tank_readings:
@@ -110,7 +110,7 @@ dictitems:
       exclude: []
       keys: tank_id
       last_failure: 2018-10-18 11:59:44.620958
-      last_success: 2019-01-17 16:50:12.530482
+      last_success: 2019-01-18 10:37:55.427531
       normalize: false
       path: /tanks/{tank_id}/readings
     tanks:
@@ -123,7 +123,7 @@ dictitems:
       exclude: []
       keys: null
       last_failure: null
-      last_success: 2019-01-17 16:50:04.495429
+      last_success: 2019-01-18 10:37:52.958632
       normalize: false
       path: /tanks
     well_field_values:
@@ -167,7 +167,7 @@ dictitems:
       - alias
       keys: group_id
       last_failure: null
-      last_success: 2019-01-17 17:05:42.461615
+      last_success: 2019-01-18 10:40:12.493338
       normalize: false
       path: /well-groups/{group_id}/wells
     well_groups:
@@ -181,7 +181,7 @@ dictitems:
       - wells.data
       keys: null
       last_failure: null
-      last_success: 2019-01-17 17:05:41.828620
+      last_success: 2019-01-18 10:40:12.354976
       normalize: true
       path: /well-groups
     well_notes:
@@ -192,7 +192,7 @@ dictitems:
       exclude: []
       keys: well_id
       last_failure: 2018-10-18 13:30:28.855766
-      last_success: 2019-01-17 17:05:29.342904
+      last_success: 2019-01-18 10:40:12.275919
       normalize: false
       path: /wells/{well_id}/notes
     well_tanks:
@@ -207,7 +207,7 @@ dictitems:
       - type
       keys: well_id
       last_failure: 2018-10-18 13:30:03.591703
-      last_success: 2019-01-17 16:50:36.252937
+      last_success: 2019-01-18 10:37:59.258394
       normalize: false
       path: /wells/{well_id}/tanks
     wells:
@@ -221,7 +221,7 @@ dictitems:
       exclude: []
       keys: null
       last_failure: 2019-01-17 17:18:00.191633
-      last_success: 2019-01-17 17:17:15.738810
+      last_success: 2019-01-18 10:37:46.174238
       normalize: false
       path: /wells
   password: 7haYrAaFqTwS

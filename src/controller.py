@@ -48,64 +48,62 @@ WELL_NOTES.session = db.Session()
 WELL_GROUPS.session = db.Session()
 WELL_GROUP_WELLS.session = db.Session()
 
-pairings = [
-{'table': WELLS,
- 'endpoint': wells,
- 'extra': datetime.fromtimestamp(DEFAULT_TIMESTAMP)
- },
-{'table': PROD,
- 'endpoint': prod,
- 'extra': find_delta()
- },
-{'table': METERS,
- 'endpoint': meters,
- 'extra': find_delta()
- },
-{'table': METER_READINGS,
- 'endpoint': meter_readings,
- 'extra': find_delta()
- },
-{'table': FIELDS_BY_WELL,
- 'endpoint': fields_by_well,
- 'extra': find_delta()
- },
-{'table': FIELD_VALUES,
- 'endpoint': field_values,
- 'extra': find_delta()
- },
-{'table': TANKS,
- 'endpoint': tanks,
- 'extra': find_delta()
- },
-{'table': TANK_READINGS,
- 'endpoint': tank_readings,
- 'extra': find_delta()
- },
-{'table': WELL_TANKS,
- 'endpoint': well_tanks,
- 'extra': find_delta()
- },
-{'table': RUN_TICKETS,
- 'endpoint': run_tickets,
- 'extra': find_delta()
- },
-{'table': WELL_NOTES,
- 'endpoint': well_notes,
- 'extra': find_delta()
- },
-{'table': WELL_GROUPS,
- 'endpoint': well_groups,
- 'extra': find_delta()
- },
-{'table': WELL_GROUP_WELLS,
- 'endpoint': well_group_wells,
- 'extra': find_delta()
- }
-]
+# pairings = [
+# {'table': WELLS,
+#  'endpoint': wells,
+#  'extra': datetime.fromtimestamp(DEFAULT_TIMESTAMP)
+#  },
+# {'table': PROD,
+#  'endpoint': prod,
+#  'extra': find_delta()
+#  },
+# {'table': METERS,
+#  'endpoint': meters,
+#  'extra': find_delta()
+#  },
+# {'table': METER_READINGS,
+#  'endpoint': meter_readings,
+#  'extra': find_delta()
+#  },
+# {'table': FIELDS_BY_WELL,
+#  'endpoint': fields_by_well,
+#  'extra': find_delta()
+#  },
+# {'table': FIELD_VALUES,
+#  'endpoint': field_values,
+#  'extra': find_delta()
+#  },
+# {'table': TANKS,
+#  'endpoint': tanks,
+#  'extra': find_delta()
+#  },
+# {'table': TANK_READINGS,
+#  'endpoint': tank_readings,
+#  'extra': find_delta()
+#  },
+# {'table': WELL_TANKS,
+#  'endpoint': well_tanks,
+#  'extra': find_delta()
+#  },
+# {'table': RUN_TICKETS,
+#  'endpoint': run_tickets,
+#  'extra': find_delta()
+#  },
+# {'table': WELL_NOTES,
+#  'endpoint': well_notes,
+#  'extra': find_delta()
+#  },
+# {'table': WELL_GROUPS,
+#  'endpoint': well_groups,
+#  'extra': find_delta()
+#  },
+# {'table': WELL_GROUP_WELLS,
+#  'endpoint': well_group_wells,
+#  'extra': find_delta()
+#  }
+# ]
 
 
-
-# FIXME: Updating o)
 
 
 def find_delta(api: iwell_api, table: Table, on_delta: bool = True):
@@ -134,14 +132,39 @@ def find_delta(api: iwell_api, table: Table, on_delta: bool = True):
 
 
 
-def integrate(pairings: list):
-    """trigger integration tasks"""
+# def integrate(pairings: list):
+#     """trigger integration tasks"""
 
-    for pair in pairings:
+#     for pair in pairings:
+#         table = pair.table
+#         api = pair.api
+
+#         #* Pull
+#         # Build URIs
+#         api.build_uris(wells_active, delta = find_delta(api, PROD))
+
+#         # Make requests
+#         api.request_uris()
+
+#         # Clean up response
+#         api.parse_response()
+
+
+#         if LOAD_TO_DB:
+
+#             #* Push
+#             # Merge records into session
+#             PROD.merge_records(prod.df)
+
+#             # Get affected row counts
+#             PROD.get_session_state()
+
+#             # Persist changes to database
+#             PROD.persist()
 
 
 
-def bust():
+def integrate():
 
 
     # if method == 'delta':
@@ -151,6 +174,9 @@ def bust():
     # else:
     #     logger.critical('Invalid protocol provided to integration controller.')
     #     sys.exit()
+
+    query = WELLS.session.query(WELLS.well_id).filter(WELLS.is_active == True)
+    wells_active = pd.read_sql(query.statement, query.session.bind).to_dict('records')
 
     #! Wells
 
@@ -179,7 +205,7 @@ def bust():
 
     #* Pull
     # Build URIs
-    prod.build_uris(WELLS.keyedkeys(), delta = find_delta(prod, PROD))
+    prod.build_uris(wells_active, delta = find_delta(prod, PROD))
 
     # Make requests
     prod.request_uris()
@@ -205,7 +231,7 @@ def bust():
 
     #* Pull
     # Build URIs
-    meters.build_uris(WELLS.keyedkeys())
+    meters.build_uris(wells_active, delta = find_delta(meters, METERS))
 
     # Make requests
     meters.request_uris()
@@ -232,8 +258,7 @@ def bust():
 
     #* Pull
     # Build URIs
-    meter_readings.build_uris(METERS.keyedkeys(),
-                )
+    meter_readings.build_uris(METERS.keyedkeys(), delta = find_delta(meter_readings, METER_READINGS))
 
     # Make requests
     meter_readings.request_uris()
@@ -281,8 +306,7 @@ def bust():
 
     #* Pull
     # Build URIs
-    fields_by_well.build_uris(WELLS.keyedkeys(),
-                )
+    fields_by_well.build_uris(wells_active, delta = find_delta(fields_by_well, FIELDS_BY_WELL))
 
     # Make requests
     fields_by_well.request_uris()
@@ -308,8 +332,7 @@ def bust():
 
     #* Pull
     # Build URIs
-    field_values.build_uris(FIELDS_BY_WELL.keyedkeys(),
-            )
+    field_values.build_uris(FIELDS_BY_WELL.keyedkeys(), delta = find_delta(field_values, FIELD_VALUES))
 
     # Make requests
     field_values.request_uris()
@@ -365,8 +388,7 @@ def bust():
 
     #* Pull
     # Build URIs
-    tank_readings.build_uris(TANKS.keyedkeys(),
-                )
+    tank_readings.build_uris(TANKS.keyedkeys(), delta = find_delta(tank_readings, TANK_READINGS))
 
     # Make requests
     tank_readings.request_uris()
@@ -392,8 +414,7 @@ def bust():
 
     #* Pull
     # Build URIs
-    well_tanks.build_uris(WELLS.keyedkeys(),
-        )
+    well_tanks.build_uris(wells_active, delta = find_delta(well_tanks, WELL_TANKS))
 
     # Make requests
     well_tanks.request_uris()
@@ -418,8 +439,7 @@ def bust():
 
     #* Pull
     # Build URIs
-    run_tickets.build_uris(TANK_READINGS.keyedkeys(),
-            )
+    run_tickets.build_uris(TANK_READINGS.keyedkeys(), delta = find_delta(tank_readings, TANK_READINGS))
 
     # Make requests
     run_tickets.request_uris()
@@ -445,8 +465,7 @@ def bust():
 
     #* Pull
     # Build URIs
-    well_notes.build_uris(WELLS.keyedkeys(),
-            )
+    well_notes.build_uris(wells_active, delta = find_delta(well_notes, WELL_NOTES))
 
     # Make requests
     well_notes.request_uris()
@@ -499,8 +518,7 @@ def bust():
     #! Well Group Wells
 
     # Build URIs
-    well_group_wells.build_uris(WELL_GROUPS.keyedkeys(),
-                )
+    well_group_wells.build_uris(WELL_GROUPS.keyedkeys(), delta = find_delta(well_group_wells, WELL_GROUP_WELLS))
 
     # Make requests
     well_group_wells.request_uris()
@@ -523,7 +541,7 @@ def bust():
 
 
 
-
+    save_properties()
 
 
 

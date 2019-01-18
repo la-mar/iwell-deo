@@ -17,18 +17,22 @@ class Config(dict):
                 # use super here to avoid unnecessary write
                 super(Config, self).update(yaml.load(f) or {})
 
-    def __setitem__(self, key, value):
-        super(Config, self).__setitem__(key, value)
-        with open(self.filename, "w") as f:
-            yaml.dump(self, f, default_flow_style=False)
+    # def __setitem__(self, key, value):
+    #     super(Config, self).__setitem__(key, value)
+    #     with open(self.filename, "w") as f:
+    #         yaml.dump(self, f, default_flow_style=False)
 
-    def __delitem__(self, key):
-        super(Config, self).__delitem__(key)
-        with open(self.filename, "w") as f:
-            yaml.dump(self, f, default_flow_style=False)
+    # def __delitem__(self, key):
+    #     super(Config, self).__delitem__(key)
+    #     with open(self.filename, "w") as f:
+    #         yaml.dump(self, f, default_flow_style=False)
 
-    def update(self, kwargs):
-        super(Config, self).update(kwargs)
+    # def update(self, kwargs):
+    #     super(Config, self).update(kwargs)
+    #     with open(self.filename, "w") as f:
+    #         yaml.dump(self, f, default_flow_style=False)
+
+    def save(self):
         with open(self.filename, "w") as f:
             yaml.dump(self, f, default_flow_style=False)
 

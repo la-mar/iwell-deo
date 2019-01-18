@@ -24,7 +24,7 @@ def main():
     setup_logging(LOG_CONFIG_PATH)
     logger = logging.getLogger(__tag__)
 
-    setup_sentry(SENTRY_KEY, release =  __tag__)
+    setup_sentry(SENTRY_KEY, release =  __tag__, level = logging.INFO)
     logger.info(f'Sentry configured: {__tag__}')
 
 
@@ -47,19 +47,3 @@ if __name__ == "__main__":
 
 
 
-
-q = WELLS.session.query(func.max(WELLS.__table__.c.updated))
-
-
-
-
-
-# prod = iwell_api('production')
-
-
-
-
-# prod.request_uri('https://api.iwell.info/v1/wells/17588/production?start=2015-01-01', {'well_id': '17588'})
-
-
-# {'https://api.iwell.info/v1/wells/17588/production?since=21600': {'well_id': '17588'}}
