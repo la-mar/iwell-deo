@@ -1,7 +1,8 @@
 import logging
+import sys
+
 from src.requestor import *
 from src.dbagents import *
-
 from src.settings import LOAD_TO_DB, DEFAULT_START
 
 logger = logging.getLogger(__name__)
@@ -13,6 +14,7 @@ logger = logging.getLogger(__name__)
 #! Classes in CamelCase represent iWell objects
 
 db = iwell_agent()
+
 wells = iwell_api('wells')
 prod = iwell_api('production')
 meters = iwell_api('meters')
@@ -46,21 +48,109 @@ WELL_NOTES.session = db.Session()
 WELL_GROUPS.session = db.Session()
 WELL_GROUP_WELLS.session = db.Session()
 
-
+pairings = [
+{'table': WELLS,
+ 'endpoint': wells,
+ 'extra': datetime.fromtimestamp(DEFAULT_TIMESTAMP)
+ },
+{'table': PROD,
+ 'endpoint': prod,
+ 'extra': find_delta()
+ },
+{'table': METERS,
+ 'endpoint': meters,
+ 'extra': find_delta()
+ },
+{'table': METER_READINGS,
+ 'endpoint': meter_readings,
+ 'extra': find_delta()
+ },
+{'table': FIELDS_BY_WELL,
+ 'endpoint': fields_by_well,
+ 'extra': find_delta()
+ },
+{'table': FIELD_VALUES,
+ 'endpoint': field_values,
+ 'extra': find_delta()
+ },
+{'table': TANKS,
+ 'endpoint': tanks,
+ 'extra': find_delta()
+ },
+{'table': TANK_READINGS,
+ 'endpoint': tank_readings,
+ 'extra': find_delta()
+ },
+{'table': WELL_TANKS,
+ 'endpoint': well_tanks,
+ 'extra': find_delta()
+ },
+{'table': RUN_TICKETS,
+ 'endpoint': run_tickets,
+ 'extra': find_delta()
+ },
+{'table': WELL_NOTES,
+ 'endpoint': well_notes,
+ 'extra': find_delta()
+ },
+{'table': WELL_GROUPS,
+ 'endpoint': well_groups,
+ 'extra': find_delta()
+ },
+{'table': WELL_GROUP_WELLS,
+ 'endpoint': well_group_wells,
+ 'extra': find_delta()
+ }
+]
 
 
 
 # FIXME: Updating o)
 
 
-def find_delta(api, table):
-    d1 = prod.get_last_success()
-    d2 = PROD.get_last_update()[0]
-    return d1 if d1 < d2 else d2
+def find_delta(api: iwell_api, table: Table, on_delta: bool = True):
+    """If on_delta == True, find the earlier of the last successful integration time
+    and the time the database table was last updatedself. Otherwise, return the default
+    datetime (1970-01-01)
+
+    Arguments:
+        api {iwell_api} -- iwell api connector object
+        table {Table} -- sqlalchemy table object
+
+    Keyword Arguments:
+        on_delta {str} -- integration method (default: {True})
+
+    Returns:
+        datetime
+    """
+
+    if on_delta:
+        last_success = api.get_last_success()
+        last_updated = table.get_last_update()[0]
+        return last_success if last_success < last_updated else last_updated
+
+    else:
+        return datetime.fromtimestamp(DEFAULT_TIMESTAMP)
 
 
 
-def integrate():
+def integrate(pairings: list):
+    """trigger integration tasks"""
+
+    for pair in pairings:
+
+
+
+def bust():
+
+
+    # if method == 'delta':
+    #     run_delta = True
+    # elif method == 'full':
+    #     run_delta = False
+    # else:
+    #     logger.critical('Invalid protocol provided to integration controller.')
+    #     sys.exit()
 
     #! Wells
 
@@ -89,7 +179,7 @@ def integrate():
 
     #* Pull
     # Build URIs
-    prod.build_uris(WELLS.keyedkeys(), start = DEFAULT_START)
+    prod.build_uris(WELLS.keyedkeys(), delta = find_delta(prod, PROD))
 
     # Make requests
     prod.request_uris()
