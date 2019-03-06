@@ -6,8 +6,11 @@ LOAD_TO_DB = True
 
 LOGLEVEL = logging.INFO
 
-
+""" API keys """
 SENTRY_KEY = "https://e98008aac80c407ab03ce6a826368190@sentry.io/1365080"
+SENTRY_LEVEL = logging.INFO
+SENTRY_EVENT_LEVEL = logging.ERROR
+
 
 DATABASE_URI = 'mssql+pymssql://DWENRG-SQL01\\DRIFTWOOD_DB/iWell'
 DEFAULT_EXCLUSIONS = ['updated', 'inserted']
