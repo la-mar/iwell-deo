@@ -1,10 +1,13 @@
 
 import logging
-
+import os
 
 LOAD_TO_DB = True
 
 LOGLEVEL = logging.INFO
+
+ENV_NAME = os.environ['ENV_NAME']
+
 
 """ API keys """
 SENTRY_KEY = "https://e98008aac80c407ab03ce6a826368190@sentry.io/1365080"

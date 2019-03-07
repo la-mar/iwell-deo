@@ -1,5 +1,6 @@
 """ Logger definitions """
 
+import os
 import logging
 import logging.config
 
@@ -14,8 +15,10 @@ except:
     LOGLEVEL = logging.INFO
 
 
+LOGDIR = './log'
 
-
+if not os.path.exists(LOGDIR):
+    os.mkdir(LOGDIR)
 
 LOGGING = {
     'version': 1,
@@ -82,7 +85,7 @@ def sentry_config():
         dsn: str,
         level: int = 10, # debug
         event_level: int = 40, # error
-        release: str = __name__
+        release: str = __release__
 
         ):
 
@@ -92,12 +95,13 @@ def sentry_config():
         )
         sentry_sdk.init(
             dsn= dsn,
+            release = release,
             integrations=[sentry_logging],
-            release=release
+            environment = ENV_NAME
         )
 
     try:
-        from src.settings import SENTRY_KEY, SENTRY_EVENT_LEVEL, SENTRY_LEVEL
+        from src.settings import SENTRY_KEY, SENTRY_EVENT_LEVEL, SENTRY_LEVEL, ENV_NAME
         setup_sentry(SENTRY_KEY, SENTRY_EVENT_LEVEL, SENTRY_LEVEL)
     except Exception as e:
         print(f'Unable to load Sentry configuration from settings. -- {e}')
