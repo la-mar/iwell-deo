@@ -11,7 +11,7 @@ ENV_NAME = os.environ['ENV_NAME']
 
 """ API keys """
 SENTRY_KEY = "https://e98008aac80c407ab03ce6a826368190@sentry.io/1365080"
-SENTRY_LEVEL = logging.INFO
+SENTRY_LEVEL = logging.ERROR
 SENTRY_EVENT_LEVEL = logging.ERROR
 
 
