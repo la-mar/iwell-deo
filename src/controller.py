@@ -48,62 +48,6 @@ WELL_NOTES.session = db.Session()
 WELL_GROUPS.session = db.Session()
 WELL_GROUP_WELLS.session = db.Session()
 
-# pairings = [
-# {'table': WELLS,
-#  'endpoint': wells,
-#  'extra': datetime.fromtimestamp(DEFAULT_TIMESTAMP)
-#  },
-# {'table': PROD,
-#  'endpoint': prod,
-#  'extra': find_delta()
-#  },
-# {'table': METERS,
-#  'endpoint': meters,
-#  'extra': find_delta()
-#  },
-# {'table': METER_READINGS,
-#  'endpoint': meter_readings,
-#  'extra': find_delta()
-#  },
-# {'table': FIELDS_BY_WELL,
-#  'endpoint': fields_by_well,
-#  'extra': find_delta()
-#  },
-# {'table': FIELD_VALUES,
-#  'endpoint': field_values,
-#  'extra': find_delta()
-#  },
-# {'table': TANKS,
-#  'endpoint': tanks,
-#  'extra': find_delta()
-#  },
-# {'table': TANK_READINGS,
-#  'endpoint': tank_readings,
-#  'extra': find_delta()
-#  },
-# {'table': WELL_TANKS,
-#  'endpoint': well_tanks,
-#  'extra': find_delta()
-#  },
-# {'table': RUN_TICKETS,
-#  'endpoint': run_tickets,
-#  'extra': find_delta()
-#  },
-# {'table': WELL_NOTES,
-#  'endpoint': well_notes,
-#  'extra': find_delta()
-#  },
-# {'table': WELL_GROUPS,
-#  'endpoint': well_groups,
-#  'extra': find_delta()
-#  },
-# {'table': WELL_GROUP_WELLS,
-#  'endpoint': well_group_wells,
-#  'extra': find_delta()
-#  }
-# ]
-
-
 
 
 def find_delta(api: iwell_api, table: Table, on_delta: bool = True):
@@ -132,48 +76,8 @@ def find_delta(api: iwell_api, table: Table, on_delta: bool = True):
 
 
 
-# def integrate(pairings: list):
-#     """trigger integration tasks"""
-
-#     for pair in pairings:
-#         table = pair.table
-#         api = pair.api
-
-#         #* Pull
-#         # Build URIs
-#         api.build_uris(wells_active, delta = find_delta(api, PROD))
-
-#         # Make requests
-#         api.request_uris()
-
-#         # Clean up response
-#         api.parse_response()
-
-
-#         if LOAD_TO_DB:
-
-#             #* Push
-#             # Merge records into session
-#             PROD.merge_records(prod.df)
-
-#             # Get affected row counts
-#             PROD.get_session_state()
-
-#             # Persist changes to database
-#             PROD.persist()
-
-
-
 def integrate():
 
-
-    # if method == 'delta':
-    #     run_delta = True
-    # elif method == 'full':
-    #     run_delta = False
-    # else:
-    #     logger.critical('Invalid protocol provided to integration controller.')
-    #     sys.exit()
 
     query = WELLS.session.query(WELLS.well_id).filter(WELLS.is_active == True)
     wells_active = pd.read_sql(query.statement, query.session.bind).to_dict('records')

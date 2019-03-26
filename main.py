@@ -1,5 +1,4 @@
 
-
 # TODO: Add configuration for complete pull
 
 
@@ -13,7 +12,6 @@ src.loggers.standard_config()
 logger = logging.getLogger(__name__)
 
 def main():
-
 
     try:
         src.controller.integrate()

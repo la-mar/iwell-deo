@@ -428,3 +428,28 @@ class iwell_api(object):
         [self.build_uri(**x, delta = delta, start = start) for x in ids]
 
 
+if __name__ == "__main__":
+    logging.basicConfig()
+    logger.setLevel(logging.DEBUG)
+
+
+def _getAccessToken():
+    # FIXME: Fetching new token tries to attach to str and fails
+    """Fetch a new access token from the provider using OAuth2"""
+    # https://requests-oauthlib.readthedocs.io/en/latest/oauth2_workflow.html#backend-application-flow
+    oauth = OAuth2Session(
+        client=LegacyApplicationClient(client_id=_properties['client_id']))
+
+    logger.info(f'Fetching new oauth token: {oauth}')
+
+    return oauth.fetch_token(
+        token_url= _properties['url']+ _properties['token_path']
+        , username=_properties['username']
+        , password=_properties['password']
+        , client_id=_properties['client_id']
+        , client_secret=_properties['client_secret']
+    )
+
+
+
+_getAccessToken()
