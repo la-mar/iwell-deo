@@ -15,23 +15,23 @@ logger = logging.getLogger(__name__)
 
 db = iwell_agent()
 
-wells = iwell_api('wells')
-prod = iwell_api('production')
-meters = iwell_api('meters')
-meter_readings = iwell_api('meter_readings')
-fields = iwell_api('fields')
-fields_by_well = iwell_api('fields_by_well')
-field_values = iwell_api('field_values')
+wells = iwell_api("wells")
+prod = iwell_api("production")
+meters = iwell_api("meters")
+meter_readings = iwell_api("meter_readings")
+fields = iwell_api("fields")
+fields_by_well = iwell_api("fields_by_well")
+field_values = iwell_api("field_values")
 
-tanks = iwell_api('tanks')
-tank_readings = iwell_api('tank_readings')
-well_tanks = iwell_api('well_tanks')
-run_tickets = iwell_api('run_tickets')
-well_notes = iwell_api('well_notes')
-well_groups = iwell_api('well_groups')
-well_group_wells = iwell_api('well_group_wells')
+tanks = iwell_api("tanks")
+tank_readings = iwell_api("tank_readings")
+well_tanks = iwell_api("well_tanks")
+run_tickets = iwell_api("run_tickets")
+well_notes = iwell_api("well_notes")
+well_groups = iwell_api("well_groups")
+well_group_wells = iwell_api("well_group_wells")
 
-#**
+# **
 WELLS.session = db.Session()
 PROD.session = db.Session()
 METERS.session = db.Session()
@@ -47,7 +47,6 @@ RUN_TICKETS.session = db.Session()
 WELL_NOTES.session = db.Session()
 WELL_GROUPS.session = db.Session()
 WELL_GROUP_WELLS.session = db.Session()
-
 
 
 def find_delta(api: iwell_api, table: Table, on_delta: bool = True):
@@ -75,41 +74,35 @@ def find_delta(api: iwell_api, table: Table, on_delta: bool = True):
         return datetime.fromtimestamp(DEFAULT_TIMESTAMP)
 
 
-
 def integrate():
 
-
     query = WELLS.session.query(WELLS.well_id).filter(WELLS.is_active == True)
-    wells_active = pd.read_sql(query.statement, query.session.bind).to_dict('records')
+    wells_active = pd.read_sql(query.statement, query.session.bind).to_dict("records")
 
     #! Wells
 
-    #** Build URIs
+    # ** Build URIs
     wells.request_uri(wells.build_uri())
 
-    #** Clean up wells from iWell
+    # ** Clean up wells from iWell
     wells.parse_response()
-
 
     if LOAD_TO_DB:
 
-        #** Merge records into session
+        # ** Merge records into session
         WELLS.merge_records(wells.df)
 
-        #** Get affected row counts
+        # ** Get affected row counts
         WELLS.get_session_state()
 
-        #** Persist changes to database
+        # ** Persist changes to database
         WELLS.persist()
-
-
 
     #! Production
 
-
-    #* Pull
+    # * Pull
     # Build URIs
-    prod.build_uris(wells_active, delta = find_delta(prod, PROD))
+    prod.build_uris(wells_active, delta=find_delta(prod, PROD))
 
     # Make requests
     prod.request_uris()
@@ -117,10 +110,9 @@ def integrate():
     # Clean up response
     prod.parse_response()
 
-
     if LOAD_TO_DB:
 
-        #* Push
+        # * Push
         # Merge records into session
         PROD.merge_records(prod.df)
 
@@ -130,12 +122,11 @@ def integrate():
         # Persist changes to database
         PROD.persist()
 
-
     #! Meters
 
-    #* Pull
+    # * Pull
     # Build URIs
-    meters.build_uris(wells_active, delta = find_delta(meters, METERS))
+    meters.build_uris(wells_active, delta=find_delta(meters, METERS))
 
     # Make requests
     meters.request_uris()
@@ -145,7 +136,7 @@ def integrate():
 
     if LOAD_TO_DB:
 
-        #* Push
+        # * Push
         # Merge records into session
         METERS.merge_records(meters.df)
 
@@ -155,14 +146,13 @@ def integrate():
         # Persist changes to database
         METERS.persist()
 
-
-
     #! Meter Readings
 
-
-    #* Pull
+    # * Pull
     # Build URIs
-    meter_readings.build_uris(METERS.keyedkeys(), delta = find_delta(meter_readings, METER_READINGS))
+    meter_readings.build_uris(
+        METERS.keyedkeys(), delta=find_delta(meter_readings, METER_READINGS)
+    )
 
     # Make requests
     meter_readings.request_uris()
@@ -172,7 +162,7 @@ def integrate():
 
     if LOAD_TO_DB:
 
-        #* Push
+        # * Push
         # Merge records into session
         METER_READINGS.merge_records(meter_readings.df)
 
@@ -182,11 +172,9 @@ def integrate():
         # Persist changes to database
         METER_READINGS.persist()
 
-
-
     #! Fields
 
-    #* Pull
+    # * Pull
     # Make requests
     fields.request_uri(fields.build_uri())
 
@@ -195,7 +183,7 @@ def integrate():
 
     if LOAD_TO_DB:
 
-        #* Push
+        # * Push
         # Merge records into session
         FIELDS.merge_records(fields.df)
 
@@ -205,12 +193,13 @@ def integrate():
         # Persist changes to database
         FIELDS.persist()
 
-
     #! Fields by Well
 
-    #* Pull
+    # * Pull
     # Build URIs
-    fields_by_well.build_uris(wells_active, delta = find_delta(fields_by_well, FIELDS_BY_WELL))
+    fields_by_well.build_uris(
+        wells_active, delta=find_delta(fields_by_well, FIELDS_BY_WELL)
+    )
 
     # Make requests
     fields_by_well.request_uris()
@@ -218,10 +207,9 @@ def integrate():
     # Clean up response
     fields_by_well.parse_response()
 
-
     if LOAD_TO_DB:
 
-        #* Push
+        # * Push
         # Merge records into session
         FIELDS_BY_WELL.merge_records(fields_by_well.df)
 
@@ -231,12 +219,13 @@ def integrate():
         # Persist changes to database
         FIELDS_BY_WELL.persist()
 
-
     #! Field Values
 
-    #* Pull
+    # * Pull
     # Build URIs
-    field_values.build_uris(FIELDS_BY_WELL.keyedkeys(), delta = find_delta(field_values, FIELD_VALUES))
+    field_values.build_uris(
+        FIELDS_BY_WELL.keyedkeys(), delta=find_delta(field_values, FIELD_VALUES)
+    )
 
     # Make requests
     field_values.request_uris()
@@ -244,10 +233,9 @@ def integrate():
     # Clean up response
     field_values.parse_response()
 
-
     if LOAD_TO_DB:
 
-        #* Push
+        # * Push
         # Merge records into session
         FIELD_VALUES.merge_records(field_values.df)
 
@@ -257,27 +245,22 @@ def integrate():
         # Persist changes to database
         FIELD_VALUES.persist()
 
-
     # field_values.df = field_values.df.fillna(0)
-
 
     # FIELD_VALUES.session.rollback()
 
-
-
     #! Tanks
 
-    #* Pull
+    # * Pull
     # Make requests
     tanks.request_uri(tanks.build_uri())
 
     # Clean up response
     tanks.parse_response()
 
-
     if LOAD_TO_DB:
 
-        #* Push
+        # * Push
         # Merge records into session
         TANKS.merge_records(tanks.df)
 
@@ -287,12 +270,13 @@ def integrate():
         # Persist changes to database
         TANKS.persist()
 
-
     #! Tank Readings
 
-    #* Pull
+    # * Pull
     # Build URIs
-    tank_readings.build_uris(TANKS.keyedkeys(), delta = find_delta(tank_readings, TANK_READINGS))
+    tank_readings.build_uris(
+        TANKS.keyedkeys(), delta=find_delta(tank_readings, TANK_READINGS)
+    )
 
     # Make requests
     tank_readings.request_uris()
@@ -300,10 +284,9 @@ def integrate():
     # Clean up response
     tank_readings.parse_response()
 
-
     if LOAD_TO_DB:
 
-        #* Push
+        # * Push
         # Merge records into session
         TANK_READINGS.merge_records(tank_readings.df)
 
@@ -313,12 +296,11 @@ def integrate():
         # Persist changes to database
         TANK_READINGS.persist()
 
-
     #! Well Tanks
 
-    #* Pull
+    # * Pull
     # Build URIs
-    well_tanks.build_uris(wells_active, delta = find_delta(well_tanks, WELL_TANKS))
+    well_tanks.build_uris(wells_active, delta=find_delta(well_tanks, WELL_TANKS))
 
     # Make requests
     well_tanks.request_uris()
@@ -326,10 +308,9 @@ def integrate():
     # Clean up response
     well_tanks.parse_response()
 
-
     if LOAD_TO_DB:
 
-        #* Push
+        # * Push
         # Merge records into session
         WELL_TANKS.merge_records(well_tanks.df)
 
@@ -341,9 +322,11 @@ def integrate():
 
     # SECTION: Run Tickets
 
-    #* Pull
+    # * Pull
     # Build URIs
-    run_tickets.build_uris(TANK_READINGS.keyedkeys(), delta = find_delta(tank_readings, TANK_READINGS))
+    run_tickets.build_uris(
+        TANK_READINGS.keyedkeys(), delta=find_delta(tank_readings, TANK_READINGS)
+    )
 
     # Make requests
     run_tickets.request_uris()
@@ -351,10 +334,9 @@ def integrate():
     # Clean up response
     run_tickets.parse_response()
 
-
     if LOAD_TO_DB:
 
-        #* Push
+        # * Push
         # Merge records into session
         RUN_TICKETS.merge_records(run_tickets.df)
 
@@ -364,12 +346,11 @@ def integrate():
         # Persist changes to database
         RUN_TICKETS.persist()
 
-
     #! Well Notes
 
-    #* Pull
+    # * Pull
     # Build URIs
-    well_notes.build_uris(wells_active, delta = find_delta(well_notes, WELL_NOTES))
+    well_notes.build_uris(wells_active, delta=find_delta(well_notes, WELL_NOTES))
 
     # Make requests
     well_notes.request_uris()
@@ -377,10 +358,9 @@ def integrate():
     # Clean up response
     well_notes.parse_response()
 
-
     if LOAD_TO_DB:
 
-        #* Push
+        # * Push
         # Merge records into session
         WELL_NOTES.merge_records(well_notes.df)
 
@@ -390,24 +370,28 @@ def integrate():
         # Persist changes to database
         WELL_NOTES.persist()
 
-
     #! Well Groups
 
-    #* Pull
+    # * Pull
     # Make requests
     well_groups.request_uri(well_groups.build_uri())
 
     # Clean up response
     well_groups.parse_response()
     # Extra steps for this one stupid group
-    well_groups.df.created_iwell = well_groups.df.created_iwell.apply(pd.datetime.fromtimestamp)
-    well_groups.df.updated_iwell = well_groups.df.updated_iwell.apply(pd.datetime.fromtimestamp)
-    well_groups.df.group_latest_production_time  = well_groups.df.group_latest_production_time .apply(pd.datetime.fromtimestamp)
-
+    well_groups.df.created_iwell = well_groups.df.created_iwell.apply(
+        pd.datetime.fromtimestamp
+    )
+    well_groups.df.updated_iwell = well_groups.df.updated_iwell.apply(
+        pd.datetime.fromtimestamp
+    )
+    well_groups.df.group_latest_production_time = well_groups.df.group_latest_production_time.apply(
+        pd.datetime.fromtimestamp
+    )
 
     if LOAD_TO_DB:
 
-        #* Push
+        # * Push
         # Merge records into session
         WELL_GROUPS.merge_records(well_groups.df)
 
@@ -417,12 +401,12 @@ def integrate():
         # Persist changes to database
         WELL_GROUPS.persist()
 
-
-
     #! Well Group Wells
 
     # Build URIs
-    well_group_wells.build_uris(WELL_GROUPS.keyedkeys(), delta = find_delta(well_group_wells, WELL_GROUP_WELLS))
+    well_group_wells.build_uris(
+        WELL_GROUPS.keyedkeys(), delta=find_delta(well_group_wells, WELL_GROUP_WELLS)
+    )
 
     # Make requests
     well_group_wells.request_uris()
@@ -430,10 +414,9 @@ def integrate():
     # Clean up response
     well_group_wells.parse_response()
 
-
     if LOAD_TO_DB:
 
-        #* Push
+        # * Push
         # Merge records into session
         WELL_GROUP_WELLS.merge_records(well_group_wells.df)
 
@@ -443,11 +426,11 @@ def integrate():
         # Persist changes to database
         WELL_GROUP_WELLS.persist()
 
-
-
     save_properties()
 
 
-
-
+if __name__ == "__main__":
+    logging.basicConfig()
+    logger.setLevel(logging.DEBUG)
+    integrate()
 

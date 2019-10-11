@@ -1,6 +1,6 @@
 !!python/object/new:src.config.Config
 dictitems:
-  cached_at: 2019-03-07 07:17:46.939323
+  cached_at: 2019-09-09 14:16:46.547468
   client_id: KTDMpqhGyBMhnRDB
   client_secret: gYFRiXRtMN0fDYTDPUDYOk1RAbPz44Bu
   endpoints:
@@ -12,7 +12,7 @@ dictitems:
       exclude: []
       keys: null
       last_failure: 2018-10-18 11:34:47.046800
-      last_success: 2019-03-07 07:15:32.159181
+      last_success: 2019-09-09 13:00:27.835677
       normalize: false
       path: /wells/{well_id}/fields/{field_id}/values
     fields:
@@ -26,8 +26,8 @@ dictitems:
         updated_at: updated_iwell
       exclude: []
       keys: null
-      last_failure: null
-      last_success: 2019-03-07 07:15:31.177807
+      last_failure: 2019-09-09 12:58:54.355267
+      last_success: 2019-09-09 12:52:13.903055
       normalize: false
       path: /fields
     fields_by_well:
@@ -41,8 +41,8 @@ dictitems:
         updated_at: updated_iwell
       exclude: []
       keys: null
-      last_failure: 2018-10-18 13:29:57.447666
-      last_success: 2019-03-07 07:15:31.533513
+      last_failure: 2019-09-09 12:59:05.721233
+      last_success: 2019-09-09 12:59:05.104121
       normalize: false
       path: /wells/{well_id}/fields
     meter_readings:
@@ -54,8 +54,8 @@ dictitems:
       keys: !!python/tuple
       - well_id
       - meter_id
-      last_failure: 2018-10-18 11:03:54.492051
-      last_success: 2019-03-07 07:15:29.586358
+      last_failure: 2019-09-09 12:55:45.773487
+      last_success: 2019-09-09 12:55:43.278928
       normalize: false
       path: /wells/{well_id}/meters/{meter_id}/readings
     meters:
@@ -69,8 +69,8 @@ dictitems:
         updated_at: updated_iwell
       exclude: []
       keys: well_id
-      last_failure: 2018-10-18 13:29:55.186960
-      last_success: 2019-03-07 07:15:28.646790
+      last_failure: 2019-09-09 12:55:25.617760
+      last_success: 2019-09-09 12:55:23.861666
       normalize: false
       path: /wells/{well_id}/meters
     production:
@@ -83,7 +83,7 @@ dictitems:
       - date
       keys: well_id
       last_failure: 2019-02-22 10:15:58.481312
-      last_success: 2019-03-07 07:15:28.307677
+      last_success: 2019-09-09 12:54:50.722730
       normalize: false
       path: /wells/{well_id}/production
     run_tickets:
@@ -98,8 +98,8 @@ dictitems:
       - tank_id
       - reading_id
       - run_ticket_id
-      last_failure: 2019-03-06 19:19:17.582791
-      last_success: 2019-03-07 07:17:42.852330
+      last_failure: 2019-09-09 14:00:26.273717
+      last_success: 2019-09-09 14:16:40.999050
       normalize: false
       path: /tanks/{tank_id}/readings/{reading_id}/run-tickets
     tank_readings:
@@ -110,7 +110,7 @@ dictitems:
       exclude: []
       keys: tank_id
       last_failure: 2018-10-18 11:59:44.620958
-      last_success: 2019-03-07 07:15:33.762495
+      last_success: 2019-09-09 12:52:53.722956
       normalize: false
       path: /tanks/{tank_id}/readings
     tanks:
@@ -123,7 +123,7 @@ dictitems:
       exclude: []
       keys: null
       last_failure: null
-      last_success: 2019-03-07 07:15:32.240430
+      last_success: 2019-09-09 12:52:41.407956
       normalize: false
       path: /tanks
     well_field_values:
@@ -167,7 +167,7 @@ dictitems:
       - alias
       keys: group_id
       last_failure: null
-      last_success: 2019-03-07 07:17:46.939323
+      last_success: 2019-09-09 14:16:46.547449
       normalize: false
       path: /well-groups/{group_id}/wells
     well_groups:
@@ -181,7 +181,7 @@ dictitems:
       - wells.data
       keys: null
       last_failure: null
-      last_success: 2019-03-07 07:17:46.820803
+      last_success: 2019-09-09 14:16:44.693134
       normalize: true
       path: /well-groups
     well_notes:
@@ -192,7 +192,7 @@ dictitems:
       exclude: []
       keys: well_id
       last_failure: 2018-10-18 13:30:28.855766
-      last_success: 2019-03-07 07:17:46.761691
+      last_success: 2019-05-28 12:38:16.102536
       normalize: false
       path: /wells/{well_id}/notes
     well_tanks:
@@ -206,8 +206,8 @@ dictitems:
       - name
       - type
       keys: well_id
-      last_failure: 2018-10-18 13:30:03.591703
-      last_success: 2019-03-07 07:15:35.780922
+      last_failure: 2019-09-09 13:01:03.546011
+      last_success: 2019-09-09 13:00:59.183471
       normalize: false
       path: /wells/{well_id}/tanks
     wells:
@@ -220,13 +220,13 @@ dictitems:
         updated_at: updated_iwell
       exclude: []
       keys: null
-      last_failure: 2019-02-22 10:15:39.537817
-      last_success: 2019-03-07 07:15:27.963866
+      last_failure: 2019-09-09 12:54:04.505791
+      last_success: 2019-09-09 12:51:41.867192
       normalize: false
       path: /wells
   password: 7haYrAaFqTwS
-  token: leF6J4RoQTNyGvPQLO6XcucjlD7MjvXQooN6wBPR
-  token_expiration: 2019-03-10 06:15:52.812779
+  token: 7T8zCuyV1Uc1G0ndr6eGBFuZ5fRjiTflXxH3T1Bi
+  token_expiration: 2019-09-16 17:36:18.686506
   token_path: /oauth2/access-token
   url: https://api.iwell.info/v1
   username: data@driftwoodenergy.com
