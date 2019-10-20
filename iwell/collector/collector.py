@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Dict, List, Union, Any
 import logging
+from datetime import datetime
 
 import pandas as pd
 from flask_sqlalchemy import Model
@@ -66,7 +67,7 @@ class IWellCollector(Collector):
         # get any identifiers in request headers
         prefix_header = str(headers.get(config.API_HEADER_KEY))
         keys = {
-            k.replace(prefix_header, ""): v
+            k.replace(prefix_header + "-", ""): v
             for k, v in headers.items()
             if k.startswith(prefix_header)
         }
@@ -74,7 +75,7 @@ class IWellCollector(Collector):
 
     def collect(self, response: requests.Response) -> None:
         data = response.json()["data"]
-        logger.info(f"{self.endpoint}: downloaded {len(data)} records")
+        logger.info(f"{response.url}: downloaded {len(data)} records")
         df = self.transform(data)
         # add ids from headers as columns to dataframe
         ids = self.strip_ids_from_headers(response.request.headers)  # type: ignore
@@ -86,12 +87,28 @@ class IWellCollector(Collector):
         else:
             logger.info(f"{self.endpoint}: empty dataframe")
 
+        # TODO: On IntegrityError, queue a task to sync the model containing the foreign key
+
 
 class CollectionLogger(object):
     """ Logs the completion status of collection tasks in the database"""
 
-    def __init__(self, model: Model, result: Dict[str, Union[str, int, float, bool]]):
-        pass
+    def __init__(self, model: Model):
+        self.model = model
+
+    def log(
+        self, model_name: str, inserts: int = 0, updates: int = 0, deletes: int = 0
+    ):
+        integrated_at = datetime.now()
+        new = self.model(
+            integrated_at=integrated_at,
+            model_name=model_name,
+            inserts=inserts,
+            updates=updates,
+            deletes=deletes,
+        )
+        self.model.s.add(new)
+        self.model.s.commit()
 
 
 if __name__ == "__main__":

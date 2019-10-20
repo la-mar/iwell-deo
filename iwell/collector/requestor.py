@@ -162,8 +162,9 @@ class Requestor(object):
         self.requests.append(r)
         logger.debug(f"Queued request: {r}")
 
-    def run(self) -> Generator:
+    def get_all(self) -> Generator:
         for r in self:
+            logger.info(f"Sending request: {r}")
             yield r.get()
 
 
@@ -171,9 +172,24 @@ class IWellRequestor(Requestor):
     custom_header_key = config.API_HEADER_KEY
     custom_header_prefix = config.API_HEADER_PREFIX
 
-    def __init__(self, base_url: str, endpoint: dict, **kwargs):
+    def __init__(
+        self,
+        base_url: str,
+        endpoint: dict,
+        mode: str = "default",
+        since: datetime = None,
+        start: datetime = None,
+        end: datetime = None,
+        **kwargs,
+    ):
         super().__init__(base_url, endpoint, **kwargs)
         self.add_auth()
+        if since:
+            self.add_since(since)
+        if start:
+            self.add_start(start)
+        if end:
+            self.add_end(end)
         self.headers.update({self.custom_header_key: self.custom_header_prefix})
 
     def add_since(self, since: datetime, **kwargs) -> None:
@@ -181,15 +197,13 @@ class IWellRequestor(Requestor):
         self.add_param("since", ts)
 
     def add_start(self, start: datetime, **kwargs) -> None:
-        ts = int(start.timestamp())
-        self.add_param("start", ts)
+        self.add_param("start", start.strftime("%Y-%m-%d"))
 
     def add_end(self, end: datetime, **kwargs) -> None:
-        since_ts = int(end.timestamp())
-        self.add_param("end", since_ts)
+        self.add_param("end", end.strftime("%Y-%m-%d"))
 
     def add_auth(self) -> None:
-        self.headers.update({"Authorization": self.get_token()})
+        self.headers.update({"Authorization": self.get_token(force_refresh=True)})
 
     def enqueue(self, headers: dict = None, params: dict = None, **kwargs) -> None:
         super().enqueue(headers, params, **kwargs)
@@ -277,6 +291,9 @@ if __name__ == "__main__":
     from config import get_active_config
     from collector.collector import Collector, IWellCollector
 
+    logging.basicConfig()
+    logger.setLevel(10)
+
     app = create_app()
     app.app_context().push()
 
@@ -289,30 +306,34 @@ if __name__ == "__main__":
     ts = int(dt.timestamp())
 
     endpoint = endpoints["tank_readings"]
-    r = IWellRequestor(url, endpoint)
+    r = IWellRequestor(url, endpoint, since=dt)
     c = IWellCollector(endpoint)
 
-    resp = next(r.sync_model())
-    resp.request.headers
+    responses = []
+    for req in r.sync_model():
+        responses.append(req.get())
 
-    # for req in r.sync_model():
-    #     data = req.json()["data"]
-    #     c.collect(data)
+    # responses[0].json()
+    [len(x.json()["data"]) for x in responses]
+    [x.ok for x in responses]
 
-    for resp in r.sync_model():
+    for resp in responses:
         c.collect(resp)
 
-        # data = resp.json()["data"]
-        # keys = {
-        #     k.replace("iwell_", ""): v
-        #     for k, v in resp.request.headers.items()
-        #     if k.startswith("iwell")
-        # }
-        # df = c.tf.transform(data)
-        # for key, value in keys.items():
-        #     df[key] = int(value)
-        # if not df.empty:
-        #     c.model.bulk_merge(df)
+    # for req in r.sync_model():
+    #     c.collect(req.get())
+
+    # data = resp.json()["data"]
+    # keys = {
+    #     k.replace("iwell_", ""): v
+    #     for k, v in resp.request.headers.items()
+    #     if k.startswith("iwell")
+    # }
+    # df = c.tf.transform(data)
+    # for key, value in keys.items():
+    #     df[key] = int(value)
+    # if not df.empty:
+    #     c.model.bulk_merge(df)
 
     # # group by table
     # import itertools

@@ -1,5 +1,6 @@
 import random
 import time
+from datetime import datetime, timedelta
 
 from celery.signals import task_postrun, setup_logging
 from celery.utils.log import get_task_logger
@@ -72,37 +73,41 @@ def count_wells():
 
 @celery.task(bind=True, max_retries=10, ignore_result=True)
 def collect_request(self, request: Request, endpoint: Endpoint):
-    c = IWellCollector(endpoint)
-    logger.info(f"Collecting {endpoint}")
     try:
-        response = request.get()
-        # logger.warning(response)
-        if not response.ok:
-            raise Exception(
-                f"GET {response.url} returned unexpected response code: {response.status_code}"
-            )
-        result = c.collect(response)
-        # logger.debug(result)
-        return result
-
+        return _collect_request(request, endpoint)
     except Exception as exc:
         raise self.retry(exc=exc, countdown=2 ** self.request.retries)
 
 
+def _collect_request(request: Request, endpoint: Endpoint):
+    c = IWellCollector(endpoint)
+    logger.info(f"Collecting {request}")
+    response = request.get()
+    # logger.warning(response)
+    if not response.ok:
+        raise Exception(
+            f"GET {response.url} returned unexpected response code: {response.status_code}"
+        )
+    result = c.collect(response)
+    # logger.debug(result)
+    return result
+
+
 @celery.task(bind=True, rate_limit="100/s", ignore_result=True)
-def sync_endpoint(self, endpoint_name: str, eager: bool = False):
+def sync_endpoint(self, endpoint_name: str, **kwargs):
+    return _sync_endpoint(endpoint_name, celery=True, **kwargs)
+
+
+def _sync_endpoint(endpoint_name: str, celery: bool = False, **kwargs):
     """ Sync model from source to data warehouse"""
     endpoint = endpoints[endpoint_name]
-    requestor = IWellRequestor(conf.API_BASE_URL, endpoint)
-
-    # logger.debug(f"Syncing model: {endpoint_name}")
-
+    requestor = IWellRequestor(conf.API_BASE_URL, endpoint, **kwargs)
     for req in requestor.sync_model():
         logger.debug(f"sending request to {req}")
-        if eager:
-            return collect_request.apply((req, endpoint))
+        if celery:
+            collect_request.apply_async((req, endpoint))
         else:
-            return collect_request.apply_async((req, endpoint))
+            _collect_request(req, endpoint)
 
 
 @task_postrun.connect

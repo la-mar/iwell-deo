@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 83d80f9938d3
-Revises: bf7473dbd8fd
-Create Date: 2019-10-15 11:16:37.796439
+Revision ID: f0461bdb269b
+Revises: 
+Create Date: 2019-10-20 11:32:32.779785
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '83d80f9938d3'
-down_revision = 'bf7473dbd8fd'
+revision = 'f0461bdb269b'
+down_revision = None
 branch_labels = None
 depends_on = None
 
@@ -34,6 +34,19 @@ def upgrade():
     sa.PrimaryKeyConstraint('id'),
     schema='iwell'
     )
+    op.create_table('integration_log',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('integrated_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('model_name', sa.String(), nullable=False),
+    sa.Column('inserts', sa.Integer(), nullable=False),
+    sa.Column('updates', sa.Integer(), nullable=False),
+    sa.Column('deletes', sa.Integer(), nullable=False),
+    sa.Column('updated_by', sa.String(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
+    sa.PrimaryKeyConstraint('id'),
+    schema='iwell'
+    )
     op.create_table('tanks',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('tank_name', sa.String(), nullable=True),
@@ -48,14 +61,14 @@ def upgrade():
     schema='iwell'
     )
     op.create_table('users',
-    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('email', sa.String(), nullable=True),
     sa.Column('phone', sa.String(), nullable=True),
     sa.Column('user_type', sa.String(), nullable=True),
     sa.Column('status', sa.String(), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     schema='iwell'
     )
@@ -265,5 +278,6 @@ def downgrade():
     op.drop_table('well_groups', schema='iwell')
     op.drop_table('users', schema='iwell')
     op.drop_table('tanks', schema='iwell')
+    op.drop_table('integration_log', schema='iwell')
     op.drop_table('fields', schema='iwell')
     # ### end Alembic commands ###

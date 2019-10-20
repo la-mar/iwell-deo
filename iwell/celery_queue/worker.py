@@ -46,18 +46,22 @@ celery = create_celery(flask_app)
 
 
 class Task:
+    """ A yaml defined task object to be passed to Celery """
+
     def __init__(
         self,
         model_name: str,
         task_name: str,
         cron: dict = None,
         seconds: int = None,
+        mode: str = None,
         **kwargs,
     ):
         self.model_name = model_name
         self.task_name = task_name
         self.cron = self.parse_cron(cron or {})
         self.seconds = seconds
+        self.mode = mode
 
         if not any([self.cron, self.seconds]):
             raise ValueError("Either seconds or cron must be specified")
@@ -88,7 +92,8 @@ class Task:
 
 
 def tasks_from_app_config(conf: object):
-
+    """ Retrieves collection task definitions from the active configuration and parses
+    them into Task objects """
     for_scheduling: List[Task] = []
     endpoints = collector.endpoint.load_from_config(conf)
     for model_name in conf.endpoints.keys():  # type: ignore
@@ -106,12 +111,14 @@ def tasks_from_app_config(conf: object):
 
 @celery.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
-
+    """ Schedules a periodic task for each configured collection task """
     tasks = tasks_from_app_config(conf)
 
     for task in tasks:
         sender.add_periodic_task(
-            task.schedule, sync_endpoint.s(task.model_name), name=task.qualified_name
+            task.schedule,
+            sync_endpoint.s(task.model_name, task.mode),
+            name=task.qualified_name,
         )
 
 

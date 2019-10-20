@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Any
 import logging
 from pydoc import locate
 
@@ -23,8 +23,8 @@ class Endpoint(object):
         url_params: List[str] = None,
         exclude: List[str] = None,
         depends_on: Dict[str, str] = None,
+        options: Dict[Any, Any] = None,
         normalize: bool = False,
-        mode: str = "delta",
         updated_column: str = "updated_at",
         **kwargs,
     ):
@@ -35,18 +35,13 @@ class Endpoint(object):
         self.mappings = AttrDict(mappings or {})
         self.model_name = model
         self._model = None
-        self.mode = mode
         self.updated_column = updated_column
         self.url_params = url_params
         self.exclude = exclude or []
         self._dependency_map = depends_on or {}
         self._depends_on: Union[Dict[str, Model], None] = None
         self.normalize = normalize
-
-    # def __new__(cls, *args, **kwargs):
-    #     print(args)
-    #     print(kwargs)
-    #     return super().__new__(cls)
+        self.options = options or {}
 
     def __repr__(self):
         return f"{self.version}{self.path}"
@@ -69,7 +64,7 @@ class Endpoint(object):
         return self._depends_on
 
     def link_upstream_columns(self) -> Dict[str, Column]:
-        linked_columns = {}
+        linked_columns: Dict[Any, Any] = {}
         for key_field, model_name in self._dependency_map.items():
             model_name, column_name = model_name.rsplit(".", maxsplit=1)
             columns = list(self.locate_model(model_name).__table__.columns)

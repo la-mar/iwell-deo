@@ -95,6 +95,25 @@ def run():
 @cli.command()
 @click.argument("endpoint")
 @click.option(
+    "--since",
+    "-s",
+    type=click.DateTime(formats=["%Y-%m-%d"]),
+    help="Set to download records updated after the specified time",
+)
+@click.option(
+    "from_",
+    "--from",
+    "-f",
+    type=click.DateTime(formats=["%Y-%m-%d"]),
+    help="Set to download records between the specified time and now",
+)
+@click.option(
+    "--to",
+    "-t",
+    type=click.DateTime(formats=["%Y-%m-%d"]),
+    help="Set to download records occuring before the specified time",
+)
+@click.option(
     "--verbose",
     "-v",
     help="Set the verbosity level. A higher verbosity level will generate more output during the process' execution. Repeat the flag to increase the verbosity level. (ex. -vvv)",
@@ -102,11 +121,11 @@ def run():
     count=True,
     default=2,
 )
-def sync_endpoint(endpoint, verbose):
+def sync_endpoint(endpoint, since, from_, to, verbose):
     "Run a one-off task to synchronize an endpoint"
     update_logger(verbose, formatter="layman")
     # app.app_context().push()
-    collector.tasks.sync_endpoint.apply((endpoint,), kwargs={"eager": True})
+    collector.tasks._sync_endpoint(endpoint, since=since, start=from_, end=to)
 
 
 @cli.command()

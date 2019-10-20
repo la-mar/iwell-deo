@@ -7,7 +7,9 @@ init-db:
 	poetry run iwell db init
 
 migrate:
+	# poetry run iwell db stamp head
 	poetry run iwell db migrate
+	poetry run iwell db upgrade
 
 celery-worker:
 	celery -E -A iwell.celery_queue.worker:celery worker --loglevel=INFO --purge

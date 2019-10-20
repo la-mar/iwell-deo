@@ -14,10 +14,24 @@ from iwell.api.model_mixins import DataFrameMixin
 schema = "iwell"
 
 
-# class IntegrationLog(DataFrameMixin, db.Model):
+class IntegrationLog(DataFrameMixin, db.Model):
 
-#     __tablename__ = "integration_log"
-#     __table_args__ = {"schema": schema}
+    __tablename__ = "integration_log"
+    __table_args__ = {"schema": schema}
+
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    integrated_at = db.Column(db.DateTime(timezone=True), nullable=False)
+    model_name = db.Column(db.String(), nullable=False)
+    inserts = db.Column(db.Integer(), nullable=False, default=0)
+    updates = db.Column(db.Integer(), nullable=False, default=0)
+    deletes = db.Column(db.Integer(), nullable=False, default=0)
+    updated_by = db.Column(db.String(), default=func.current_user(), nullable=False)
+    created_at = db.Column(
+        db.DateTime(timezone=True), default=func.now(), nullable=False
+    )
+    updated_at = db.Column(
+        db.DateTime(timezone=True), default=func.now(), nullable=False
+    )
 
 
 class User(DataFrameMixin, db.Model):
