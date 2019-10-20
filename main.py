@@ -4,17 +4,17 @@
 
 import logging
 
-import src.controller
-import src.loggers
-from src.version import __release__
+import controller
+import loggers
+from version import __release__
 
-src.loggers.standard_config()
+loggers.standard_config()
 logger = logging.getLogger(__name__)
 
 def main():
 
     try:
-        src.controller.integrate()
+        controller.integrate()
 
     except Exception as e:
         logger.exception(f'{__release__} exited abnormally. -- Error: {e}')

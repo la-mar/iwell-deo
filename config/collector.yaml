@@ -1,0 +1,292 @@
+default_schedule: &default_schedule
+  seconds: 15
+
+default_aliases: &default_aliases
+  created_at: iwell_created_at
+  updated_at: iwell_updated_at
+
+endpoints:
+  users:
+    model: api.models.User
+    mappings:
+      aliases:
+        type: user_type
+    exclude: []
+    normalize: false
+    path: /users
+    version: v1
+    mode: delta
+    tasks:
+      sync:
+        <<: *default_schedule
+        # cron:
+        #   minute: "*"
+        #   hour:
+        #   day_of_week:
+        #   day_of_month:
+        #   month_of_year:
+  wells:
+    model: api.models.Well
+    mappings:
+      aliases:
+        <<: *default_aliases
+        alias: well_alias
+        name: well_name
+        type: well_type
+    exclude: []
+    normalize: false
+    path: /wells
+    version: v1
+    mode: delta
+    tasks:
+      sync:
+        <<: *default_schedule
+  tanks:
+    model: api.models.Tank
+    mappings:
+      aliases:
+        <<: *default_aliases
+        name: tank_name
+        type: tank_type
+    exclude: []
+    normalize: false
+    path: /tanks
+    version: v1
+    mode: delta
+    tasks:
+      sync:
+        <<: *default_schedule
+  fields:
+    model: api.models.Field
+    mappings:
+      aliases:
+        <<: *default_aliases
+        name: field_name
+        order: field_order
+        type: field_type
+        unit: field_unit
+    exclude: []
+    normalize: false
+    path: /fields
+    version: v1
+    mode: delta
+    tasks:
+      sync:
+        <<: *default_schedule
+  tank_readings:
+    model: api.models.TankReading
+    depends_on:
+      tank_id: api.models.Tank.id
+    mappings:
+      aliases:
+        <<: *default_aliases
+        reading_time: reading_at
+    exclude: []
+    # depends_on:
+    #   tank_id: api.models.Tank
+    normalize: false
+    path: /tanks/{tank_id}/readings
+    version: v1
+    mode: delta
+    tasks:
+      sync:
+        <<: *default_schedule
+  field_values:
+    model: api.models.FieldValue
+    depends_on:
+      field_id: api.models.WellField.field_id
+      well_id: api.models.WellField.well_id
+    mappings:
+      aliases:
+        <<: *default_aliases
+    exclude: []
+    normalize: false
+    path: /wells/{well_id}/fields/{field_id}/values
+    version: v1
+    mode: delta
+    tasks:
+      sync:
+        <<: *default_schedule
+  fields_by_well:
+    model: api.models.WellField
+    depends_on:
+      well_id: api.models.Well.id
+    mappings:
+      aliases:
+        <<: *default_aliases
+        name: field_name
+        order: field_order
+        type: field_type
+        unit: field_unit
+    exclude: []
+    normalize: false
+    path: /wells/{well_id}/fields
+    version: v1
+    mode: delta
+    tasks:
+      sync:
+        <<: *default_schedule
+  # meters:
+  #   mappings:
+  #     aliases:
+  #       <<: *default_aliases
+  #       date: reading_at
+  #       name: meter_name
+  #       order: meter_order
+  #       type: product_type
+  #   exclude: []
+  #   primary_keys: well_id
+  #   normalize: false
+  #   path: /wells/{well_id}/meters
+  #   version: v1
+  #   mode: delta
+  #   tasks:
+  #     sync:
+  #       <<: *default_schedule
+  # meter_readings:
+  #   mappings:
+  #     aliases:
+  #       <<: *default_aliases
+  #   exclude: []
+  #   primary_keys:
+  #     - well_id
+  #     - meter_id
+  #   normalize: false
+  #   path: /wells/{well_id}/meters/{meter_id}/readings
+  #   version: v1
+  #   mode: delta
+  # production:
+  #   mappings:
+  #     aliases:
+  #       <<: *default_aliases
+  #       production_time: production_at
+  #   exclude:
+  #     - date
+  #   primary_keys: well_id
+  #   normalize: false
+  #   path: /wells/{well_id}/production
+  #   version: v1
+  #   mode: delta
+  #   tasks:
+  #     sync:
+  #       <<: *default_schedule
+  # run_tickets:
+  #   mappings:
+  #     aliases:
+  #       <<: *default_aliases
+  #       date: reading_at
+  #       type: product_type
+  #   exclude: []
+  #   primary_keys:
+  #     - tank_id
+  #     - reading_id
+  #     - run_ticket_id
+  #   normalize: false
+  #   path: /tanks/{tank_id}/readings/{reading_id}/run-tickets
+  #   version: v1
+  #   mode: delta
+  #   tasks:
+  #     sync:
+  #       <<: *default_schedule
+  # well_field_values:
+  #   mappings:
+  #     aliases:
+  #       <<: *default_aliases
+  #   exclude: []
+  #   primary_keys:
+  #     - well_id
+  #     - field_id
+  #   normalize: false
+  #   path: /wells/{well_id}/fields/{field_id}/values
+  #   version: v1
+  #   mode: delta
+  #   tasks:
+  #     sync:
+  #       <<: *default_schedule
+  # well_fields:
+  #   mappings:
+  #     aliases:
+  #       <<: *default_aliases
+  #       name: field_name
+  #       order: field_order
+  #       type: field_type
+  #       unit: field_unit
+  #   exclude: []
+  #   primary_keys: well_id
+  #   normalize: false
+  #   path: /wells/{well_id}/fields
+  #   version: v1
+  #   mode: delta
+  #   tasks:
+  #     sync:
+  #       <<: *default_schedule
+  # well_group_wells:
+  #   mappings:
+  #     aliases:
+  #       <<: *default_aliases
+  #   exclude:
+  #     - type
+  #     - name
+  #     - latest_production_time
+  #     - is_active
+  #     - alias
+  #   primary_keys: group_id
+  #   normalize: false
+  #   path: /well-groups/{group_id}/wells
+  #   version: v1
+  #   mode: delta
+  #   tasks:
+  #     sync:
+  #       <<: *default_schedule
+  # well_groups:
+  #   mappings:
+  #     aliases:
+  #       created_at: iwell_created_at
+  #       latest_production_time: group_latest_production_time
+  #       name: group_name
+  #       updated_at: iwell_updated_at
+  #   exclude:
+  #     - wells.data
+  #   normalize: true
+  #   path: /well-groups
+  #   version: v1
+  #   mode: delta
+  #   tasks:
+  #     sync:
+  #       <<: *default_schedule
+  # well_notes:
+  #   mappings:
+  #     aliases:
+  #       <<: *default_aliases
+  #   exclude: []
+  #   primary_keys: well_id
+  #   normalize: false
+  #   path: /wells/{well_id}/notes
+  #   version: v1
+  #   mode: delta
+  #   tasks:
+  #     sync:
+  #       <<: *default_schedule
+  # well_tanks:
+  #   mappings:
+  #     aliases:
+  #       <<: *default_aliases
+  #   exclude:
+  #     - capacity
+  #     - multiplier
+  #     - name
+  #     - type
+  #   primary_keys: well_id
+  #   normalize: false
+  #   path: /wells/{well_id}/tanks
+  #   version: v1
+  #   mode: delta
+  #   tasks:
+  #     sync:
+  #       <<: *default_schedule
+
+functions:
+  since:
+    alternatives: null
+    example: "since=32342561"
+    template: "since={value}"

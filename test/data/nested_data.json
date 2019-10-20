@@ -1,0 +1,123 @@
+{
+    "data": [{
+            "id": 16677,
+            "name": "University Reagan 27-1",
+            "alias": "Univ Reagan 27-1",
+            "type": "OIL",
+            "is_active": true,
+            "latest_production_time": 1571105881,
+            "created_at": 1524776014,
+            "updated_at": 1571105886
+        },
+        {
+            "id": 16681,
+            "name": "University 9A 2",
+            "alias": "University 9A 2",
+            "type": "OIL",
+            "is_active": true,
+            "latest_production_time": 1571097121,
+            "created_at": 1525123811,
+            "updated_at": 1571097122
+        },
+        {
+            "id": 16682,
+            "name": "University 2W 1",
+            "alias": "University 2W 1",
+            "type": "OIL",
+            "is_active": true,
+            "latest_production_time": 1571097248,
+            "created_at": 1525123975,
+            "updated_at": 1571097249
+        },
+        {
+            "id": 16768,
+            "name": "Univ Reagan 27-2",
+            "alias": "Univ Reagan 27-2",
+            "type": "OIL",
+            "is_active": false,
+            "latest_production_time": 943941600,
+            "created_at": 1527861131,
+            "updated_at": 1530222834
+        },
+        {
+            "id": 17417,
+            "name": "Dogwood #1H",
+            "alias": "Dogwood #1H",
+            "type": "OIL",
+            "is_active": true,
+            "latest_production_time": 1571105828,
+            "created_at": 1536151838,
+            "updated_at": 1571151729
+        },
+        {
+            "id": 17588,
+            "name": "Sequoia #1H",
+            "alias": "Sequoia #1H",
+            "type": "OIL",
+            "is_active": true,
+            "latest_production_time": 1571068814,
+            "created_at": 1539032967,
+            "updated_at": 1571151730
+        },
+        {
+            "id": 18713,
+            "name": "Prime Kile A4 & B5",
+            "alias": "Prime Kile A4B5",
+            "type": "OIL",
+            "is_active": true,
+            "latest_production_time": 1571105851,
+            "created_at": 1554409326,
+            "updated_at": 1571105886
+        },
+        {
+            "id": 19520,
+            "name": "Chloe 1806",
+            "alias": "Chloe 1806",
+            "type": "OIL",
+            "is_active": true,
+            "latest_production_time": 1571029200,
+            "created_at": 1557928004,
+            "updated_at": 1571097418
+        },
+        {
+            "id": 19683,
+            "name": "Sierra #1H",
+            "alias": "Sierra #1H",
+            "type": "OIL",
+            "is_active": true,
+            "latest_production_time": 1571029200,
+            "created_at": 1561392985,
+            "updated_at": 1571082668
+        },
+        {
+            "id": 20336,
+            "name": "Big Tree 1H",
+            "alias": "Big Tree 1H",
+            "type": "OIL",
+            "is_active": true,
+            "latest_production_time": 1571029200,
+            "created_at": 1569438967,
+            "updated_at": 1571066939
+        },
+        {
+            "id": 20337,
+            "name": "Big Tree 2H",
+            "alias": "Big Tree 2H",
+            "type": "OIL",
+            "is_active": true,
+            "latest_production_time": 1571029200,
+            "created_at": 1569439028,
+            "updated_at": 1571067001
+        },
+        {
+            "id": 20338,
+            "name": "Big Tree Facility",
+            "alias": "Big Tree Facilit",
+            "type": "OIL",
+            "is_active": true,
+            "latest_production_time": 1571029200,
+            "created_at": 1569439092,
+            "updated_at": 1571071820
+        }
+    ]
+}

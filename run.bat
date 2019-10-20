@@ -1,1 +1,0 @@
-python "C:\Repositories\Collector-iWell\src\controller.py"

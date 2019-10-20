@@ -1,0 +1,78 @@
+endpoints:
+  complex:
+    model: api.models.TankReading
+    depends_on:
+      test_id: api.models.Tank
+    mappings:
+      aliases:
+        created_at: iwell_created_at
+        updated_at: iwell_updated_at
+    exclude: []
+    normalize: false
+    path: /path/{id}/subpath/{id2}/values
+    version: v1
+    mode: delta
+  moderate:
+    model: api.models.TankReading
+    mappings:
+      aliases:
+        created_at: iwell_created_at
+        updated_at: iwell_updated_at
+    exclude:
+      - type
+      - name
+      - latest_production_time
+      - is_active
+      - alias
+    primary_keys: group_id
+    normalize: false
+    path: /well-groups/{group_id}/wells
+    version: v1
+    mode: delta
+  simple:
+    model: api.models.Well
+    mappings:
+      aliases:
+        alias: well_alias
+        created_at: iwell_created_at
+        name: well_name
+        type: well_type
+        updated_at: iwell_updated_at
+    exclude: []
+    normalize: false
+    path: /wells
+    version: v1
+    mode: delta
+  no_mappings:
+    model: api.models.Well
+    exclude: []
+    normalize: false
+    path: /wells
+    version: v1
+    mode: delta
+
+  null_keys:
+    model: api.models.TankReading
+    exclude: null
+    primary_keys: null
+    normalize: null
+    path: null
+    version: null
+    mode: null
+
+  no_keys:
+    model: api.models.TankReading
+
+  no_model:
+    model: null
+
+  test_collector_import_dotted_model:
+    model: api.models.Well
+  test_collector_import_global_model:
+    model: Well
+
+functions:
+  since:
+    alternatives: null
+    example: "since=32342561"
+    template: "since={value}"
