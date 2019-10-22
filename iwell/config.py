@@ -2,6 +2,7 @@ import logging
 import os
 import socket
 
+from dotenv import load_dotenv
 import pandas as pd
 import tomlkit
 import yaml
@@ -82,6 +83,8 @@ version = pkg_meta.get("version")
 class BaseConfig:
     """Base configuration"""
 
+    load_dotenv(".env")
+
     DEFAULT_COLLECTION_INTERVAL = {"hours": 1}
     ENV_NAME = os.getenv("ENV_NAME", socket.gethostname())
 
@@ -146,6 +149,7 @@ class BaseConfig:
     API_PAGESIZE = os.getenv("IWELL_PAGESIZE", 1000)
     API_HEADER_KEY = os.getenv("IWELL_HEADER_KEY", "API-HEADER-KEY")
     API_HEADER_PREFIX = os.getenv("IWELL_HEADER_PREFIX", "DEO")
+    API_SYNC_INTERVAL = os.getenv("IWELL_SYNC_INTERVAL", 7 * 24)  # 7 days
 
     @property
     def show(self):
@@ -179,6 +183,8 @@ class BaseConfig:
 class DevelopmentConfig(BaseConfig):
     """Development configuration"""
 
+    load_dotenv(".env.development")
+
     # SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
     DEBUG_TB_ENABLED = True
     SECRET_KEY = os.getenv("SECRET_KEY", "test")
@@ -187,6 +193,8 @@ class DevelopmentConfig(BaseConfig):
 
 class TestingConfig(BaseConfig):
     """Testing configuration"""
+
+    load_dotenv(".env.testing")
 
     CONFIG_BASEPATH = "./test/data"
     COLLECTOR_CONFIG_PATH = make_config_path(CONFIG_BASEPATH, "collector.yaml")
@@ -205,13 +213,10 @@ class TestingConfig(BaseConfig):
     API_DEFAULT_PAGESIZE = 100
 
 
-class StagingConfig(BaseConfig):
-    """Staging configuration"""
-
-    # SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
-
-
 class ProductionConfig(BaseConfig):
     """Production configuration"""
 
+    load_dotenv(".env.production")
     # SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+

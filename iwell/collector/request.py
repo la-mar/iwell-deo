@@ -54,7 +54,7 @@ class Request(requests.Request):
     def path(self):
         return urlparse(self.url).path
 
-    @session.setter
+    @session.setter  # type: ignore
     def session(self, value):
         self._session = value
 
@@ -77,7 +77,6 @@ class Request(requests.Request):
 if __name__ == "__main__":
 
     from collector.requestor import IWellRequestor
-    from collector.request import Request
 
     from collector.endpoint import Endpoint
     from config import get_active_config

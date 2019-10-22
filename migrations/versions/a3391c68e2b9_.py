@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: f0461bdb269b
+Revision ID: a3391c68e2b9
 Revises: 
-Create Date: 2019-10-20 11:32:32.779785
+Create Date: 2019-10-21 11:18:37.623686
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'f0461bdb269b'
+revision = 'a3391c68e2b9'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -31,8 +31,7 @@ def upgrade():
     sa.Column('iwell_updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
-    sa.PrimaryKeyConstraint('id'),
-    schema='iwell'
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('integration_log',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -44,8 +43,7 @@ def upgrade():
     sa.Column('updated_by', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
-    sa.PrimaryKeyConstraint('id'),
-    schema='iwell'
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('tanks',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -57,8 +55,7 @@ def upgrade():
     sa.Column('iwell_updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
-    sa.PrimaryKeyConstraint('id'),
-    schema='iwell'
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -69,8 +66,7 @@ def upgrade():
     sa.Column('status', sa.String(), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
-    sa.PrimaryKeyConstraint('id'),
-    schema='iwell'
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('well_groups',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -81,8 +77,7 @@ def upgrade():
     sa.Column('iwell_updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
-    sa.PrimaryKeyConstraint('id'),
-    schema='iwell'
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('wells',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -95,8 +90,7 @@ def upgrade():
     sa.Column('iwell_updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
-    sa.PrimaryKeyConstraint('id'),
-    schema='iwell'
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('meters',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -108,11 +102,10 @@ def upgrade():
     sa.Column('iwell_updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
-    sa.ForeignKeyConstraint(['well_id'], ['iwell.wells.id'], ),
-    sa.PrimaryKeyConstraint('id', 'well_id'),
-    schema='iwell'
+    sa.ForeignKeyConstraint(['well_id'], ['wells.id'], ),
+    sa.PrimaryKeyConstraint('id', 'well_id')
     )
-    op.create_table('production_daily',
+    op.create_table('production',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('well_id', sa.Integer(), nullable=False),
     sa.Column('produced_at', sa.DateTime(timezone=True), nullable=False),
@@ -122,15 +115,14 @@ def upgrade():
     sa.Column('is_operating', sa.Boolean(), nullable=True),
     sa.Column('hours_on', sa.Integer(), nullable=False),
     sa.Column('normal_hours_on', sa.Integer(), nullable=False),
+    sa.Column('reported_date', sa.Date(), nullable=False),
     sa.Column('updated_by', sa.Integer(), nullable=True),
     sa.Column('iwell_created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('iwell_updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
-    sa.ForeignKeyConstraint(['updated_by'], ['iwell.users.id'], ),
-    sa.ForeignKeyConstraint(['well_id'], ['iwell.wells.id'], ),
-    sa.PrimaryKeyConstraint('id'),
-    schema='iwell'
+    sa.ForeignKeyConstraint(['well_id'], ['wells.id'], ),
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('tank_readings',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -144,15 +136,13 @@ def upgrade():
     sa.Column('previous_cut_inches', sa.Float(), nullable=True),
     sa.Column('previous_top_feet', sa.Float(), nullable=True),
     sa.Column('previous_top_inches', sa.Float(), nullable=True),
-    sa.Column('updated_by', sa.Integer(), nullable=False),
+    sa.Column('updated_by', sa.Integer(), nullable=True),
     sa.Column('iwell_created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('iwell_updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
-    sa.ForeignKeyConstraint(['tank_id'], ['iwell.tanks.id'], ),
-    sa.ForeignKeyConstraint(['updated_by'], ['iwell.users.id'], ),
-    sa.PrimaryKeyConstraint('id', 'tank_id'),
-    schema='iwell'
+    sa.ForeignKeyConstraint(['tank_id'], ['tanks.id'], ),
+    sa.PrimaryKeyConstraint('id', 'tank_id')
     )
     op.create_table('well_fields',
     sa.Column('field_id', sa.Integer(), nullable=False),
@@ -161,10 +151,9 @@ def upgrade():
     sa.Column('iwell_updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
-    sa.ForeignKeyConstraint(['field_id'], ['iwell.fields.id'], ),
-    sa.ForeignKeyConstraint(['well_id'], ['iwell.wells.id'], ),
-    sa.PrimaryKeyConstraint('field_id', 'well_id'),
-    schema='iwell'
+    sa.ForeignKeyConstraint(['field_id'], ['fields.id'], ),
+    sa.ForeignKeyConstraint(['well_id'], ['wells.id'], ),
+    sa.PrimaryKeyConstraint('field_id', 'well_id')
     )
     op.create_table('well_group_wells',
     sa.Column('group_id', sa.Integer(), nullable=False),
@@ -173,10 +162,9 @@ def upgrade():
     sa.Column('iwell_updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
-    sa.ForeignKeyConstraint(['group_id'], ['iwell.well_groups.id'], ),
-    sa.ForeignKeyConstraint(['well_id'], ['iwell.wells.id'], ),
-    sa.PrimaryKeyConstraint('group_id', 'well_id'),
-    schema='iwell'
+    sa.ForeignKeyConstraint(['group_id'], ['well_groups.id'], ),
+    sa.ForeignKeyConstraint(['well_id'], ['wells.id'], ),
+    sa.PrimaryKeyConstraint('group_id', 'well_id')
     )
     op.create_table('well_notes',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -189,10 +177,9 @@ def upgrade():
     sa.Column('iwell_updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
-    sa.ForeignKeyConstraint(['author'], ['iwell.users.id'], ),
-    sa.ForeignKeyConstraint(['well_id'], ['iwell.wells.id'], ),
-    sa.PrimaryKeyConstraint('id', 'well_id'),
-    schema='iwell'
+    sa.ForeignKeyConstraint(['author'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['well_id'], ['wells.id'], ),
+    sa.PrimaryKeyConstraint('id', 'well_id')
     )
     op.create_table('well_tanks',
     sa.Column('tank_id', sa.Integer(), nullable=False),
@@ -201,10 +188,9 @@ def upgrade():
     sa.Column('iwell_updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
-    sa.ForeignKeyConstraint(['tank_id'], ['iwell.tanks.id'], ),
-    sa.ForeignKeyConstraint(['well_id'], ['iwell.wells.id'], ),
-    sa.PrimaryKeyConstraint('tank_id', 'well_id'),
-    schema='iwell'
+    sa.ForeignKeyConstraint(['tank_id'], ['tanks.id'], ),
+    sa.ForeignKeyConstraint(['well_id'], ['wells.id'], ),
+    sa.PrimaryKeyConstraint('tank_id', 'well_id')
     )
     op.create_table('field_values',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -217,10 +203,8 @@ def upgrade():
     sa.Column('iwell_updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
-    sa.ForeignKeyConstraint(['field_id', 'well_id'], ['iwell.well_fields.field_id', 'iwell.well_fields.well_id'], ),
-    sa.ForeignKeyConstraint(['updated_by'], ['iwell.users.id'], ),
-    sa.PrimaryKeyConstraint('id'),
-    schema='iwell'
+    sa.ForeignKeyConstraint(['field_id', 'well_id'], ['well_fields.field_id', 'well_fields.well_id'], ),
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('meter_readings',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -229,21 +213,19 @@ def upgrade():
     sa.Column('reading_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('value', sa.Float(), nullable=False),
     sa.Column('previous_value', sa.Float(), nullable=False),
-    sa.Column('updated_by', sa.Integer(), nullable=False),
+    sa.Column('updated_by', sa.Integer(), nullable=True),
     sa.Column('iwell_created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('iwell_updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
-    sa.ForeignKeyConstraint(['meter_id', 'well_id'], ['iwell.meters.id', 'iwell.meters.well_id'], ),
-    sa.ForeignKeyConstraint(['updated_by'], ['iwell.users.id'], ),
-    sa.PrimaryKeyConstraint('id'),
-    schema='iwell'
+    sa.ForeignKeyConstraint(['meter_id', 'well_id'], ['meters.id', 'meters.well_id'], ),
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('run_tickets',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('tank_id', sa.Integer(), nullable=False),
     sa.Column('reading_id', sa.Integer(), nullable=False),
-    sa.Column('reading_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('ticket_date', sa.Date(), nullable=False),
     sa.Column('run_ticket_number', sa.String(), nullable=False),
     sa.Column('total', sa.Float(), nullable=True),
     sa.Column('product_type', sa.String(), nullable=False),
@@ -254,30 +236,28 @@ def upgrade():
     sa.Column('iwell_updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
-    sa.ForeignKeyConstraint(['tank_id', 'reading_id'], ['iwell.tank_readings.tank_id', 'iwell.tank_readings.id'], ),
-    sa.ForeignKeyConstraint(['updated_by'], ['iwell.users.id'], ),
-    sa.PrimaryKeyConstraint('id'),
-    schema='iwell'
+    sa.ForeignKeyConstraint(['tank_id', 'reading_id'], ['tank_readings.tank_id', 'tank_readings.id'], ),
+    sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###
 
 
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
-    op.drop_table('run_tickets', schema='iwell')
-    op.drop_table('meter_readings', schema='iwell')
-    op.drop_table('field_values', schema='iwell')
-    op.drop_table('well_tanks', schema='iwell')
-    op.drop_table('well_notes', schema='iwell')
-    op.drop_table('well_group_wells', schema='iwell')
-    op.drop_table('well_fields', schema='iwell')
-    op.drop_table('tank_readings', schema='iwell')
-    op.drop_table('production_daily', schema='iwell')
-    op.drop_table('meters', schema='iwell')
-    op.drop_table('wells', schema='iwell')
-    op.drop_table('well_groups', schema='iwell')
-    op.drop_table('users', schema='iwell')
-    op.drop_table('tanks', schema='iwell')
-    op.drop_table('integration_log', schema='iwell')
-    op.drop_table('fields', schema='iwell')
+    op.drop_table('run_tickets')
+    op.drop_table('meter_readings')
+    op.drop_table('field_values')
+    op.drop_table('well_tanks')
+    op.drop_table('well_notes')
+    op.drop_table('well_group_wells')
+    op.drop_table('well_fields')
+    op.drop_table('tank_readings')
+    op.drop_table('production')
+    op.drop_table('meters')
+    op.drop_table('wells')
+    op.drop_table('well_groups')
+    op.drop_table('users')
+    op.drop_table('tanks')
+    op.drop_table('integration_log')
+    op.drop_table('fields')
     # ### end Alembic commands ###

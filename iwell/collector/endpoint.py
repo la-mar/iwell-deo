@@ -23,7 +23,7 @@ class Endpoint(object):
         url_params: List[str] = None,
         exclude: List[str] = None,
         depends_on: Dict[str, str] = None,
-        options: Dict[Any, Any] = None,
+        options: List[str] = None,
         normalize: bool = False,
         updated_column: str = "updated_at",
         **kwargs,
@@ -41,7 +41,7 @@ class Endpoint(object):
         self._dependency_map = depends_on or {}
         self._depends_on: Union[Dict[str, Model], None] = None
         self.normalize = normalize
-        self.options = options or {}
+        self.options = options or []
 
     def __repr__(self):
         return f"{self.version}{self.path}"

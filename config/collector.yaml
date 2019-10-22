@@ -5,6 +5,7 @@ default_aliases: &default_aliases
   created_at: iwell_created_at
   updated_at: iwell_updated_at
 
+
 endpoints:
   users:
     model: api.models.User
@@ -15,7 +16,6 @@ endpoints:
     normalize: false
     path: /users
     version: v1
-    mode: delta
     tasks:
       sync:
         <<: *default_schedule
@@ -39,7 +39,6 @@ endpoints:
     exclude: []
     normalize: false
     version: v1
-    mode: delta
     tasks:
       sync:
         <<: *default_schedule
@@ -56,7 +55,6 @@ endpoints:
     normalize: false
     path: /tanks
     version: v1
-    mode: delta
     tasks:
       sync:
         <<: *default_schedule
@@ -73,7 +71,6 @@ endpoints:
     exclude: []
     normalize: false
     version: v1
-    mode: delta
     tasks:
       sync:
         <<: *default_schedule
@@ -91,7 +88,6 @@ endpoints:
       tank_id: api.models.Tank.id
     normalize: false
     version: v1
-    mode: delta
     tasks:
       sync:
         <<: *default_schedule
@@ -108,29 +104,10 @@ endpoints:
     mappings:
       aliases:
         <<: *default_aliases
+        reading_time: reading_at
     exclude: []
     normalize: false
     version: v1
-    mode: delta
-    tasks:
-      sync:
-        <<: *default_schedule
-  fields_by_well:
-    model: api.models.WellField
-    path: /wells/{well_id}/fields
-    depends_on:
-      well_id: api.models.Well.id
-    mappings:
-      aliases:
-        <<: *default_aliases
-        name: field_name
-        order: field_order
-        type: field_type
-        unit: field_unit
-    exclude: []
-    normalize: false
-    version: v1
-    mode: delta
     tasks:
       sync:
         <<: *default_schedule
@@ -152,7 +129,6 @@ endpoints:
     exclude: []
     normalize: false
     version: v1
-    mode: delta
     tasks:
       sync:
         <<: *default_schedule
@@ -164,15 +140,17 @@ endpoints:
       - start
       - end
     depends_on:
-      well_id: api.models.Well.id
+      well_id: api.models.Meter.well_id
       meter_id: api.models.Meter.id
     mappings:
       aliases:
         <<: *default_aliases
+        reading_time: reading_at
+        reading: value
+        previous_reading: previous_value
     exclude: []
     normalize: false
     version: v1
-    mode: delta
     tasks:
       sync:
         <<: *default_schedule
@@ -188,12 +166,10 @@ endpoints:
     mappings:
       aliases:
         <<: *default_aliases
-        production_time: production_at
-    exclude:
-      - date
+        production_time: produced_at
+        date: reported_date
     normalize: false
     version: v1
-    mode: delta
     tasks:
       sync:
         <<: *default_schedule
@@ -203,37 +179,19 @@ endpoints:
     options:
       - since
     depends_on:
-      tank_id: api.models.Tank.id
+      tank_id: api.models.TankReading.tank_id
       reading_id: api.models.TankReading.id
     mappings:
       aliases:
         <<: *default_aliases
-        date: reading_at
+        date: ticket_date
         type: product_type
     exclude: []
     normalize: false
     version: v1
-    mode: delta
     tasks:
       sync:
         <<: *default_schedule
-
-  # well_field_values:
-  #   model: api.models.WellFields
-  #   depends_on:
-  #     well_id: api.models.Well.id
-  #     field_id: api.models.Field.id
-  #   mappings:
-  #     aliases:
-  #       <<: *default_aliases
-  #   exclude: []
-  #   normalize: false
-  #   path: /wells/{well_id}/fields/{field_id}/values
-  #   version: v1
-  #   mode: delta
-  #   tasks:
-  #     sync:
-  #       <<: *default_schedule
   well_fields:
     model: api.models.WellField
     path: /wells/{well_id}/fields
@@ -242,6 +200,7 @@ endpoints:
     mappings:
       aliases:
         <<: *default_aliases
+        id: field_id
     exclude:
       - name
       - order
@@ -253,27 +212,6 @@ endpoints:
       - order
     normalize: false
     version: v1
-    mode: delta
-    tasks:
-      sync:
-        <<: *default_schedule
-  well_group_wells:
-    model: api.models.WellGroupWell
-    path: /well-groups/{group_id}/wells
-    depends_on:
-      group_id: api.models.WellGroup.id
-    mappings:
-      aliases:
-        <<: *default_aliases
-    exclude:
-      - type
-      - name
-      - latest_production_time
-      - is_active
-      - alias
-    normalize: false
-    version: v1
-    mode: delta
     tasks:
       sync:
         <<: *default_schedule
@@ -289,7 +227,26 @@ endpoints:
       - wells.data
     normalize: true
     version: v1
-    mode: delta
+    tasks:
+      sync:
+        <<: *default_schedule
+  well_group_wells:
+    model: api.models.WellGroupWell
+    path: /well-groups/{group_id}/wells
+    depends_on:
+      group_id: api.models.WellGroup.id
+    mappings:
+      aliases:
+        <<: *default_aliases
+        id: well_id
+    exclude:
+      - type
+      - name
+      - latest_production_time
+      - is_active
+      - alias
+    normalize: false
+    version: v1
     tasks:
       sync:
         <<: *default_schedule
@@ -305,7 +262,6 @@ endpoints:
     exclude: []
     normalize: false
     version: v1
-    mode: delta
     tasks:
       sync:
         <<: *default_schedule
@@ -317,6 +273,7 @@ endpoints:
     mappings:
       aliases:
         <<: *default_aliases
+        id: tank_id
     exclude:
       - capacity
       - multiplier
@@ -324,11 +281,9 @@ endpoints:
       - type
     normalize: false
     version: v1
-    mode: delta
     tasks:
       sync:
         <<: *default_schedule
-
 functions:
   since:
     alternatives: null

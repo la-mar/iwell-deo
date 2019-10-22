@@ -2,28 +2,9 @@ version: "3"
 services:
   web:
     build:
-      context: src/iwell/api
+      context: .
       dockerfile: Dockerfile
     restart: always
     ports:
-      - "5001:5001"
-    depends_on:
-      - redis
-  worker:
-    build:
-      context: src/iwell/celery-queue
-      dockerfile: Dockerfile
-    depends_on:
-      - redis
-  monitor:
-    build:
-      context: src/iwell/celery-queue
-      dockerfile: Dockerfile
-    ports:
-      - "5555:5555"
-    entrypoint: flower
-    command: -A tasks --port=5555 --broker=redis://redis:6379/0
-    depends_on:
-      - redis
-  redis:
-    image: redis
+      - "5000:5000"
+    env_file: .env

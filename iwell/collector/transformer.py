@@ -12,8 +12,6 @@ logger = logging.getLogger(__name__)
 class Transformer(object):
     """ Unpacks a response object's json into a Pandas Dataframe"""
 
-    df = pd.DataFrame()
-    errors: List[str] = []
     date_handler_args: Dict[str, Union[str, int, bool]] = {
         "infer_datetime_format": True,
         "unit": "s",
@@ -35,6 +33,7 @@ class Transformer(object):
         self.exclude = exclude or []
         self.date_columns = date_columns or []
         self.date_handler_args = date_handler_args or self.date_handler_args
+        self.errors: List[str] = []
 
     def __repr__(self):
         return (
@@ -46,6 +45,10 @@ class Transformer(object):
         df = self.apply_aliases(df)
         df = self.drop_exclusions(df)
         df = self.standardize_dates(df)
+        if len(self.errors) > 0:
+            logger.warning(
+                f"Captured {len(self.errors)} parsing errors during transformation: {self.errors}"
+            )
         return df
 
     def column_map(self) -> Dict[str, str]:
@@ -81,12 +84,20 @@ class Transformer(object):
 
     def date_handler(self, value: str) -> Union[pd.Timestamp, pd.NaT]:
         try:
-            return pd.to_datetime(value, **self.date_handler_args)
+            dt = pd.to_datetime(value, **self.date_handler_args)
+            if pd.isnull(dt):
+                # TODO: Convert this into a default array of args at the class level
+                modified_args = {**self.date_handler_args}
+                modified_args.pop("unit", None)
+                # modified_args["yearfirst"] = True
+                # format="%Y-%m-%d"
+                dt = pd.to_datetime(value, **modified_args)
+            return dt
         except Exception as e:
             msg = f"Unable to convert value to datetime: {value} -- {e}"
             self.errors.append(msg)
             logger.debug(msg)
-            return pd.NaT
+            return None
 
     def standardize_dates(self, df: pd.DataFrame) -> pd.DataFrame:
         for column_name in self.date_columns:

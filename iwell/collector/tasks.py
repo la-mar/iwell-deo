@@ -1,3 +1,5 @@
+from __future__ import annotations
+from typing import List, Dict, Tuple
 import random
 import time
 from datetime import datetime, timedelta
@@ -85,9 +87,12 @@ def _collect_request(request: Request, endpoint: Endpoint):
     response = request.get()
     # logger.warning(response)
     if not response.ok:
-        raise Exception(
-            f"GET {response.url} returned unexpected response code: {response.status_code}"
-        )
+        if response.status_code == 404:
+            logger.warning(f"{request}: Resource not found")
+        else:
+            raise Exception(
+                f"GET {response.url} returned unexpected response code: {response.status_code}"
+            )
     result = c.collect(response)
     # logger.debug(result)
     return result
@@ -102,12 +107,24 @@ def _sync_endpoint(endpoint_name: str, celery: bool = False, **kwargs):
     """ Sync model from source to data warehouse"""
     endpoint = endpoints[endpoint_name]
     requestor = IWellRequestor(conf.API_BASE_URL, endpoint, **kwargs)
+    errors: List[str] = []
+
     for req in requestor.sync_model():
         logger.debug(f"sending request to {req}")
-        if celery:
-            collect_request.apply_async((req, endpoint))
-        else:
-            _collect_request(req, endpoint)
+        try:
+            if celery:
+                collect_request.apply_async((req, endpoint))
+            else:
+                _collect_request(req, endpoint)
+        except Exception as e:
+            logger.warning(f"Unable to collect request: {req}")
+            errors.append(f"{req}: {e}")
+
+    if len(errors) > 0:
+        err = "\n".join(errors)
+        logger.error(
+            f"Captured {len(errors)} when syncing endpoint: " + "\n" + f"{err}"
+        )
 
 
 @task_postrun.connect

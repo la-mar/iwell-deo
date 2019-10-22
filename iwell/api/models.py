@@ -1,7 +1,8 @@
 # import os
 from sqlalchemy.sql import func
+
 from iwell import db
-from iwell.api.model_mixins import DataFrameMixin
+from api.model_mixins import DataFrameMixin
 
 # from flask import current_app
 
@@ -11,13 +12,13 @@ from iwell.api.model_mixins import DataFrameMixin
 # my_module = importlib.import_module("module.submodule")
 # MyClass = getattr(my_module, "MyClass")
 # instance = MyClass()
-schema = "iwell"
+schema = "public"
 
 
 class IntegrationLog(DataFrameMixin, db.Model):
 
     __tablename__ = "integration_log"
-    __table_args__ = {"schema": schema}
+    # __table_args__ = {"schema": schema}
 
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     integrated_at = db.Column(db.DateTime(timezone=True), nullable=False)
@@ -37,7 +38,7 @@ class IntegrationLog(DataFrameMixin, db.Model):
 class User(DataFrameMixin, db.Model):
 
     __tablename__ = "users"
-    __table_args__ = {"schema": schema}
+    # __table_args__ = {"schema": schema}
 
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     name = db.Column(db.String(), nullable=False)
@@ -56,7 +57,7 @@ class User(DataFrameMixin, db.Model):
 class Well(DataFrameMixin, db.Model):
 
     __tablename__ = "wells"
-    __table_args__ = {"schema": schema}
+    # __table_args__ = {"schema": schema}
 
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     well_name = db.Column(db.String(), nullable=True)
@@ -85,13 +86,13 @@ class Well(DataFrameMixin, db.Model):
     notes = db.relationship("WellNote", backref="well", lazy=True)
     fields = db.relationship("WellField", backref="well", lazy=True)
     # field_values = db.relationship("FieldValue", backref="well", lazy=True)
-    production = db.relationship("ProductionDaily", backref="well", lazy=True)
+    production = db.relationship("Production", backref="well", lazy=True)
 
 
 class Tank(DataFrameMixin, db.Model):
 
     __tablename__ = "tanks"
-    __table_args__ = {"schema": schema}
+    # __table_args__ = {"schema": schema}
 
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     tank_name = db.Column(db.String(), nullable=True)
@@ -116,14 +117,11 @@ class Tank(DataFrameMixin, db.Model):
 class Meter(DataFrameMixin, db.Model):
 
     __tablename__ = "meters"
-    __table_args__ = {"schema": schema}
+    # __table_args__ = {"schema": schema}
 
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     well_id = db.Column(
-        db.Integer,
-        db.ForeignKey(f"{schema}.wells.id"),
-        primary_key=True,
-        nullable=False,
+        db.Integer, db.ForeignKey(f"wells.id"), primary_key=True, nullable=False
     )
     meter_name = db.Column(db.String(), nullable=True)
     meter_order = db.Column(db.Integer, nullable=True)
@@ -146,7 +144,7 @@ class Meter(DataFrameMixin, db.Model):
 class Field(DataFrameMixin, db.Model):
 
     __tablename__ = "fields"
-    __table_args__ = {"schema": schema}
+    # __table_args__ = {"schema": schema}
 
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     field_name = db.Column(db.String(), nullable=True)
@@ -174,7 +172,7 @@ class Field(DataFrameMixin, db.Model):
 class WellGroup(DataFrameMixin, db.Model):
 
     __tablename__ = "well_groups"
-    __table_args__ = {"schema": schema}
+    # __table_args__ = {"schema": schema}
 
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     group_name = db.Column(db.String(), nullable=True)
@@ -200,19 +198,13 @@ class WellGroup(DataFrameMixin, db.Model):
 class WellGroupWell(DataFrameMixin, db.Model):
 
     __tablename__ = "well_group_wells"
-    __table_args__ = {"schema": schema}
+    # __table_args__ = {"schema": schema}
 
     group_id = db.Column(
-        db.Integer,
-        db.ForeignKey(f"{schema}.well_groups.id"),
-        primary_key=True,
-        nullable=False,
+        db.Integer, db.ForeignKey(f"well_groups.id"), primary_key=True, nullable=False
     )
     well_id = db.Column(
-        db.Integer,
-        db.ForeignKey(f"{schema}.wells.id"),
-        primary_key=True,
-        nullable=False,
+        db.Integer, db.ForeignKey(f"wells.id"), primary_key=True, nullable=False
     )
     iwell_created_at = db.Column(
         db.DateTime(timezone=True), default=func.now(), nullable=False
@@ -231,19 +223,13 @@ class WellGroupWell(DataFrameMixin, db.Model):
 class WellTank(DataFrameMixin, db.Model):
 
     __tablename__ = "well_tanks"
-    __table_args__ = {"schema": schema}
+    # __table_args__ = {"schema": schema}
 
     tank_id = db.Column(
-        db.Integer,
-        db.ForeignKey(f"{schema}.tanks.id"),
-        primary_key=True,
-        nullable=False,
+        db.Integer, db.ForeignKey(f"tanks.id"), primary_key=True, nullable=False
     )
     well_id = db.Column(
-        db.Integer,
-        db.ForeignKey(f"{schema}.wells.id"),
-        primary_key=True,
-        nullable=False,
+        db.Integer, db.ForeignKey(f"wells.id"), primary_key=True, nullable=False
     )
     iwell_created_at = db.Column(
         db.DateTime(timezone=True), default=func.now(), nullable=False
@@ -262,14 +248,11 @@ class WellTank(DataFrameMixin, db.Model):
 class TankReading(DataFrameMixin, db.Model):
 
     __tablename__ = "tank_readings"
-    __table_args__ = {"schema": schema}
+    # __table_args__ = {"schema": schema}
 
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     tank_id = db.Column(
-        db.Integer,
-        db.ForeignKey(f"{schema}.tanks.id"),
-        primary_key=True,
-        nullable=False,
+        db.Integer, db.ForeignKey(f"tanks.id"), primary_key=True, nullable=False
     )
     reading_at = db.Column(db.DateTime(timezone=True), nullable=False)  # reading_time
     cut_feet = db.Column(db.Float, nullable=True, default=0)
@@ -280,9 +263,10 @@ class TankReading(DataFrameMixin, db.Model):
     previous_cut_inches = db.Column(db.Float, nullable=True, default=0)
     previous_top_feet = db.Column(db.Float, nullable=True, default=0)
     previous_top_inches = db.Column(db.Float, nullable=True, default=0)
-    updated_by = db.Column(
-        db.Integer, db.ForeignKey(f"{schema}.users.id"), nullable=False
-    )
+    # updated_by = db.Column(
+    #     db.Integer, db.ForeignKey(f"users.id"), nullable=False
+    # )
+    updated_by = db.Column(db.Integer, nullable=True)
     iwell_created_at = db.Column(
         db.DateTime(timezone=True), default=func.now(), nullable=False
     )
@@ -301,18 +285,15 @@ class TankReading(DataFrameMixin, db.Model):
 class WellNote(DataFrameMixin, db.Model):
 
     __tablename__ = "well_notes"
-    __table_args__ = {"schema": schema}
+    # __table_args__ = {"schema": schema}
 
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     well_id = db.Column(
-        db.Integer,
-        db.ForeignKey(f"{schema}.wells.id"),
-        primary_key=True,
-        nullable=False,
+        db.Integer, db.ForeignKey(f"wells.id"), primary_key=True, nullable=False
     )
     noted_at = db.Column(db.DateTime(timezone=True), nullable=False)  # note_time
     message = db.Column(db.String(), nullable=True)
-    author = db.Column(db.Integer, db.ForeignKey(f"{schema}.users.id"), nullable=True)
+    author = db.Column(db.Integer, db.ForeignKey(f"users.id"), nullable=True)
     is_pumper_content = db.Column(db.Boolean)
     iwell_created_at = db.Column(
         db.DateTime(timezone=True), default=func.now(), nullable=False
@@ -331,19 +312,13 @@ class WellNote(DataFrameMixin, db.Model):
 class WellField(DataFrameMixin, db.Model):
 
     __tablename__ = "well_fields"
-    __table_args__ = {"schema": schema}
+    # __table_args__ = {"schema": schema}
 
     field_id = db.Column(
-        db.Integer,
-        db.ForeignKey(f"{schema}.fields.id"),
-        primary_key=True,
-        nullable=False,
+        db.Integer, db.ForeignKey(f"fields.id"), primary_key=True, nullable=False
     )
     well_id = db.Column(
-        db.Integer,
-        db.ForeignKey(f"{schema}.wells.id"),
-        primary_key=True,
-        nullable=False,
+        db.Integer, db.ForeignKey(f"wells.id"), primary_key=True, nullable=False
     )
     # field_name = db.Column(db.String(), nullable=True)
     # field_type = db.Column(db.String(), nullable=True)
@@ -372,19 +347,16 @@ class FieldValue(DataFrameMixin, db.Model):
     __tablename__ = "field_values"
     __table_args__ = (
         db.ForeignKeyConstraint(
-            ["field_id", "well_id"],
-            [f"{schema}.well_fields.field_id", f"{schema}.well_fields.well_id"],
+            ["field_id", "well_id"], [f"well_fields.field_id", f"well_fields.well_id"]
         ),
-        {"schema": schema},
+        # {"schema": schema},
     )
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     field_id = db.Column(db.Integer, nullable=False)
     well_id = db.Column(db.Integer, nullable=False)
     reading_at = db.Column(db.DateTime(timezone=True), nullable=False)
     value = db.Column(db.Float, nullable=False)
-    updated_by = db.Column(
-        db.Integer, db.ForeignKey(f"{schema}.users.id"), nullable=True
-    )
+    updated_by = db.Column(db.Integer, nullable=True)
     iwell_created_at = db.Column(
         db.DateTime(timezone=True), default=func.now(), nullable=False
     )
@@ -404,9 +376,9 @@ class MeterReading(DataFrameMixin, db.Model):
     __tablename__ = "meter_readings"
     __table_args__ = (
         db.ForeignKeyConstraint(
-            ["meter_id", "well_id"], [f"{schema}.meters.id", f"{schema}.meters.well_id"]
+            ["meter_id", "well_id"], [f"meters.id", f"meters.well_id"]
         ),
-        {"schema": schema},
+        # {"schema": schema},
     )
 
     id = db.Column(db.Integer, primary_key=True, nullable=False)
@@ -415,9 +387,7 @@ class MeterReading(DataFrameMixin, db.Model):
     reading_at = db.Column(db.DateTime(timezone=True), nullable=False)
     value = db.Column(db.Float, nullable=False)
     previous_value = db.Column(db.Float, nullable=False)
-    updated_by = db.Column(
-        db.Integer, db.ForeignKey(f"{schema}.users.id"), nullable=False
-    )
+    updated_by = db.Column(db.Integer, nullable=True)
     iwell_created_at = db.Column(
         db.DateTime(timezone=True), default=func.now(), nullable=False
     )
@@ -432,13 +402,13 @@ class MeterReading(DataFrameMixin, db.Model):
     )
 
 
-class ProductionDaily(DataFrameMixin, db.Model):
+class Production(DataFrameMixin, db.Model):
 
-    __tablename__ = "production_daily"
-    __table_args__ = {"schema": schema}
+    __tablename__ = "production"
+    # __table_args__ = {"schema": schema}
 
     id = db.Column(db.Integer, primary_key=True, nullable=False)
-    well_id = db.Column(db.Integer, db.ForeignKey(f"{schema}.wells.id"), nullable=False)
+    well_id = db.Column(db.Integer, db.ForeignKey(f"wells.id"), nullable=False)
     produced_at = db.Column(db.DateTime(timezone=True), nullable=False)
     oil = db.Column(db.Float, nullable=False, default=0)
     gas = db.Column(db.Float, nullable=False, default=0)
@@ -446,9 +416,8 @@ class ProductionDaily(DataFrameMixin, db.Model):
     is_operating = db.Column(db.Boolean, nullable=True, default=False)
     hours_on = db.Column(db.Integer, nullable=False)
     normal_hours_on = db.Column(db.Integer, nullable=False)
-    updated_by = db.Column(
-        db.Integer, db.ForeignKey(f"{schema}.users.id"), nullable=True
-    )
+    reported_date = db.Column(db.Date(), nullable=False)
+    updated_by = db.Column(db.Integer, nullable=True)
     iwell_created_at = db.Column(
         db.DateTime(timezone=True), default=func.now(), nullable=False
     )
@@ -472,24 +441,21 @@ class RunTicket(DataFrameMixin, db.Model):
     __tablename__ = "run_tickets"
     __table_args__ = (
         db.ForeignKeyConstraint(
-            ["tank_id", "reading_id"],
-            [f"{schema}.tank_readings.tank_id", f"{schema}.tank_readings.id"],
+            ["tank_id", "reading_id"], [f"tank_readings.tank_id", f"tank_readings.id"]
         ),
-        {"schema": schema},
+        # {"schema": schema},
     )
 
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     tank_id = db.Column(db.Integer, nullable=False)
     reading_id = db.Column(db.Integer, nullable=False)
-    reading_at = db.Column(db.DateTime(timezone=True), nullable=False)
+    ticket_date = db.Column(db.Date(), nullable=False)
     run_ticket_number = db.Column(db.String(), nullable=False, default="")
     total = db.Column(db.Float, nullable=True)
     product_type = db.Column(db.String(), nullable=False, default="")
     picture_url = db.Column(db.String(), nullable=False, default="")
     comments = db.Column(db.String(), nullable=False, default="")
-    updated_by = db.Column(
-        db.Integer, db.ForeignKey(f"{schema}.users.id"), nullable=True
-    )
+    updated_by = db.Column(db.Integer, nullable=True)
     iwell_created_at = db.Column(
         db.DateTime(timezone=True), default=func.now(), nullable=False
     )

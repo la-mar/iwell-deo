@@ -66,11 +66,6 @@ class Requestor(object):
         return self.endpoint.model
 
     @property
-    def mode(self):
-        """ Mode of integration for the underlying endpoint """
-        return self.endpoint.mode
-
-    @property
     def session(self):
         if self._session is None:
             self.session = requests.Session()
@@ -171,18 +166,21 @@ class Requestor(object):
 class IWellRequestor(Requestor):
     custom_header_key = config.API_HEADER_KEY
     custom_header_prefix = config.API_HEADER_PREFIX
+    sync_interval = config.API_SYNC_INTERVAL
 
     def __init__(
         self,
         base_url: str,
         endpoint: dict,
-        mode: str = "default",
+        mode: str = "sync",
         since: datetime = None,
         start: datetime = None,
         end: datetime = None,
         **kwargs,
     ):
         super().__init__(base_url, endpoint, **kwargs)
+        self.mode = mode
+        self.configure_mode()
         self.add_auth()
         if since:
             self.add_since(since)
@@ -191,6 +189,18 @@ class IWellRequestor(Requestor):
         if end:
             self.add_end(end)
         self.headers.update({self.custom_header_key: self.custom_header_prefix})
+
+    def configure_mode(self):
+
+        if self.mode == "delta":
+            # handled by iwell default params (queries last 30 days)
+            pass
+        elif self.mode == "full":
+            self.add_start(datetime(year=1970, month=1, day=1))
+        elif self.mode == "sync":
+            self.add_start(datetime.now() - timedelta(hours=self.sync_interval))
+        else:
+            pass
 
     def add_since(self, since: datetime, **kwargs) -> None:
         ts = int(since.timestamp())
@@ -211,7 +221,7 @@ class IWellRequestor(Requestor):
     def get_dependency_ids(
         self, since: datetime = None, updated_column_name: str = "updated_at"
     ) -> list:
-
+        # TODO: function needs to be reworked and parameter agnostic
         ids: list = []
         grouped: dict = {}
 
@@ -238,7 +248,7 @@ class IWellRequestor(Requestor):
 
             df = pd.read_sql(query.statement, query.session.bind)
             records = df.to_dict(orient="records")
-            ids += records  #! this is likely wrong
+            ids += records
         return ids
 
     @property
@@ -305,16 +315,21 @@ if __name__ == "__main__":
     dt = datetime(year=1970, month=1, day=1)
     ts = int(dt.timestamp())
 
-    endpoint = endpoints["tank_readings"]
+    endpoint = endpoints["run_tickets"]
     r = IWellRequestor(url, endpoint, since=dt)
     c = IWellCollector(endpoint)
 
+    # response = next(r.sync_model())
+    # response = response.get()
     responses = []
     for req in r.sync_model():
         responses.append(req.get())
 
+    response = responses[0]
+    self = c
     # responses[0].json()
-    [len(x.json()["data"]) for x in responses]
+    [len(x.text) for x in responses]
+    # [len(x.json()["data"]) for x in responses]
     [x.ok for x in responses]
 
     for resp in responses:

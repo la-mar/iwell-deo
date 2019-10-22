@@ -9,6 +9,11 @@ init-db:
 migrate:
 	# poetry run iwell db stamp head
 	poetry run iwell db migrate
+
+revision:
+	poetry run iwell db revision
+
+upgrade:
 	poetry run iwell db upgrade
 
 celery-worker:

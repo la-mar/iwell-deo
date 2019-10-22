@@ -83,7 +83,14 @@ class IWellCollector(Collector):
             df[key] = int(value)
 
         if not df.empty:
-            return self.model.bulk_merge(df)
+            try:
+                return self.model.bulk_merge(df)
+            except KeyError as ke:
+                # TODO: Special message if missing key is a primary key in the model
+                logger.error(
+                    f"Expected field not found.  Does it have the correct alias? -- {ke} -- fields in passed dataframe:  {df.columns.tolist()}"
+                )
+
         else:
             logger.info(f"{self.endpoint}: empty dataframe")
 

@@ -117,7 +117,7 @@ def setup_periodic_tasks(sender, **kwargs):
     for task in tasks:
         sender.add_periodic_task(
             task.schedule,
-            sync_endpoint.s(task.model_name, task.mode),
+            sync_endpoint.s(task.model_name, mode=task.mode),
             name=task.qualified_name,
         )
 
