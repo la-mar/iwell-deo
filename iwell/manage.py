@@ -124,6 +124,7 @@ def ipython_embed():
 )
 def sync_endpoint(endpoint, since, from_, to, verbose):
     "Run a one-off task to synchronize an endpoint"
+    print(conf)
     update_logger(verbose, formatter="layman")
     # app.app_context().push()
     collector.tasks._sync_endpoint(endpoint, since=since, start=from_, end=to)
@@ -136,7 +137,7 @@ def endpoints():
         click.secho(tpl.format(name=f"{name}:", value=str(ep)))
 
 
-@run_cli.command()
+@run_cli.command(context_settings=dict(ignore_unknown_options=True))
 @click.argument("celery_args", nargs=-1, type=click.UNPROCESSED)
 def worker(celery_args):
     # from celery_queue.worker import celery
@@ -147,7 +148,7 @@ def worker(celery_args):
     subprocess.call(cmd)
 
 
-@run_cli.command()
+@run_cli.command(context_settings=dict(ignore_unknown_options=True))
 @click.argument("celery_args", nargs=-1, type=click.UNPROCESSED)
 def cron(celery_args):
     # from celery_queue.worker import celery
@@ -156,7 +157,7 @@ def cron(celery_args):
     subprocess.call(cmd)
 
 
-@run_cli.command()
+@run_cli.command(context_settings=dict(ignore_unknown_options=True))
 @click.argument("celery_args", nargs=-1, type=click.UNPROCESSED)
 def monitor(celery_args):
     # from celery_queue.worker import celery
