@@ -100,6 +100,7 @@ class IWellCollector(Collector):
             logger.info(f"{self.endpoint}: empty dataframe")
 
         # TODO: On IntegrityError, queue a task to sync the model containing the foreign key
+        return {}
 
 
 class CollectionLogger(object):
@@ -126,7 +127,7 @@ class CollectionLogger(object):
 if __name__ == "__main__":
     from iwell import create_app, db
     from api.models import *
-    from collector.requestor import Requestor
+    from collector.requestor import Requestor, IWellRequestor
     from collector.endpoint import load_from_config
     import requests
 
@@ -140,7 +141,7 @@ if __name__ == "__main__":
     c = IWellCollector(endpoint)
     c.model
 
-    requestor = Requestor(config.API_BASE_URL, endpoint, functions={})
+    requestor = IWellRequestor(config.API_BASE_URL, endpoint, functions={})
 
     r2 = requests.get(
         requestor.url, headers={"Authorization": requestor.get_token()}, params={}
