@@ -1,5 +1,7 @@
 default_schedule: &default_schedule
-  seconds: 15
+  # seconds: 15
+  cron:
+    minute: "*/30"
 
 default_aliases: &default_aliases
   created_at: iwell_created_at

@@ -315,11 +315,11 @@ if __name__ == "__main__":
     dt = datetime(year=1970, month=1, day=1)
     ts = int(dt.timestamp())
 
-    endpoint = endpoints["run_tickets"]
+    endpoint = endpoints["meters"]
     r = IWellRequestor(url, endpoint, since=dt)
     c = IWellCollector(endpoint)
 
-    # response = next(r.sync_model())
+    # req = next(r.sync_model())
     # response = response.get()
     responses = []
     for req in r.sync_model():
@@ -328,8 +328,9 @@ if __name__ == "__main__":
     response = responses[0]
     self = c
     # responses[0].json()
+    [x.status_code for x in responses]
     [len(x.text) for x in responses]
-    # [len(x.json()["data"]) for x in responses]
+    [len(x.json()["data"]) for x in responses]
     [x.ok for x in responses]
 
     for resp in responses:
@@ -417,7 +418,7 @@ class iwell_api:
         return "?since={}".format(int(ts))
 
     def add_start(self, start: str):
-        """Example 'https://api.info/v1/wells/17588/production?start=2015-01-01'
+        """Example 'https://api.example.com/v1/path/to/resource?start=2015-01-01'
 
         Arguments:
             start {str} -- [description]

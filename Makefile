@@ -27,3 +27,6 @@ celery-flower:
 
 app-start:
 	poetry run iwell ipython
+
+build:
+	docker build . -t iwell-deo

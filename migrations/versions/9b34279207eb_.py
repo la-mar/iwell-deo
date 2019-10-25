@@ -17,8 +17,10 @@ depends_on = None
 
 
 def upgrade():
-    op.execute("""ALTER ROLE grafana SET search_path = public;""")
+    pass
+    # op.execute("""ALTER ROLE grafana SET search_path = public;""")
 
 
 def downgrade():
-    op.execute("""ALTER ROLE grafana SET search_path = '';""")
+    pass
+    # op.execute("""ALTER ROLE grafana SET search_path = '';""")

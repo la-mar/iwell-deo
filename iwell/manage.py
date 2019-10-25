@@ -3,26 +3,33 @@ import os
 import shutil
 import sys
 from collections import defaultdict
+import subprocess
 
 import click
-from flask.cli import FlaskGroup
+from flask.cli import FlaskGroup, AppGroup
 
 from api.models import *
 import collector.tasks
 from iwell import create_app, db
 import loggers
+from config import get_active_config
+from collector.endpoint import load_from_config
 
 loggers.standard_config()
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
-CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
+CONTEXT_SETTINGS = dict(
+    help_option_names=["-h", "--help"], ignore_unknown_options=False
+)
 STATUS_COLOR_MAP = defaultdict(
     lambda: "white",
     {"success": "green", "error": "red", "timeout": "yellow", "failed": "red"},
 )
 
+conf = get_active_config()
 app = create_app()
-cli = FlaskGroup(create_app=create_app)
+cli = FlaskGroup(create_app=create_app, context_settings=CONTEXT_SETTINGS)
+run_cli = AppGroup("run")
 
 
 def update_logger(level: int, formatter: str = None):
@@ -87,12 +94,6 @@ def ipython_embed():
 
 
 @cli.command()
-def run():
-    # app.run()
-    pass
-
-
-@cli.command()
 @click.argument("endpoint")
 @click.option(
     "--since",
@@ -130,7 +131,38 @@ def sync_endpoint(endpoint, since, from_, to, verbose):
 
 @cli.command()
 def endpoints():
-    print("iwell cli")
+    tpl = "{name:>25} {value:<50}\n"
+    for name, ep in load_from_config(conf).items():
+        click.secho(tpl.format(name=f"{name}:", value=str(ep)))
+
+
+@run_cli.command()
+@click.argument("celery_args", nargs=-1, type=click.UNPROCESSED)
+def worker(celery_args):
+    # from celery_queue.worker import celery
+
+    cmd = ["celery", "-E", "-A", "celery_queue.worker:celery", "worker"] + list(
+        celery_args
+    )
+    subprocess.call(cmd)
+
+
+@run_cli.command()
+@click.argument("celery_args", nargs=-1, type=click.UNPROCESSED)
+def cron(celery_args):
+    # from celery_queue.worker import celery
+
+    cmd = ["celery", "-A", "celery_queue.worker:celery", "beat"] + list(celery_args)
+    subprocess.call(cmd)
+
+
+@run_cli.command()
+@click.argument("celery_args", nargs=-1, type=click.UNPROCESSED)
+def monitor(celery_args):
+    # from celery_queue.worker import celery
+
+    cmd = ["celery", "-A", "celery_queue.worker:celery", "flower"] + list(celery_args)
+    subprocess.call(cmd)
 
 
 def main(argv=sys.argv):
@@ -180,6 +212,7 @@ def recreate_db():
 #         return 0
 #     sys.exit(result)
 
+cli.add_command(run_cli)
 
 if __name__ == "__main__":
     cli()

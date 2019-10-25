@@ -113,9 +113,20 @@ def _sync_endpoint(endpoint_name: str, celery: bool = False, **kwargs):
         logger.debug(f"sending request to {req}")
         try:
             if celery:
-                collect_request.apply_async((req, endpoint))
+                result = collect_request.apply_async((req, endpoint))
             else:
-                _collect_request(req, endpoint)
+                result = _collect_request(req, endpoint)
+
+            if len(result.keys()) > 0:
+                result.update(
+                    {
+                        "integrated_at": datetime.now(),
+                        "model_name": f"{endpoint.model.__module__}.{endpoint.model.__tablename__}",
+                    }
+                )
+                IntegrationLog.s.add(IntegrationLog(**result))  # type: ignore
+                IntegrationLog.persist()  # type: ignore
+
         except Exception as e:
             logger.warning(f"Unable to collect request: {req}")
             errors.append(f"{req}: {e}")
@@ -123,7 +134,7 @@ def _sync_endpoint(endpoint_name: str, celery: bool = False, **kwargs):
     if len(errors) > 0:
         err = "\n".join(errors)
         logger.error(
-            f"Captured {len(errors)} when syncing endpoint: " + "\n" + f"{err}"
+            f"Captured {len(errors)} errors when syncing endpoint: " + "\n" + f"{err}"
         )
 
 

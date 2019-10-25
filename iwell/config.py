@@ -1,6 +1,7 @@
 import logging
 import os
 import socket
+import shutil
 
 from dotenv import load_dotenv
 import pandas as pd
@@ -18,7 +19,8 @@ pd.set_option("precision", 2)
 _pg_aliases = ["postgres", "postgresql", "psychopg2", "psychopg2-binary"]
 _mssql_aliases = ["mssql", "sql server"]
 
-APP_SETTINGS = os.getenv("APP_SETTINGS", "")
+APP_SETTINGS = os.getenv("APP_SETTINGS", "iwell.config.DevelopmentConfig")
+FLASK_APP = os.getenv("FLASK_APP", "iwell.manage.py")
 
 
 def make_config_path(path: str, filename: str) -> str:
@@ -85,6 +87,7 @@ class BaseConfig:
 
     load_dotenv(".env")
 
+    FLASK_ENV = os.getenv("FLASK_ENV", "development")
     DEFAULT_COLLECTION_INTERVAL = {"hours": 1}
     ENV_NAME = os.getenv("ENV_NAME", socket.gethostname())
 
@@ -179,6 +182,22 @@ class BaseConfig:
     def functions(self):
         return self.COLLECTOR_CONFIG.functions
 
+    def __repr__(self):
+        """ Print noteworthy configuration items """
+        hr = "-" * shutil.get_terminal_size().columns + "\n"
+        tpl = "{name:>25} {value:<50}\n"
+        string = ""
+        string += tpl.format(name="app config:", value=APP_SETTINGS)
+        string += tpl.format(name="flask app:", value=FLASK_APP)
+        string += tpl.format(name="flask env:", value=self.FLASK_ENV)
+        string += tpl.format(
+            name="backend:", value=make_url(self.DATABASE_URL_PARAMS).__repr__()
+        )
+        string += tpl.format(name="broker:", value=self.BROKER_URL)
+        string += tpl.format(name="result broker:", value=self.CELERY_RESULT_BACKEND)
+        string += tpl.format(name="collector:", value=self.API_BASE_URL)
+        return hr + string + hr
+
 
 class DevelopmentConfig(BaseConfig):
     """Development configuration"""
@@ -211,6 +230,10 @@ class TestingConfig(BaseConfig):
     API_PASSWORD = "password"
     API_TOKEN_PATH = "/auth"
     API_DEFAULT_PAGESIZE = 100
+
+
+class CIConfig(BaseConfig):
+    pass
 
 
 class ProductionConfig(BaseConfig):

@@ -73,7 +73,12 @@ class IWellCollector(Collector):
         }
         return keys
 
-    def collect(self, response: requests.Response) -> None:
+    def collect(self, response: requests.Response) -> Dict[str, str]:
+        if not response.ok:
+            logger.warning(
+                f"Invalid status code in response: ({response.status_code}: {response.reason}){response.url}"
+            )
+            return {}
         data = response.json()["data"]
         logger.info(f"{response.url}: downloaded {len(data)} records")
         df = self.transform(data)

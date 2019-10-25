@@ -1,9 +1,6 @@
 FROM python:3.7 as base
 
-ARG FLASK_ENV
-
-ENV FLASK_ENV=${FLASK_ENV} \
-    PYTHONFAULTHANDLER=1 \
+ENV PYTHONFAULTHANDLER=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONHASHSEED=random \
     PIP_NO_CACHE_DIR=off \
@@ -14,21 +11,23 @@ ENV FLASK_ENV=${FLASK_ENV} \
 ENV PYTHONPATH=/app/iwell
 
 
-# System deps:
+# system deps
 RUN pip install "poetry==$POETRY_VERSION"
 
-# Copy only requirements to cache them in docker layer
+# copy only requirements to cache them in docker layer
 WORKDIR /app
 COPY poetry.lock pyproject.toml /app/
 
-# Project initialization:
+# project initialization
 RUN poetry config settings.virtualenvs.create false \
-    && poetry install $(test "$FLASK_ENV" == production && echo "--no-dev") --no-interaction --no-ansi
+    && poetry install --no-dev --no-interaction --no-ansi
 
 
 RUN mkdir /app/iwell && touch /app/iwell/__init__.py
-RUN poetry install --no-interaction
 
-# Copy project files
+# make project source symlinks
+RUN poetry install --no-dev --no-interaction --no-ansi
+
+# copy project files
 COPY . /app
-
+# CMD ["python", "iwell"]

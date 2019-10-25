@@ -450,11 +450,11 @@ class RunTicket(DataFrameMixin, db.Model):
     tank_id = db.Column(db.Integer, nullable=False)
     reading_id = db.Column(db.Integer, nullable=False)
     ticket_date = db.Column(db.Date(), nullable=False)
-    run_ticket_number = db.Column(db.String(), nullable=False, default="")
+    run_ticket_number = db.Column(db.String(), nullable=True, default="")
     total = db.Column(db.Float, nullable=True)
-    product_type = db.Column(db.String(), nullable=False, default="")
-    picture_url = db.Column(db.String(), nullable=False, default="")
-    comments = db.Column(db.String(), nullable=False, default="")
+    product_type = db.Column(db.String(), nullable=True, default="")
+    picture_url = db.Column(db.String(), nullable=True, default="")
+    comments = db.Column(db.String(), nullable=True, default="")
     updated_by = db.Column(db.Integer, nullable=True)
     iwell_created_at = db.Column(
         db.DateTime(timezone=True), default=func.now(), nullable=False

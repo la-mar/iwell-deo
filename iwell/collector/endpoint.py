@@ -110,7 +110,7 @@ def load_from_config(app_config: object) -> Dict[str, Endpoint]:
     for ep in endpoints.items():
         try:
             loaded[ep[0]] = Endpoint(name=ep[0], **ep[1])
-            logger.debug(f"Successfully created endpoint ({ep[0]})")
+            logger.debug(f"Created endpoint ({ep[0]})")
         except Exception as e:
             logger.error(f"Failed to create endpoint ({ep[0]}) -> {e}")
 

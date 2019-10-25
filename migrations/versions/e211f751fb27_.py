@@ -17,26 +17,28 @@ depends_on = None
 
 
 def upgrade():
-    op.execute(
-        """
-        GRANT CONNECT ON DATABASE iwell TO grafana;
-        GRANT USAGE ON SCHEMA public TO grafana;
-        GRANT SELECT ON ALL TABLES IN SCHEMA public TO grafana;
-        ALTER DEFAULT PRIVILEGES
-        IN SCHEMA public
-        GRANT SELECT ON TABLES TO grafana;
-    """
-    )
+    pass
+    # op.execute(
+    #     """
+    #     GRANT CONNECT ON DATABASE iwell TO grafana;
+    #     GRANT USAGE ON SCHEMA public TO grafana;
+    #     GRANT SELECT ON ALL TABLES IN SCHEMA public TO grafana;
+    #     ALTER DEFAULT PRIVILEGES
+    #     IN SCHEMA public
+    #     GRANT SELECT ON TABLES TO grafana;
+    # """
+    # )
 
 
 def downgrade():
-    op.execute(
-        """
-        REVOKE CONNECT ON DATABASE iwell from grafana;
-        REVOKE USAGE ON SCHEMA public from grafana;
-        REVOKE SELECT ON ALL TABLES IN SCHEMA public from grafana;
-        ALTER DEFAULT PRIVILEGES
-        IN SCHEMA public
-        REVOKE SELECT ON TABLES from grafana;
-    """
-    )
+    pass
+    # op.execute(
+    #     """
+    #     REVOKE CONNECT ON DATABASE iwell from grafana;
+    #     REVOKE USAGE ON SCHEMA public from grafana;
+    #     REVOKE SELECT ON ALL TABLES IN SCHEMA public from grafana;
+    #     ALTER DEFAULT PRIVILEGES
+    #     IN SCHEMA public
+    #     REVOKE SELECT ON TABLES from grafana;
+    # """
+    # )
