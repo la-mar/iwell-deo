@@ -51,8 +51,8 @@ class Transformer(object):
             )
         return df
 
-    def column_map(self) -> Dict[str, str]:
-        return {k: k for k in self.df.columns.tolist()}
+    def column_map(self, df: pd.DataFrame) -> Dict[str, str]:
+        return {k: k for k in df.columns.tolist()}
 
     def apply_aliases(self, df: pd.DataFrame) -> pd.DataFrame:
         return df.rename(columns=self.aliases)
@@ -63,7 +63,7 @@ class Transformer(object):
                 logger.debug(f"Dropping {len(self.exclude)} columns: {self.exclude}")
             df = df.drop(columns=self.exclude)
         except Exception as e:
-            msg = f"Failed attempting to drop columns"
+            msg = f"Failed attempting to drop columns -- {e}"
             self.errors.append(msg)
             logger.debug(msg)
         return df
@@ -107,7 +107,7 @@ class Transformer(object):
                 ]
             except KeyError as ke:
                 msg = f"DataFrame has no date column named '{ke.args[0]}' -- {ke}"
-                self.errors.append(msg)
+                # self.errors.append(msg)
                 logger.debug(msg)
 
         return df
