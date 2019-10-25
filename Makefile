@@ -1,4 +1,6 @@
-
+ENV:=production
+COMMIT_HASH    := $$(git log -1 --pretty=%h)
+DATE := $$(date +"%Y-%m-%d")
 
 redis-start:
 	docker run -d --name redis -p 6379:6379 redis
@@ -29,4 +31,25 @@ app-start:
 	poetry run iwell ipython
 
 build:
-	docker build . -t iwell-deo
+	@echo "Building docker image: ${IMAGE_NAME}"
+	docker build . -t ${IMAGE_NAME}
+	docker tag ${IMAGE_NAME}:latest ${IMAGE_NAME}:${ENV}
+	docker tag ${IMAGE_NAME}:latest ${IMAGE_NAME}:${COMMIT_HASH}
+	docker tag ${IMAGE_NAME}:latest ${IMAGE_NAME}:${DATE}
+
+push:
+	${eval LATEST=${IMAGE_NAME}:latest}
+	${eval GCR_LATEST=${GCR}/${LATEST}}
+	${eval GCR_ENV=${GCR}/${IMAGE_NAME}:$${ENV}}
+	${eval GCR_HASH=${GCR}/${IMAGE_NAME}:$${COMMIT_HASH}}
+	${eval GCR_DATE=${GCR}/${IMAGE_NAME}:$${DATE}}
+
+	docker tag ${LATEST} ${GCR_LATEST}
+	docker tag ${LATEST} ${GCR_ENV}
+	docker tag ${LATEST} ${GCR_HASH}
+	docker tag ${LATEST} ${GCR_DATE}
+
+	docker push ${GCR_LATEST}
+	docker push ${GCR_ENV}
+	docker push ${GCR_HASH}
+	docker push ${GCR_DATE}
