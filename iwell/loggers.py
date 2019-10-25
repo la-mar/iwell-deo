@@ -7,9 +7,6 @@ from collections import defaultdict
 
 import logutils.colorize
 
-dir(logutils.colorize)
-dir(logutils.colorize.ColorizingStreamHandler)
-
 from config import get_active_config
 
 config = get_active_config()
@@ -130,11 +127,16 @@ def load_sentry():
         )
 
     try:
-        if config.sentry_params.get("dsn") is not None:
-            setup(**config.sentry_params)
-
+        parms = config.sentry_params
+        if parms.get("enabled"):
+            logger.info(f"Sentry Enabled")
+            if parms.get("dsn") is not None and parms.get("dsn") != "":
+                setup(**parms)
+            else:
+                logger.warning(f"Sentry disabled: no DSN in sentry config")
         else:
-            logger.warning(f"Sentry disabled: no DSN in sentry config")
+            logger.info(f"Sentry Disabled")
+
     except Exception as e:
         logger.error(f"Failed to load Sentry configuration from config: {e}")
 
