@@ -25,4 +25,7 @@
     "python.testing.pytestArgs": [
         "test"
     ],
+    "terminal.integrated.env.osx": {
+        "PYTHONPATH": "/Users/friedrichb/repo/iwell-deo/iwell",
+    }
 }
