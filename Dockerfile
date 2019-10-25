@@ -31,3 +31,8 @@ RUN poetry install --no-dev --no-interaction --no-ansi
 # copy project files
 COPY . /app
 # CMD ["python", "iwell"]
+
+# create unprivileged user
+# RUN adduser --disabled-password --gecos '' celeryuser
+RUN groupadd -r celeryuser && useradd -r -m -g celeryuser celeryuser
+RUN find /app ! -user celeryuser -exec chown celeryuser {} \;
