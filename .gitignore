@@ -111,3 +111,5 @@ celerybeat-schedule.db
 # others
 .old/
 .vscode/settings.json
+.env.production
+.env*

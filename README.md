@@ -1,5 +1,36 @@
 # Collector-iWell
 
+### Environment Variables
+
+Example development configuration. Environment variables can either be defined at the system level or in a filed named '.env' in the project's root directory.
+
+```python
+
+PYTHONPATH=~/repo/iwell-deo/iwell
+IWELL_CLIENT_ID=KTDMpqhGyBMhnRDB
+IWELL_CLIENT_SECRET=gYFRiXRtMN0fDYTDPUDYOk1RAbPz44Bu
+IWELL_URL=https://api.iwell.info/v1
+IWELL_USERNAME=observer@driftwoodenergy.com
+IWELL_PASSWORD="%3U8NYX2eOP^@11q"
+IWELL_TOKEN_PATH=/oauth2/access-token
+
+DATABASE_DRIVER="postgres"
+DATABASE_USERNAME="iwell"
+DATABASE_PASSWORD=""
+DATABASE_HOST="localhost"
+DATABASE_NAME="iwell"
+DATABASE_SCHEMA="public"
+
+SENTRY_DSN=""
+SENTRY_ENABLED=false
+LOG_LEVEL=10
+
+FLASK_APP=iwell.manage.py
+FLASK_ENV=development
+APP_SETTINGS=iwell.config.DevelopmentConfig
+SECRET_KEY=my_precious
+```
+
 ### Migrations
 
 When setting up a new migration environment with alembic, edit version_table_schema
