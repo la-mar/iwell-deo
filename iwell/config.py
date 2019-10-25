@@ -16,7 +16,7 @@ pd.set_option("display.float_format", lambda x: "%.2f" % x)
 pd.set_option("large_repr", "truncate")
 pd.set_option("precision", 2)
 
-_pg_aliases = ["postgres", "postgresql", "psychopg2", "psychopg2-binary"]
+_pg_aliases = ["postgres", "postgresql", "psycopg2", "psycopg2-binary"]
 _mssql_aliases = ["mssql", "sql server"]
 
 APP_SETTINGS = os.getenv("APP_SETTINGS", "iwell.config.DevelopmentConfig")
@@ -130,8 +130,10 @@ class BaseConfig:
 
     """ Celery """
     # CELERY_TIMEZONE = "US/Central"
-    BROKER_URL = "redis://localhost:6379/0"
-    CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+    BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+    CELERY_RESULT_BACKEND = os.getenv(
+        "CELERY_RESULT_BACKEND", "redis://localhost:6379/0"
+    )
     CELERY_SEND_TASK_SENT_EVENT = True
     CELERY_TASK_LIST = ["collector.tasks"]
     CELERYD_TASK_SOFT_TIME_LIMIT = 3600
