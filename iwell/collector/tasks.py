@@ -110,7 +110,7 @@ def _sync_endpoint(endpoint_name: str, celery: bool = False, **kwargs):
     errors: List[str] = []
 
     for req in requestor.sync_model():
-        logger.debug(f"sending request to {req}")
+        logger.debug(f"Sending request to {req}")
         try:
             if celery:
                 result = collect_request.apply_async((req, endpoint))

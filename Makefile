@@ -1,6 +1,7 @@
 ENV:=production
 COMMIT_HASH    := $$(git log -1 --pretty=%h)
 DATE := $$(date +"%Y-%m-%d")
+CTX:=.
 
 redis-start:
 	docker run -d --name redis -p 6379:6379 redis
@@ -30,9 +31,12 @@ celery-flower:
 app-start:
 	poetry run iwell ipython
 
+kubectl-proxy:
+	kubectl proxy --port=8080
+
 build:
 	@echo "Building docker image: ${IMAGE_NAME}"
-	docker build . -t ${IMAGE_NAME}
+	docker build ${CTX} -t ${IMAGE_NAME}
 	docker tag ${IMAGE_NAME}:latest ${IMAGE_NAME}:${ENV}
 	docker tag ${IMAGE_NAME}:latest ${IMAGE_NAME}:${COMMIT_HASH}
 	docker tag ${IMAGE_NAME}:latest ${IMAGE_NAME}:${DATE}

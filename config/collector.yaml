@@ -1,7 +1,7 @@
 default_schedule: &default_schedule
   # seconds: 15
   cron:
-    minute: "*/30"
+    minute: "*/1"
 
 default_aliases: &default_aliases
   created_at: iwell_created_at
@@ -21,12 +21,6 @@ endpoints:
     tasks:
       sync:
         <<: *default_schedule
-        # cron:
-        #   minute: "*"
-        #   hour:
-        #   day_of_week:
-        #   day_of_month:
-        #   month_of_year:
   wells:
     model: api.models.Well
     path: /wells

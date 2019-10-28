@@ -1,12 +1,28 @@
-# Collector-iWell
+# iwell-deo
+
+## Getting Started
+
+1. Set the pythonpath for this project in .vscode/settings.json to the location of the project on your machine. This is required for import resolution and linting.
+
+   ```json
+   "terminal.integrated.env.osx": {
+       "PYTHONPATH": "/Users/friedrichb/repo/iwell-deo/iwell",
+   }
+   ```
+
+2. Install poetry package manager: `pip3 install poetry`
+3. Install the dependencies from pyproject.toml: `poetry install`
+4. Define the necessary environment variables (example below)
+5. Run the app: `docker-compose up`
 
 ### Environment Variables
 
 Example development configuration. Environment variables can either be defined at the system level or in a filed named '.env' in the project's root directory.
 
+.env
+
 ```python
 
-PYTHONPATH=~/repo/iwell-deo/iwell
 IWELL_CLIENT_ID=KTDMpqhGyBMhnRDB
 IWELL_CLIENT_SECRET=gYFRiXRtMN0fDYTDPUDYOk1RAbPz44Bu
 IWELL_URL=https://api.iwell.info/v1
@@ -32,6 +48,8 @@ SECRET_KEY=my_precious
 ```
 
 ### Migrations
+
+NOTE: This configuration is no longer used, as the app now uses the default public schema in its own database. What is below is left for future reference.
 
 When setting up a new migration environment with alembic, edit version_table_schema
 in env.py before running the first migration. This tells alembic to store the

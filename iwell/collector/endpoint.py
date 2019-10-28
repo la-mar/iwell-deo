@@ -80,7 +80,7 @@ class Endpoint(object):
         try:
             # try to import dotted model name. ex: api.models.MyModel
             model = locate(model_name)
-            logger.debug(f"Model '{model_name}' found in project")
+            logger.debug(f"Found model: {model_name}")
         except ModuleNotFoundError:
             logger.debug(
                 f"Failed to import module '{model_name}' from project directory"
