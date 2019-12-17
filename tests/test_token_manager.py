@@ -15,7 +15,13 @@ class TestTokenManager:
         requests_mock.register_uri("GET", ANY, text="Bearer ersvbteyh536425q3r")
         assert bool(re.match(r"Bearer\s.*", token_manager_legacy.get_token()))
 
-    def test_legacy_client_get_token_dict(self, token_manager_legacy):
+    def test_legacy_client_get_token_dict(self, token_manager_legacy, requests_mock):
+        requests_mock.register_uri(
+            "GET",
+            ANY,
+            json='{"access_token": "", "expires_at": 1577149458, "expires_in": 604800, "token_type": "Bearer"}',
+        )
+
         expected = ["access_token", "expires_at", "expires_in", "token_type"]
         token = list(token_manager_legacy.get_token_dict().keys())
         assert expected == token
