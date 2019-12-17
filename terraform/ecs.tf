@@ -88,7 +88,7 @@ resource "aws_iam_role_policy_attachment" "attach_ecs_service_policy_to_task_rol
 
 
 # Allow task role to talk to SQS
-data "aws_iam_policy_document" "allow_task_access_to_sqs" {
+data "aws_iam_policy_document" "task_policy" {
   statement {
     actions = [
       "sqs:*",
@@ -125,15 +125,15 @@ data "aws_iam_policy_document" "allow_task_access_to_sqs" {
 
 }
 
-resource "aws_iam_policy" "allow_task_access_to_sqs" {
-  name        = "${var.service_name}-task-access-sqs"
+resource "aws_iam_policy" "task_policy" {
+  name        = "${var.service_name}-task-policy"
   path        = "/"
   description = "Allow ${var.service_name} tasks running in ECS to interface with SQS queues"
 
-  policy = data.aws_iam_policy_document.allow_task_access_to_sqs.json
+  policy = data.aws_iam_policy_document.task_policy.json
 }
 
 resource "aws_iam_role_policy_attachment" "attach_sqs_policy_to_task_role" {
   role       = aws_iam_role.ecs_task_role.name
-  policy_arn = aws_iam_policy.allow_task_access_to_sqs.arn
+  policy_arn = aws_iam_policy.task_policy.arn
 }
