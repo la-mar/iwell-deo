@@ -53,6 +53,17 @@ data "terraform_remote_state" "ecs_cluster" {
 }
 
 
+data "terraform_remote_state" "kms" {
+  backend = "remote"
+
+  config = {
+    organization = "deo"
+    workspaces = {
+      name = "kms-${replace(var.environment, "stage", "dev")}" # remaps stage to use dev network
+    }
+  }
+}
+
 # Get current account id that terraform is running under
 data "aws_caller_identity" "current" {
 }

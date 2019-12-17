@@ -79,17 +79,6 @@ data "aws_iam_policy_document" "task_policy" {
     }
   }
 
-  statement {
-    sid = "1" # task_access_secrets
-    actions = [
-      "ssm:GetParameter*",
-    ]
-    resources = [
-      "arn:aws:ssm:*:*:parameter/${var.service_name}/*",
-      "arn:aws:ssm:*:*:parameter/datadog/*"
-    ]
-  }
-
 }
 
 resource "aws_iam_role_policy_attachment" "attach_ecs_service_policy_to_task_role" {
@@ -109,6 +98,31 @@ data "aws_iam_policy_document" "allow_task_access_to_sqs" {
       aws_sqs_queue.celery.arn
     ]
   }
+
+  statement {
+    sid = "1" # task_access_secrets
+    actions = [
+      "ssm:GetParameter*",
+    ]
+    resources = [
+      "arn:aws:ssm:*:*:parameter/${var.service_name}/*",
+      "arn:aws:ssm:*:*:parameter/datadog/*"
+    ]
+  }
+
+  statement {
+    sid = "2" # task_access_kms
+    actions = [
+      "kms:ListKeys",
+      "kms:ListAliases",
+      "kms:Describe*",
+      "kms:Decrypt"
+    ]
+    resources = [
+      data.terraform_remote_state.kms.outputs.ssm_key_arn # dont use alias arn
+    ]
+  }
+
 }
 
 resource "aws_iam_policy" "allow_task_access_to_sqs" {
