@@ -60,7 +60,7 @@ def requestor_simple(conf, endpoint_simple, functions):
 
 @pytest.fixture
 def req(conf, requests_mock):
-    requests_mock.register_uri("GET", ANY, text="not_important")
+    requests_mock.register_uri(ANY, ANY, text="not_important")
     tm = TokenManager.from_app_config(conf)
     yield Request(
         "GET",
