@@ -2,14 +2,13 @@ from __future__ import annotations
 from typing import Dict, List, Union, Generator
 import logging
 from datetime import datetime, timedelta, date
-import urllib.parse
 
 from attrdict import AttrDict
 import pandas as pd
 import requests
 from oauthlib.oauth2 import LegacyApplicationClient, TokenExpiredError
 from requests_oauthlib import OAuth2Session
-
+import util
 
 from config import get_active_config
 from collector.token_manager import TokenManager
@@ -54,7 +53,7 @@ class Requestor(object):
 
     @property
     def url(self):
-        return self.urljoin(self.base_url, self.path)
+        return util.urljoin(self.base_url, self.path)
 
     @property
     def path(self):
@@ -138,14 +137,6 @@ class Requestor(object):
             return self.url.format(**kwargs)
         except KeyError as ke:
             raise KeyError(f"Unable to format path ({self.path}) without {ke}")
-
-    @staticmethod
-    def urljoin(base: str = "", path: str = "") -> str:
-        if not base.endswith("/"):
-            base = base + "/"
-        if path.startswith("/"):
-            path = path[1:]
-        return urllib.parse.urljoin(base, path)
 
     def enqueue(self, headers: dict = None, params: dict = None, **kwargs) -> None:
         url = self.format(**kwargs)

@@ -35,19 +35,3 @@ class TestTokenManager:
         expected = ["access_token", "expires_at", "expires_in", "token_type"]
         token = list(token_manager_legacy.get_token_dict().keys())
         assert expected == token
-
-    def test_token_urljoin_vanilla(self, conf):
-        url = conf.API_BASE_URL
-        path = "/path/to/endpoint"
-        assert TokenManager.urljoin(url, path) == expected_url
-
-    def test_token_urljoin_double_slash(self, conf):
-        url = f"{conf.API_BASE_URL}/"
-        path = "/path/to/endpoint"
-        assert TokenManager.urljoin(url, path) == expected_url
-
-    def test_token_urljoin_no_slash(self, conf):
-        url = conf.API_BASE_URL
-        path = "path/to/endpoint"
-        assert TokenManager.urljoin(url, path) == expected_url
-

@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 from collector.yammler import Yammler
 from config import BaseConfig
 from collector.util import retry
-
+import util
 
 logger = logging.getLogger(__name__)
 
@@ -37,21 +37,13 @@ class TokenManager:
         **kwargs,
     ):
         self._client_type = client_type
-        self.url = url or self.urljoin(
+        self.url = url or util.urljoin(
             kwargs.get("base_url", ""), kwargs.get("token_path", "")
         )
         self.headers = headers
         self.cache = Yammler(cache or "./config/token.yaml")
         for key, value in kwargs.items():
             setattr(self, key, value)
-
-    @staticmethod
-    def urljoin(base: str = "", path: str = ""):
-        if not base.endswith("/"):
-            base = base + "/"
-        if path.startswith("/"):
-            path = path[1:]
-        return urllib.parse.urljoin(base, path)
 
     @property
     def client_type(self):

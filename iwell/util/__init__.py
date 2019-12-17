@@ -44,6 +44,8 @@ def to_file(xml: str, filename: str):
 
 
 def urljoin(base: str = "", path: str = "") -> str:
+    base = base or ""
+    path = path or ""
     if not base.endswith("/"):
         base = base + "/"
     if path.startswith("/"):
