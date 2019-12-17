@@ -2,7 +2,8 @@ import os
 import json
 
 import pytest
-import requests_mock
+
+from requests_mock import ANY
 
 from collector.endpoint import Endpoint
 from collector.request import Request
@@ -15,12 +16,6 @@ from config import TestingConfig
 # conf = TestingConfig()
 # endpoints = collector.endpoint.load_from_config(conf)
 # functions = config.functions
-
-
-@pytest.fixture
-def m():
-    with requests_mock.Mocker() as m:
-        yield m
 
 
 @pytest.fixture
@@ -64,7 +59,8 @@ def requestor_simple(conf, endpoint_simple, functions):
 
 
 @pytest.fixture
-def req(conf):
+def req(conf, requests_mock):
+    requests_mock.register_uri("GET", ANY, text="not_important")
     tm = TokenManager.from_app_config(conf)
     yield Request(
         "GET",
