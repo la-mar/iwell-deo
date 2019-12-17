@@ -26,10 +26,8 @@ class TestRequestor:
         assert bool(re.match("Bearer\s.*", requestor.get_token()))
 
     def test_get_function(self, requestor):
-        value = requestor.get_function(
-            "since", int(datetime(year=1970, month=1, day=1).timestamp())
-        )
-        assert value == "since=21600"
+        value = requestor.get_function("since", 300)
+        assert value == "since=300"
 
     def test_get_function_with_values(self, requestor):
         value = requestor.get_function(func_name="since_values", values=[1, 2, 3])
@@ -37,10 +35,7 @@ class TestRequestor:
 
     def test_get_function_not_found(self, requestor):
         with pytest.raises(KeyError):
-            requestor.get_function(
-                "bad_function_name",
-                int(datetime(year=1970, month=1, day=1).timestamp()),
-            )
+            requestor.get_function("bad_function_name", 300)
 
     def test_get_function_no_value(self, requestor):
         with pytest.raises(ValueError):
