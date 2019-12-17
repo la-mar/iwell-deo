@@ -6,6 +6,7 @@ from requests import Session
 
 from collector.request import Request
 from collector.requestor import Requestor
+from requests_mock import ANY
 
 
 class TestRequestor:
@@ -76,7 +77,7 @@ class TestRequestor:
             requestor.enqueue()
 
     def test_get_all(self, requestor_simple, requests_mock):
-        requests_mock.register_uri("GET", requestor_simple.url, text="not_important")
+        requests_mock.register_uri("GET", ANY, text="not_important")
         requestor_simple.enqueue(id=1, id2=2)
         requestor_simple.enqueue(id=1, id2=2)
         requestor_simple.enqueue(id=1, id2=2)
