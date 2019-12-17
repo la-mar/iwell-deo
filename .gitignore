@@ -1,3 +1,15 @@
+.terraform/
+.DS_Store
+env.tfvars
+.vscode/
+.idea/
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+.env*
+*coverage
+
 # custom
 .terraform
 config/token.yaml
@@ -119,3 +131,4 @@ celerybeat-schedule.db
 .env.production
 .env*
 terraform/env.tfvars
+scripts/deploy copy.py

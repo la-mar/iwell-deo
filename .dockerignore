@@ -1,11 +1,24 @@
 .env*
 terraform/
+test/
 .vscode/
+Makefile
+log/
+scripts/
+Dockerfile
+docker-compose.yml
 
 # custom
 .terraform
 config/token.yaml
 .vscode/settings.json
+terraform/
+doc/
+.venv/
+.idea/
+.mypy_cache/
+*.pid
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

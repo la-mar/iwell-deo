@@ -89,8 +89,6 @@ version = pkg_meta.get("version")
 class BaseConfig:
     """Base configuration"""
 
-    load_dotenv(".env")
-
     FLASK_ENV = os.getenv("FLASK_ENV", "development")
     DEFAULT_COLLECTION_INTERVAL = {"hours": 1}
     ENV_NAME = os.getenv("ENV_NAME", socket.gethostname())
@@ -139,15 +137,9 @@ class BaseConfig:
     DEFAULT_EXCLUSIONS = ["updated_at", "inserted_at"]
 
     """ Celery """
-    # CELERY_TIMEZONE = "US/Central"
     # BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
     BROKER_URL = os.getenv("CELERY_BROKER_URL", "sqs://")
-    # CELERY_RESULT_BACKEND = os.getenv(
-    #     "CELERY_RESULT_BACKEND", "redis://localhost:6379/0"
-    # )
-    # CELERY_SEND_TASK_SENT_EVENT = True
     CELERY_TASK_LIST = ["collector.tasks"]
-    # CELERYD_TASK_SOFT_TIME_LIMIT = 3600
     CELERYD_TASK_TIME_LIMIT = os.getenv(
         "CELERYD_TASK_TIME_LIMIT", 60 * 10
     )  # 10 minutes
@@ -159,15 +151,7 @@ class BaseConfig:
     )  # 24MB
     CELERY_ENABLE_REMOTE_CONTROL = False  # required for sqs
     CELERY_SEND_EVENTS = False  # required for sqs
-    # BROKER_TRANSPORT_OPTIONS = {
-    #     "visibility_timeout": 360,
-    #     "region": "us-east-1",
-    #     "queue_name_prefix": "iwell-",
-    # }
     CELERY_DEFAULT_QUEUE = "iwell-celery"  # sqs queue name
-    # CELERYD_HIJACK_ROOT_LOGGER = False
-    # CELERY_RESULT_DBURI = "db+" + SQLALCHEMY_DATABASE_URI
-    # CELERY_RESULT_EXTENDED = True
 
     """ API """
     API_CLIENT_TYPE = os.getenv("IWELL_CLIENT_TYPE", "legacy")
@@ -238,9 +222,6 @@ class BaseConfig:
 class DevelopmentConfig(BaseConfig):
     """Development configuration"""
 
-    # load_dotenv(".env.development")
-
-    # SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
     DEBUG_TB_ENABLED = True
     SECRET_KEY = os.getenv("SECRET_KEY", "test")
     SQLALCHEMY_TRACK_MODIFICATIONS = True
@@ -249,13 +230,10 @@ class DevelopmentConfig(BaseConfig):
 class TestingConfig(BaseConfig):
     """Testing configuration"""
 
-    # load_dotenv(".env.testing")
-
     CONFIG_BASEPATH = "./tests/data"
     COLLECTOR_CONFIG_PATH = make_config_path(CONFIG_BASEPATH, "collector.yaml")
     COLLECTOR_CONFIG = load_config(COLLECTOR_CONFIG_PATH)
     TESTING = True
-    # SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_TEST_URL")
     TOKEN_EXPIRATION_DAYS = 0
     TOKEN_EXPIRATION_SECONDS = 3
 
@@ -275,7 +253,5 @@ class CIConfig(BaseConfig):
 class ProductionConfig(BaseConfig):
     """Production configuration"""
 
-    # load_dotenv(".env.production")
-    # SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
