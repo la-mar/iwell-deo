@@ -17,13 +17,13 @@ cc-run-local:
 	circleci local execute -c process.yml --job build-image -e DOCKER_LOGIN=${DOCKER_LOGIN} -e DOCKER_PASSWORD=${DOCKER_PASSWORD}
 
 run-tests:
-	pytest --cov=ihs tests/ --cov-report xml:./coverage/python/coverage.xml
+	pytest --cov=iwell tests/ --cov-report xml:./coverage/python/coverage.xml
 
 smoke-test:
-	docker run --entrypoint ihs driftwood/ihs:${COMMIT_HASH} test smoke-test
+	docker run --entrypoint iwell driftwood/iwell:${COMMIT_HASH} test smoke-test
 
 coverage:
-	pytest --cov ihs --cov-report html:./coverage/coverage.html --log-level DEBUG
+	pytest --cov iwell --cov-report html:./coverage/coverage.html --log-level DEBUG
 
 view-cov:
 	open -a "Google Chrome" ./coverage/coverage.html/index.html

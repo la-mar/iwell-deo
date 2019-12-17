@@ -73,10 +73,6 @@ TAGS = [
     {"key": "terraform", "value": "true"},
 ]
 
-
-BUILD = False
-PUSH = False
-
 print("\n\n" + "-" * 30)
 print(f"ENV: {ENV}")
 print(f"AWS_ACCOUNT_ID: {AWS_ACCOUNT_ID}")
@@ -109,6 +105,7 @@ def get_task_definition(
                     "memoryReservation": 128,
                     "image": IMAGE_NAME,
                     "essential": True,
+                    "environment": transform_envs(envs),
                 },
             ],
             "executionRoleArn": "ecsTaskExecutionRole",
@@ -126,6 +123,7 @@ def get_task_definition(
                     "memoryReservation": 128,
                     "image": IMAGE_NAME,
                     "essential": True,
+                    "environment": transform_envs(envs),
                 },
             ],
             "executionRoleArn": "ecsTaskExecutionRole",
