@@ -36,8 +36,8 @@ class Request(requests.Request):
         super().__init__(method)
         self.method = method
         self.url = url
-        self.headers = headers
-        self.params = params
+        self.headers = headers or {}
+        self.params = params or {}
         self._session = session
 
     def __repr__(self):
@@ -86,9 +86,9 @@ if __name__ == "__main__":
     config = get_active_config()
     endpoints = config.endpoints
     functions = config.functions
-    endpoint = endpoints.wells
+    endpoint = endpoints.simple
 
-    url = config.API_BASE_URL + endpoints.wells.path
+    url = config.API_BASE_URL + endpoint.path
     requestor = IWellRequestor(
         "req_name", endpoint, since=datetime(year=2019, month=10, day=1)
     )

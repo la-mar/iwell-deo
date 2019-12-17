@@ -1,4 +1,5 @@
 """ Manages access tokens for an api interface """
+from __future__ import annotations
 
 import logging
 import urllib.parse
@@ -8,10 +9,11 @@ from oauthlib.oauth2 import (
     BackendApplicationClient,
     TokenExpiredError,
 )
+
 from requests_oauthlib import OAuth2Session
 from datetime import datetime, timedelta
 from collector.yammler import Yammler
-from config import get_active_config
+from config import BaseConfig
 from collector.util import retry
 
 
@@ -20,6 +22,11 @@ logger = logging.getLogger(__name__)
 
 class TokenManager:
     """Manages the Bearer token for a given service in an automated way."""
+
+    client_id = None
+    client_secret = None
+    username = None
+    password = None
 
     def __init__(
         self,
@@ -39,7 +46,7 @@ class TokenManager:
             setattr(self, key, value)
 
     @staticmethod
-    def urljoin(base: str, path: str):
+    def urljoin(base: str = "", path: str = ""):
         if not base.endswith("/"):
             base = base + "/"
         if path.startswith("/"):
@@ -131,16 +138,16 @@ class TokenManager:
         return f"{token['token_type']} {token['access_token']}"
 
     @classmethod
-    def from_app_config(cls):
-        settings = get_active_config()
-        return TokenManager(**settings.api_params)
+    def from_app_config(cls, conf: BaseConfig) -> TokenManager:
+        return TokenManager(**conf.api_params)
 
 
 if __name__ == "__main__":
 
-    settings = get_active_config()
+    from config import get_active_config
 
-    tm = TokenManager(**settings.api_params)
+    conf = get_active_config()
+    tm = TokenManager(**conf.api_params)
 
     tm.url
     tm.get_token_dict()

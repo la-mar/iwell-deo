@@ -255,3 +255,7 @@ class ProductionConfig(BaseConfig):
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+
+if __name__ == "__main__":
+    t = TestingConfig()
+    t.api_params

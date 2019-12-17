@@ -43,7 +43,7 @@ def to_file(xml: str, filename: str):
         f.writelines(xml)
 
 
-def urljoin(base: str, path: str) -> str:
+def urljoin(base: str = "", path: str = "") -> str:
     if not base.endswith("/"):
         base = base + "/"
     if path.startswith("/"):

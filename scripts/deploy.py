@@ -47,20 +47,13 @@ IMAGE_TAG: str = os.getenv("IMAGE_TAG")  # type: ignore
 IMAGE_NAME: str = f"{os.getenv('IMAGE_NAME')}{':' if IMAGE_TAG else ''}{IMAGE_TAG or ''}"
 
 CLUSTER_NAME = os.getenv("ECS_CLUSTER")  # type: ignore
-TASK_IAM_ROLE = f"arn:aws:iam::{AWS_ACCOUNT_ID}:role/ihs-task-role"
+TASK_IAM_ROLE = f"arn:aws:iam::{AWS_ACCOUNT_ID}:role/{SERVICE_NAME}-task-role"
 
 if not any([ENV, AWS_ACCOUNT_ID, SERVICE_NAME, IMAGE_NAME, CLUSTER_NAME]):
     raise ValueError("One or more environment variables are missing")
 
 
-SERVICES: List[str] = [
-    "ihs-web",
-    "ihs-worker-collector",
-    "ihs-worker-deleter",
-    "ihs-worker-submitter",
-    "ihs-worker-default",
-    "ihs-cron",
-]
+SERVICES: List[str] = ["iwell-worker", "iwell-cron"]
 
 IMAGES = [
     {"name": SERVICE_NAME, "dockerfile": "Dockerfile", "build_context": "."},
@@ -95,7 +88,6 @@ def get_task_definition(
     tags: list = [],
     task_iam_role_arn: str = "ecsTaskExecutionRole",
 ):
-    image = IMAGE_NAME
     defs = {
         "iwell-worker": {
             "containerDefinitions": [
@@ -202,7 +194,7 @@ class AWSClient:
         return response["taskDefinition"]["revision"]
 
 
-client = AWSClient().ecs()
+client = AWSClient()
 
 
 results = []
@@ -220,7 +212,7 @@ for service in SERVICES:
     )
 
     # pprint(cdef)
-    client.register_task_definition(**cdef)
+    client.ecs.register_task_definition(**cdef)
 
     rev_num = client.get_latest_revision(service)
     s += "\t" + f"updated revision: {prev_rev_num} -> {rev_num}"
@@ -228,7 +220,7 @@ for service in SERVICES:
     print(s)
 
 for service, prev_rev_num, rev_num in results:
-    response = client.update_service(
+    response = client.ecs.update_service(
         cluster=CLUSTER_NAME,
         service=service,
         forceNewDeployment=True,

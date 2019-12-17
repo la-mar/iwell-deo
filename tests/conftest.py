@@ -1,7 +1,8 @@
 import os
 import json
 
-import pytest  # noqa
+import pytest
+import requests_mock
 
 from collector.endpoint import Endpoint
 from collector.request import Request
@@ -11,64 +12,76 @@ from collector.collector import Collector
 import collector.endpoint
 from config import TestingConfig
 
-# app_config = TestingConfig()
-# endpoints = collector.endpoint.load_from_config(app_config)
+# conf = TestingConfig()
+# endpoints = collector.endpoint.load_from_config(conf)
 # functions = config.functions
 
 
-@pytest.fixture()
-def app_config():
+@pytest.fixture
+def m():
+    with requests_mock.Mocker() as m:
+        yield m
+
+
+@pytest.fixture
+def conf():
     yield TestingConfig()
 
 
-@pytest.fixture()
-def endpoints(app_config):
-    yield collector.endpoint.load_from_config(app_config)
+@pytest.fixture
+def endpoints(conf):
+    yield collector.endpoint.load_from_config(conf)
 
 
-@pytest.fixture()
-def functions(app_config):
-    yield app_config.functions
+@pytest.fixture
+def functions(conf):
+    yield conf.functions
 
 
-@pytest.fixture()
+@pytest.fixture
 def endpoint(endpoints):
     yield endpoints.get("complex")
 
 
-@pytest.fixture()
+@pytest.fixture
 def endpoint_simple(endpoints):
     yield endpoints.get("simple")
 
 
-@pytest.fixture()
-def token_manager_legacy(app_config):  # TODO: needs to be mocked
-    yield TokenManager(**app_config.api_params)
+@pytest.fixture
+def token_manager_legacy(conf):  # TODO: needs to be mocked
+    yield TokenManager(**conf.api_params)
 
 
-@pytest.fixture()
-def requestor(app_config, endpoint, functions):
-    yield Requestor(app_config.API_BASE_URL, endpoint, functions)
+@pytest.fixture
+def requestor(conf, endpoint, functions):
+    yield Requestor(conf.API_BASE_URL, endpoint, functions)
 
 
-@pytest.fixture()
-def req(app_config, requestor):
+@pytest.fixture
+def requestor_simple(conf, endpoint_simple, functions):
+    yield Requestor(conf.API_BASE_URL, endpoint_simple, functions)
+
+
+@pytest.fixture
+def req(conf):
+    tm = TokenManager.from_app_config(conf)
     yield Request(
         "GET",
-        f"{app_config.API_BASE_URL}/path/1/subpath/2/values",
-        headers={"Authorization": requestor.get_token()},
+        f"{conf.API_BASE_URL}/path/1/subpath/2/values",
+        headers={"Authorization": tm.get_token()},
     )
 
 
-@pytest.fixture()
-def nested_json(app_config):
-    path = os.path.join(app_config.CONFIG_BASEPATH, "nested_data.json")
+@pytest.fixture
+def nested_json(conf):
+    path = os.path.join(conf.CONFIG_BASEPATH, "nested_data.json")
     with open(path, "r") as f:
         return json.load(f)
 
 
-@pytest.fixture()
-def normalized_json(app_config):
-    path = os.path.join(app_config.CONFIG_BASEPATH, "normalized.json")
+@pytest.fixture
+def normalized_json(conf):
+    path = os.path.join(conf.CONFIG_BASEPATH, "normalized.json")
     with open(path, "r") as f:
         return json.load(f)

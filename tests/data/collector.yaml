@@ -29,6 +29,7 @@ endpoints:
     path: /well-groups/{group_id}/wells
     version: v1
     mode: delta
+
   simple:
     model: api.models.Well
     mappings:
@@ -43,6 +44,7 @@ endpoints:
     path: /wells
     version: v1
     mode: delta
+
   no_mappings:
     model: api.models.Well
     exclude: []
@@ -76,3 +78,7 @@ functions:
     alternatives: null
     example: "since=32342561"
     template: "since={value}"
+  since_values:
+    alternatives: null
+    example: "since_values=32342561"
+    template: "since_values={values}"

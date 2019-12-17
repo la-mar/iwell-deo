@@ -17,7 +17,7 @@ from collector.request import Request
 from collector.endpoint import Endpoint
 
 logger = logging.getLogger(__name__)
-config = get_active_config()
+conf = get_active_config()
 
 
 class Requestor(object):
@@ -35,7 +35,7 @@ class Requestor(object):
         headers: dict = None,
         params: dict = None,
     ):
-        self.token_manager = TokenManager.from_app_config()
+        self.token_manager = TokenManager.from_app_config(conf)
         self.headers = headers or self.headers
         self.params = params or self.params
         self.base_url = base_url
@@ -106,11 +106,12 @@ class Requestor(object):
                 raise ValueError
 
             if values:
-                values = "".join(values)  # type: ignore
-
-            return self.functions[func_name]["template"].format(  # type: ignore
+                values = ",".join([str(x) for x in values])  # type: ignore
+            result = self.functions[func_name]["template"].format(  # type: ignore
                 value=value, value2=value2, values=values
             )
+            logger.debug(result)
+            return result
         except KeyError:
             raise KeyError(f"Function not found: {func_name}")
 
@@ -126,7 +127,9 @@ class Requestor(object):
             self.params[field] = str(value)
 
         except Exception as e:
-            raise Exception(f"Failed to add parameter: field={field} value={value}")
+            raise Exception(
+                f"Failed to add parameter: field={field} value={value} -- {e}"
+            )
 
         return self
 
@@ -135,11 +138,9 @@ class Requestor(object):
             return self.url.format(**kwargs)
         except KeyError as ke:
             raise KeyError(f"Unable to format path ({self.path}) without {ke}")
-        except Exception:
-            raise
 
     @staticmethod
-    def urljoin(base: str, path: str) -> str:
+    def urljoin(base: str = "", path: str = "") -> str:
         if not base.endswith("/"):
             base = base + "/"
         if path.startswith("/"):
@@ -165,9 +166,9 @@ class Requestor(object):
 
 
 class IWellRequestor(Requestor):
-    custom_header_key = config.API_HEADER_KEY
-    custom_header_prefix = config.API_HEADER_PREFIX
-    sync_interval = config.API_SYNC_WINDOW_MINUTES
+    custom_header_key = conf.API_HEADER_KEY
+    custom_header_prefix = conf.API_HEADER_PREFIX
+    sync_interval = conf.API_SYNC_WINDOW_MINUTES
 
     def __init__(
         self,
@@ -310,15 +311,15 @@ if __name__ == "__main__":
     app = create_app()
     app.app_context().push()
 
-    config = get_active_config()
-    endpoints = load_from_config(config)
-    functions = config.functions
-    url = config.API_BASE_URL
+    conf = get_active_config()
+    endpoints = load_from_config(conf)
+    functions = conf.functions
+    url = conf.API_BASE_URL
 
     # dt = datetime(year=1970, month=1, day=1)
     # ts = int(dt.timestamp())
 
-    endpoint = endpoints["field_values"]
+    endpoint = endpoints["complex"]
     r = IWellRequestor(url, endpoint)
     c = IWellCollector(endpoint)
 
