@@ -110,7 +110,7 @@ class TokenManager:
         self.cache.dump()
         return token
 
-    @retry(Exception, tries=10, delay=5, backoff=2, logger=logger)
+    @retry(Exception, tries=3, delay=5, backoff=2, logger=logger)
     def get_token_dict(self, force_refresh: bool = False) -> dict:
         """ Checks if saved token is still valid"""
         token = self.cache.get("token")

@@ -69,7 +69,7 @@ class Request(requests.Request):
         # optionally modify exact request here
         return prepared_request
 
-    @retry(Exception, tries=10, delay=5, backoff=2, logger=logger)
+    @retry(Exception, tries=3, delay=5, backoff=2, logger=logger)
     def get(self):
         return self.session.get(self.url, headers=self.headers, params=self.params)
 

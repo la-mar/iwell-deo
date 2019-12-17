@@ -31,6 +31,7 @@ logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("boto3").setLevel(logging.WARNING)
 logging.getLogger("botocore").setLevel(logging.CRITICAL)
 logging.getLogger("zeep").setLevel(logging.CRITICAL)
+logging.getLogger("requests_oauthlib").setLevel(logging.CRITICAL)
 
 
 def mlevel(level):

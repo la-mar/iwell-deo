@@ -6,7 +6,8 @@ from requests_mock import ANY
 
 
 class TestRequest:
-    def test_request_path(self, req):
+    def test_request_path(self, req, requests_mock):
+        requests_mock.register_uri("GET", ANY, text="not_important")
         assert req.path == "/v3/path/1/subpath/2/values"
 
     def test_request_get(self, req, requests_mock):
