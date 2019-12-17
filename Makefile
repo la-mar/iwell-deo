@@ -23,7 +23,7 @@ smoke-test:
 	docker run --entrypoint iwell driftwood/iwell:${COMMIT_HASH} test smoke-test
 
 cov:
-	pytest --cov iwell --cov-report html:./coverage/coverage.html --log-level debug --log-cli-level debug
+	pytest --cov iwell --cov-report html:./coverage/coverage.html --log-level info --log-cli-level debug
 
 view-cov:
 	open -a "Google Chrome" ./coverage/coverage.html/index.html

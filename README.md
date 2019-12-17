@@ -1,5 +1,20 @@
 # iwell-deo
 
+<div style="text-align:center;">
+  <table >
+    <tr>
+      <a href="https://codeclimate.com/github/la-mar/iwell-deo/maintainability"><img src="https://api.codeclimate.com/v1/badges/35d6fa7af6b035c48b1c/maintainability" /></a>
+      <a href="https://codeclimate.com/github/la-mar/iwell-deo/test_coverage"><img src="https://api.codeclimate.com/v1/badges/35d6fa7af6b035c48b1c/test_coverage" /></a>
+      <a href="https://codecov.io/gh/la-mar/iwell-deo">
+        <img src="https://codecov.io/gh/la-mar/iwell-deo/branch/master/graph/badge.svg" />
+      </a>
+      <a href="(https://circleci.com/gh/la-mar/iwell-deo">
+        <img src="https://circleci.com/gh/la-mar/iwell-deo.svg?style=svg" />
+      </a>
+    </tr>
+  </table>
+</div>
+
 ## Getting Started
 
 1. Install poetry package manager: `pip3 install poetry`
