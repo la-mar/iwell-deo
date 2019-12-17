@@ -13,7 +13,8 @@ expected_url = "https://api.example.com/v3/path/to/endpoint"
 class TestTokenManager:
     def test_legacy_client_get_token(self, token_manager_legacy, requests_mock):
         requests_mock.register_uri(ANY, ANY, text="Bearer ersvbteyh536425q3r")
-        assert bool(re.match(r"Bearer\s.*", token_manager_legacy.get_token()))
+        # pylint: disable=anomalous-backslash-in-string
+        assert bool(re.match("Bearer\s.*", token_manager_legacy.get_token()))
 
     def test_legacy_client_get_token_dict(self, token_manager_legacy, requests_mock):
         requests_mock.register_uri(
