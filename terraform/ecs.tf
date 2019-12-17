@@ -78,6 +78,18 @@ data "aws_iam_policy_document" "task_policy" {
       identifiers = ["ecs-tasks.amazonaws.com"]
     }
   }
+
+  statement {
+    sid = "1" # task_access_secrets
+    actions = [
+      "ssm:GetParameter*",
+    ]
+    resources = [
+      "arn:aws:ssm:*:*:parameter/${var.service_name}/*",
+      "arn:aws:ssm:*:*:parameter/datadog/*"
+    ]
+  }
+
 }
 
 resource "aws_iam_role_policy_attachment" "attach_ecs_service_policy_to_task_role" {
