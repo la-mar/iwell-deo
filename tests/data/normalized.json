@@ -1,0 +1,41 @@
+[{
+        "id": 16677,
+        "name": "test well 1",
+        "alias": "test well 1",
+        "type": "OIL",
+        "is_active": true,
+        "latest_production_time": 1525123811,
+        "created_at": 1525123811,
+        "updated_at": 1525123811
+    },
+    {
+        "id": 16681,
+        "name": "test well 2",
+        "alias": "test well 2",
+        "type": "OIL",
+        "is_active": true,
+        "latest_production_time": 1525123811,
+        "created_at": 1525123811,
+        "updated_at": 1525123811
+    },
+    {
+        "id": 16682,
+        "name": "test well 3",
+        "alias": "test well 3",
+        "type": "OIL",
+        "is_active": true,
+        "latest_production_time": 1525123811,
+        "created_at": 1525123811,
+        "updated_at": 1525123811
+    },
+    {
+        "id": 16768,
+        "name": "test well 4",
+        "alias": "test well 4",
+        "type": "OIL",
+        "is_active": false,
+        "latest_production_time": 1525123811,
+        "created_at": 1525123811,
+        "updated_at": 1525123811
+    }
+]

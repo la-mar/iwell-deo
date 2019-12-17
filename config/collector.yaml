@@ -1,0 +1,356 @@
+default_schedule: &default_schedule
+  # seconds: 15
+  cron:
+    minute: "*/30"
+
+job_defaults:
+  sync: &default_sync
+    mode: sync
+    seconds: 60
+  # hourly:
+  #   mode:
+  full: &default_full
+    mode: full
+    cron:
+      minute: 0
+      hour: 0
+
+
+
+
+default_aliases: &default_aliases
+  created_at: iwell_created_at
+  updated_at: iwell_updated_at
+
+default_status: &default_status
+    enabled: true
+
+endpoints:
+  users:
+    <<: *default_status
+    model: api.models.User
+    path: /users
+    mappings:
+      aliases:
+        type: user_type
+    exclude: []
+    normalize: false
+    version: v1
+    tasks:
+      sync:
+        mode: sync
+        cron:
+          minute: "*/10"
+
+  wells:
+    enabled: true
+    model: api.models.Well
+    path: /wells
+    options:
+      - since
+    mappings:
+      aliases:
+        <<: *default_aliases
+        alias: well_alias
+        name: well_name
+        type: well_type
+    exclude: []
+    normalize: false
+    version: v1
+    tasks:
+      sync:
+        <<: *default_sync
+      full:
+        <<: *default_full
+  tanks:
+    <<: *default_status
+    model: api.models.Tank
+    options:
+      - since
+    mappings:
+      aliases:
+        <<: *default_aliases
+        name: tank_name
+        type: tank_type
+    exclude: []
+    normalize: false
+    path: /tanks
+    version: v1
+    tasks:
+      sync:
+        cron:
+          minute: 0
+      full:
+        <<: *default_full
+  fields:
+    <<: *default_status
+    model: api.models.Field
+    path: /fields
+    mappings:
+      aliases:
+        <<: *default_aliases
+        name: field_name
+        order: field_order
+        type: field_type
+        unit: field_unit
+    exclude: []
+    normalize: false
+    version: v1
+    tasks:
+      sync:
+        cron:
+          minute: "*/5"
+  tank_readings:
+    <<: *default_status
+    model: api.models.TankReading
+    path: /tanks/{tank_id}/readings
+    options:
+      - since
+      - start
+      - end
+    depends_on:
+      tank_id: api.models.Tank.id
+    mappings:
+      aliases:
+        <<: *default_aliases
+        reading_time: reading_at
+    exclude: []
+    depends_on:
+      tank_id: api.models.Tank.id
+    normalize: false
+    version: v1
+    tasks:
+      sync:
+        cron:
+          minute: "*/5"
+  field_values:
+    <<: *default_status
+    model: api.models.FieldValue
+    path: /wells/{well_id}/fields/{field_id}/values
+    options:
+      - since
+      - start
+      - end
+    depends_on:
+      field_id: api.models.WellField.field_id
+      well_id: api.models.WellField.well_id
+    mappings:
+      aliases:
+        <<: *default_aliases
+        reading_time: reading_at
+    exclude: []
+    normalize: false
+    version: v1
+    tasks:
+      sync:
+        <<: *default_sync
+      full:
+        <<: *default_full
+  meters:
+    <<: *default_status
+    model: api.models.Meter
+    path: /wells/{well_id}/meters
+    options:
+      - since
+      - kind
+    depends_on:
+      well_id: api.models.Well.id
+    mappings:
+      aliases:
+        <<: *default_aliases
+        date: reading_at
+        name: meter_name
+        order: meter_order
+        type: product_type
+    exclude: []
+    normalize: false
+    version: v1
+    tasks:
+      sync:
+        <<: *default_sync
+      full:
+        <<: *default_full
+  meter_readings:
+    <<: *default_status
+    model: api.models.MeterReading
+    path: /wells/{well_id}/meters/{meter_id}/readings
+    options:
+      - since
+      - start
+      - end
+    depends_on:
+      well_id: api.models.Meter.well_id
+      meter_id: api.models.Meter.id
+    mappings:
+      aliases:
+        <<: *default_aliases
+        reading_time: reading_at
+        reading: value
+        previous_reading: previous_value
+    exclude: []
+    normalize: false
+    version: v1
+    tasks:
+      sync:
+        cron:
+          minute: '*/5'
+      full:
+        <<: *default_full
+  production:
+    # <<: *default_status
+    enabled: true
+    model: api.models.Production
+    path: /wells/{well_id}/production
+    options:
+      - since
+      - start
+      - end
+    depends_on:
+      well_id: api.models.Well.id
+    mappings:
+      aliases:
+        <<: *default_aliases
+        production_time: produced_at
+        date: reported_date
+    normalize: false
+    version: v1
+    tasks:
+      sync:
+        cron:
+          minute: '*/5'
+      full:
+        <<: *default_full
+        # options:
+        #   since: 1970-01-01
+  run_tickets:
+    <<: *default_status
+    model: api.models.RunTicket
+    path: /tanks/{tank_id}/readings/{reading_id}/run-tickets
+    options:
+      - since
+    depends_on:
+      tank_id: api.models.TankReading.tank_id
+      reading_id: api.models.TankReading.id
+    mappings:
+      aliases:
+        <<: *default_aliases
+        date: ticket_date
+        type: product_type
+    exclude: []
+    normalize: false
+    version: v1
+    tasks:
+      sync:
+        cron:
+          minute: '*/5'
+      full:
+        <<: *default_full
+  well_fields:
+    <<: *default_status
+    model: api.models.WellField
+    path: /wells/{well_id}/fields
+    depends_on:
+      well_id: api.models.Well.id
+    mappings:
+      aliases:
+        <<: *default_aliases
+        id: field_id
+    exclude:
+      - name
+      - order
+      - type
+      - unit
+      - is_required
+      - is_historic
+      - is_remembered
+      - order
+    normalize: false
+    version: v1
+    tasks:
+      sync:
+        cron:
+          minute: 0
+  well_groups:
+    <<: *default_status
+    model: api.models.WellGroup
+    path: /well-groups
+    mappings:
+      aliases:
+        <<: *default_aliases
+        latest_production_time: group_latest_production_time
+        name: group_name
+    exclude:
+      - wells.data
+    normalize: true
+    version: v1
+    tasks:
+      sync:
+        cron:
+          minute: 0
+      full:
+        <<: *default_full
+  well_group_wells:
+    <<: *default_status
+    model: api.models.WellGroupWell
+    path: /well-groups/{group_id}/wells
+    depends_on:
+      group_id: api.models.WellGroup.id
+    mappings:
+      aliases:
+        <<: *default_aliases
+        id: well_id
+    exclude:
+      - type
+      - name
+      - latest_production_time
+      - is_active
+      - alias
+    normalize: false
+    version: v1
+    tasks:
+      sync:
+        cron:
+          minute: 0
+  well_notes:
+    <<: *default_status
+    model: api.models.WellNote
+    path: /wells/{well_id}/notes
+    depends_on:
+      well_id: api.models.Well.id
+    mappings:
+      aliases:
+        <<: *default_aliases
+        note_time: noted_at
+    exclude: []
+    normalize: false
+    version: v1
+    tasks:
+      sync:
+        cron:
+          minute: "*/5"
+  well_tanks:
+    <<: *default_status
+    model: api.models.WellTank
+    path: /wells/{well_id}/tanks
+    depends_on:
+      well_id: api.models.Well.id
+    mappings:
+      aliases:
+        <<: *default_aliases
+        id: tank_id
+    exclude:
+      - capacity
+      - multiplier
+      - name
+      - type
+    normalize: false
+    version: v1
+    tasks:
+      sync:
+        cron:
+          minute: 0
+functions:
+  since:
+    alternatives: null
+    example: "since=32342561"
+    template: "since={value}"
