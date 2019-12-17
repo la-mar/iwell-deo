@@ -63,7 +63,12 @@ def req(conf, requests_mock):
     requests_mock.register_uri(
         ANY,
         ANY,
-        json='{"access_token": "", "expires_at": 1577149458, "expires_in": 604800, "token_type": "Bearer"}',
+        json={
+            "access_token": "",
+            "expires_at": 1577149458,
+            "expires_in": 604800,
+            "token_type": "Bearer",
+        },
     )
     tm = TokenManager.from_app_config(conf)
     yield Request(

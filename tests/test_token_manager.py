@@ -24,7 +24,12 @@ class TestTokenManager:
         requests_mock.register_uri(
             ANY,
             ANY,
-            json='{"access_token": "", "expires_at": 1577149458, "expires_in": 604800, "token_type": "Bearer"}',
+            json={
+                "access_token": "",
+                "expires_at": 1577149458,
+                "expires_in": 604800,
+                "token_type": "Bearer",
+            },
         )
 
         expected = ["access_token", "expires_at", "expires_in", "token_type"]
