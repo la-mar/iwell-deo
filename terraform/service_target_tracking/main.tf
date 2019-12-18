@@ -1,8 +1,4 @@
-/*
-Adds an application autoscaling configuration for an ECS service using a
-customized ECS metric.
 
-*/
 
 variable "cluster_name" {
   description = "Name of the ECS cluster"
@@ -20,10 +16,16 @@ variable "max_capacity" {
   description = "Maximum number of tasks"
 }
 
-variable "target_value" {
+variable "scale_in_threshold" {
   description = "App autoscaling target values"
-  type        = string
-  default     = "90"
+  type        = number
+  default     = 1000
+}
+
+variable "scale_out_threshold" {
+  description = "App autoscaling target values"
+  type        = number
+  default     = 10000
 }
 
 variable "scale_in_cooldown" {
@@ -38,28 +40,16 @@ variable "scale_out_cooldown" {
   default     = "300"
 }
 
-variable "metric_namespace" {
-  description = "App autoscaling custom metric namespace"
-  type        = string
-  default     = "AWS/ECS"
-}
-
 variable "metric_name" {
   description = "App autoscaling custom metric name"
   type        = string
   default     = "CPUUtilization"
 }
 
-variable "metric_statistic" {
-  description = "App autoscaling custom metric statistic"
+variable "queue1" {
+  description = "Name of queue for Cloudwatch Metric"
   type        = string
-  default     = "Average"
-}
-
-variable "metric_unit" {
-  description = "App autoscaling custom metric unit"
-  type        = string
-  default     = "Percent"
+  default     = ""
 }
 
 resource "aws_appautoscaling_target" "ecs_target" {
@@ -70,33 +60,114 @@ resource "aws_appautoscaling_target" "ecs_target" {
   service_namespace  = "ecs"
 }
 
-resource "aws_appautoscaling_policy" "ecs_service" {
-  name               = "${aws_appautoscaling_target.ecs_target.resource_id}/target-scaling"
-  policy_type        = "TargetTrackingScaling"
+resource "aws_appautoscaling_policy" "sqs_policy_scale_out" {
+  # count              = var.sqs_policy ? 1 : 0
+  name = "${aws_appautoscaling_target.ecs_target.resource_id}/target-scaling"
+  # policy_type        = "TargetTrackingScaling"
   resource_id        = aws_appautoscaling_target.ecs_target.resource_id
   scalable_dimension = aws_appautoscaling_target.ecs_target.scalable_dimension
   service_namespace  = aws_appautoscaling_target.ecs_target.service_namespace
 
-  target_tracking_scaling_policy_configuration {
-    customized_metric_specification {
-      namespace   = var.metric_namespace
-      metric_name = var.metric_name
-      statistic   = var.metric_statistic
-      unit        = var.metric_unit
+  step_scaling_policy_configuration {
+    adjustment_type         = "ChangeInCapacity"
+    cooldown                = var.scale_out_cooldown
+    metric_aggregation_type = "Average"
 
-      dimensions {
-        name  = "ClusterName"
-        value = var.cluster_name
-      }
+    step_adjustment {
+      metric_interval_lower_bound = 0
+      scaling_adjustment          = 1.0
+    }
+  }
+  depends_on = [aws_appautoscaling_target.ecs_target]
 
-      dimensions {
-        name  = "ServiceName"
-        value = var.service_name
+}
+
+resource "aws_appautoscaling_policy" "sqs_policy_scale_in" {
+  # count              = var.sqs_policy ? 1 : 0
+  name = "${aws_appautoscaling_target.ecs_target.resource_id}/target-scaling"
+  # policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.ecs_target.resource_id
+  scalable_dimension = aws_appautoscaling_target.ecs_target.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.ecs_target.service_namespace
+
+  step_scaling_policy_configuration {
+    adjustment_type         = "ChangeInCapacity"
+    cooldown                = var.scale_in_cooldown
+    metric_aggregation_type = "Average"
+
+    step_adjustment {
+      metric_interval_upper_bound = 0
+      scaling_adjustment          = -1
+    }
+  }
+  depends_on = [aws_appautoscaling_target.ecs_target]
+
+}
+
+resource "aws_cloudwatch_metric_alarm" "sqs_usage_high" {
+  alarm_name                = "${var.cluster_name}/${var.service_name}/sqs-usage-high"
+  comparison_operator       = "GreaterThanOrEqualToThreshold"
+  evaluation_periods        = "2"
+  threshold                 = var.scale_out_threshold
+  alarm_description         = "Report the aggregate total of messages across two SQS queues"
+  insufficient_data_actions = []
+  alarm_actions             = [aws_appautoscaling_policy.sqs_policy_scale_out.arn]
+
+
+  metric_query {
+    id          = "e1"
+    expression  = "m1"
+    label       = "Average # messages (${var.queue1})"
+    return_data = "true"
+  }
+
+  metric_query {
+    id = "m1"
+
+    metric {
+      metric_name = "ApproximateNumberOfMessagesVisible"
+      namespace   = "AWS/SQS"
+      period      = "60"
+      stat        = "Average"
+      unit        = "Count"
+
+      dimensions = {
+        QueueName = var.queue1
       }
     }
+  }
+}
 
-    target_value       = var.target_value
-    scale_in_cooldown  = var.scale_in_cooldown
-    scale_out_cooldown = var.scale_out_cooldown
+resource "aws_cloudwatch_metric_alarm" "sqs_usage_low" {
+  alarm_name                = "${var.cluster_name}/${var.service_name}/sqs-usage-low"
+  comparison_operator       = "LessThanOrEqualToThreshold"
+  evaluation_periods        = "2"
+  threshold                 = var.scale_in_threshold
+  alarm_description         = "Report the aggregate total of messages across two SQS queues"
+  insufficient_data_actions = []
+  alarm_actions             = [aws_appautoscaling_policy.sqs_policy_scale_in.arn]
+
+
+  metric_query {
+    id          = "e1"
+    expression  = "m1"
+    label       = "Average # messages (${var.queue1})"
+    return_data = "true"
+  }
+
+  metric_query {
+    id = "m1"
+
+    metric {
+      metric_name = "ApproximateNumberOfMessagesVisible"
+      namespace   = "AWS/SQS"
+      period      = "60"
+      stat        = "Average"
+      unit        = "Count"
+
+      dimensions = {
+        QueueName = var.queue1
+      }
+    }
   }
 }

@@ -31,11 +31,14 @@ resource "aws_ecs_service" "iwell_worker" {
 }
 
 module "worker_autoscaler" {
-  source       = "./service_target_tracking"
-  cluster_name = data.terraform_remote_state.ecs_cluster.outputs.cluster_name
-  service_name = aws_ecs_service.iwell_worker.name
-  min_capacity = 1
-  max_capacity = 5
+  source              = "./service_target_tracking"
+  cluster_name        = data.terraform_remote_state.ecs_cluster.outputs.cluster_name
+  service_name        = aws_ecs_service.iwell_worker.name
+  min_capacity        = 1
+  max_capacity        = 5
+  queue1              = "iwell-celery"
+  scale_in_threshold  = 1000
+  scale_out_threshold = 4000
 }
 
 resource "aws_ecs_service" "iwell_cron" {
