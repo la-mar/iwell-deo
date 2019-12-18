@@ -94,7 +94,8 @@ def get_task_definition(
                 {
                     "name": "iwell-worker",
                     "command": ["iwell", "run", "worker"],
-                    "memoryReservation": 128,
+                    "memoryReservation": 256,
+                    "cpu": 256,
                     "image": IMAGE_NAME,
                     "essential": True,
                     "environment": transform_envs(envs),
@@ -112,7 +113,8 @@ def get_task_definition(
                 {
                     "name": "iwell-cron",
                     "command": ["iwell", "run", "cron"],
-                    "memoryReservation": 128,
+                    "memoryReservation": 256,
+                    "cpu": 256,
                     "image": IMAGE_NAME,
                     "essential": True,
                     "environment": transform_envs(envs),
