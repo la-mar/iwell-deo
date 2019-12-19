@@ -75,7 +75,7 @@ def mocker(requests_mock):
 
 
 @pytest.fixture
-def req(conf, requests_mock):
+def req(conf, mocker):  # pylint: disable=unused-argument
     tm = TokenManager.from_app_config(conf)
     yield Request(
         "GET",

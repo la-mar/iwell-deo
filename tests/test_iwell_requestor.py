@@ -1,4 +1,4 @@
-# pylint: disable: unused-argument
+# pylint: disable=unused-argument
 import pytest
 import re
 from datetime import datetime
@@ -10,7 +10,7 @@ from collector.endpoint import Endpoint
 
 
 @pytest.fixture()
-def iwell_requestor(conf, endpoint):
+def iwell_requestor(conf, endpoint, mocker):
     yield IWellRequestor(conf.API_BASE_URL, endpoint=endpoint)
 
 
@@ -67,3 +67,8 @@ class TestIWellRequestor:
         iwell_requestor.enqueue_with_ids(id=1, id2=2)
         iwell_requestor.enqueue_with_ids(id=1, id2=2)
         assert len(list(iwell_requestor.get_all())) == 3
+
+    def test_sync_model(self, iwell_requestor):
+        iwell_requestor.enqueue_with_ids(id=1, id2=2)
+        iwell_requestor.enqueue_with_ids(id=1, id2=2)
+        iwell_requestor.enqueue_with_ids(id=1, id2=2)
