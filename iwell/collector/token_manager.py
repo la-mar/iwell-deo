@@ -65,7 +65,11 @@ class TokenManager:
 
         client = BackendApplicationClient(client_id=self.client_id)
         oauth = OAuth2Session(client=client)
-
+        # oauth.populate_token_attributes(
+        #     token_url=self.url,
+        #     auth=(self.client_id, self.client_secret),
+        #     headers=self.headers,
+        # )
         return dict(
             oauth.fetch_token(
                 token_url=self.url,

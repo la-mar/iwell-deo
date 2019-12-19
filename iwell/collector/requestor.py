@@ -185,15 +185,10 @@ class IWellRequestor(Requestor):
 
     def configure_mode(self):
 
-        if self.mode == "delta":
-            # handled by iwell default params (queries last 30 days)
-            pass
-        elif self.mode == "full":
+        if self.mode == "full":
             self.add_start(datetime(year=1970, month=1, day=1))
         elif self.mode == "sync":
             self.add_start(datetime.now() - timedelta(minutes=self.sync_interval))
-        else:
-            pass
 
     def add_since(self, since: Union[date, datetime], **kwargs) -> None:
         """Limits records to those updated after the specified time"""

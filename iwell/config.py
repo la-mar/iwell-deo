@@ -236,6 +236,7 @@ class TestingConfig(BaseConfig):
     TESTING = True
     TOKEN_EXPIRATION_DAYS = 0
     TOKEN_EXPIRATION_SECONDS = 3
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     API_BASE_URL = "https://api.example.com/v3"
     API_CLIENT_ID = "test_client_id"

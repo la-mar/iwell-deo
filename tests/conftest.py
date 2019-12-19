@@ -1,16 +1,16 @@
-import os
 import json
+import os
+import re
 
 import pytest
-
 from requests_mock import ANY
 
+import collector.endpoint
+from collector.collector import Collector
 from collector.endpoint import Endpoint
 from collector.request import Request
 from collector.requestor import Requestor
 from collector.token_manager import TokenManager
-from collector.collector import Collector
-import collector.endpoint
 from config import TestingConfig
 
 # conf = TestingConfig()
@@ -58,18 +58,24 @@ def requestor_simple(conf, endpoint_simple, functions):
     yield Requestor(conf.API_BASE_URL, endpoint_simple, functions)
 
 
-@pytest.fixture
-def req(conf, requests_mock):
+@pytest.fixture()
+def mocker(requests_mock):
     requests_mock.register_uri(
-        ANY,
-        ANY,
+        "POST",
+        "/v3/auth",
         json={
-            "access_token": "",
+            "access_token": "testtoken",
             "expires_at": 1577149458,
             "expires_in": 604800,
             "token_type": "Bearer",
         },
     )
+
+    requests_mock.register_uri("GET", re.compile("/v3/path/.*/subpath/.*"), json={})
+
+
+@pytest.fixture
+def req(conf, requests_mock):
     tm = TokenManager.from_app_config(conf)
     yield Request(
         "GET",

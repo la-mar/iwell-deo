@@ -45,6 +45,10 @@ class TestRequestor:
         with pytest.raises(Exception):
             requestor.get_function("since", values={[]})
 
+    def test_get_function_bad_key(self, requestor):
+        with pytest.raises(Exception):
+            requestor.get_function({}, values=33)
+
     def test_add_param(self, conf, endpoint):
         r = Requestor(conf.API_BASE_URL, endpoint, {})
         r.add_param("test_param", 33)

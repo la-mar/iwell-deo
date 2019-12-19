@@ -20,3 +20,4 @@ class TestCollector:
         temp = {"test_func": "test_value"}
         c = Collector("test", functions=temp)
         assert c.functions == temp
+
