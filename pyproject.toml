@@ -49,6 +49,19 @@ boto3 = "^1.10.6"
 hypothesis = "^4.42.7"
 
 
+[tool.coverage.report]
+# Regexes for lines to exclude from consideration
+exclude_lines = [
+    "pragma: no cover",
+    "if self.debug",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "logger.debug",
+    "if 0:",
+    "if __name__ == .__main__.:"
+]
+
+
 [tool.poetry.scripts]
 iwell = "iwell.manage:main"
 
