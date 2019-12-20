@@ -71,7 +71,9 @@ def mocker(requests_mock):
         },
     )
 
-    requests_mock.register_uri("GET", re.compile("/v3/path/.*/subpath/.*"), json={})
+    requests_mock.register_uri(
+        "GET", re.compile("https://api.example.com/v3/path/.*/subpath/.*"), json={}
+    )
 
 
 @pytest.fixture
