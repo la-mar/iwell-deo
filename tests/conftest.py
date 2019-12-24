@@ -58,7 +58,7 @@ def requestor_simple(conf, endpoint_simple, functions):
     yield Requestor(conf.API_BASE_URL, endpoint_simple, functions)
 
 
-@pytest.fixture()
+@pytest.fixture(autouse=True)
 def mocker(requests_mock):
     requests_mock.register_uri(
         "POST",
@@ -74,6 +74,7 @@ def mocker(requests_mock):
     requests_mock.register_uri(
         "GET", re.compile("https://api.example.com/v3/path/.*/subpath/.*"), json={}
     )
+    requests_mock.register_uri("GET", ANY, json={})
 
 
 @pytest.fixture

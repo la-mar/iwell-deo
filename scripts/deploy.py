@@ -94,8 +94,8 @@ def get_task_definition(
                 {
                     "name": "iwell-worker",
                     "command": ["iwell", "run", "worker"],
-                    "memoryReservation": 256,
-                    "cpu": 256,
+                    "memoryReservation": 512,
+                    "cpu": 512,
                     "image": IMAGE_NAME,
                     "essential": True,
                     "environment": transform_envs(envs),
