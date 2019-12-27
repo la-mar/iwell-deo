@@ -49,7 +49,7 @@ python-versions = "*"
 version = "0.1.0"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "An abstract syntax tree for Python with inference support."
 name = "astroid"
 optional = false
@@ -268,7 +268,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 version = "7.0"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Cross-platform colored terminal text."
 marker = "sys_platform == \"win32\""
 name = "colorama"
@@ -529,7 +529,7 @@ python-versions = "*"
 version = "0.2.0"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "A Python utility / library to sort Python imports."
 name = "isort"
 optional = false
@@ -637,7 +637,7 @@ yaml = ["PyYAML (>=3.10)"]
 zookeeper = ["kazoo (>=1.3.1)"]
 
 [[package]]
-category = "dev"
+category = "main"
 description = "A fast and thorough lazy object proxy."
 name = "lazy-object-proxy"
 optional = false
@@ -687,7 +687,7 @@ pyparsing = ">=2.0.1,<2.0.4 || >2.0.4,<2.1.2 || >2.1.2,<2.1.6 || >2.1.6"
 python-dateutil = ">=2.1"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "McCabe checker, plugin for flake8"
 name = "mccabe"
 optional = false
@@ -883,7 +883,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 version = "2.5.2"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "python code static checker"
 name = "pylint"
 optional = false
@@ -895,6 +895,21 @@ astroid = ">=2.3.0,<2.4"
 colorama = "*"
 isort = ">=4.2.5,<5"
 mccabe = ">=0.6,<0.7"
+
+[[package]]
+category = "main"
+description = "A Pylint plugin for improving code analysis when editing code using Flask-SQLAlchemy"
+name = "pylint-flask-sqlalchemy"
+optional = false
+python-versions = ">= 3.5"
+version = "0.1.0"
+
+[package.dependencies]
+Flask-SQLAlchemy = ">=2"
+pylint = "*"
+
+[package.extras]
+dev = ["black", "bump2version", "gitchangelog", "pystache", "mypy"]
 
 [[package]]
 category = "main"
@@ -1192,7 +1207,7 @@ six = "*"
 test = ["pytest", "mock"]
 
 [[package]]
-category = "dev"
+category = "main"
 description = "a fork of Python 2 and 3 ast modules with type comment support"
 name = "typed-ast"
 optional = false
@@ -1261,7 +1276,7 @@ termcolor = ["termcolor"]
 watchdog = ["watchdog"]
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Module for decorators, wrappers and monkey patching."
 name = "wrapt"
 optional = false
@@ -1285,7 +1300,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["pathlib2", "contextlib2", "unittest2"]
 
 [metadata]
-content-hash = "47e2bd5c848d7e89bf88ca1e83fd2f28a1419652f8b26edaa25d4f593479fe21"
+content-hash = "40ea2d6705a11d7fe051d73e216833db4c63e989e17891665cd5a0c289adaf96"
 python-versions = "^3.7"
 
 [metadata.files]
@@ -1763,6 +1778,10 @@ pygments = [
 pylint = [
     {file = "pylint-2.4.4-py3-none-any.whl", hash = "sha256:886e6afc935ea2590b462664b161ca9a5e40168ea99e5300935f6591ad467df4"},
     {file = "pylint-2.4.4.tar.gz", hash = "sha256:3db5468ad013380e987410a8d6956226963aed94ecb5f9d3a28acca6d9ac36cd"},
+]
+pylint-flask-sqlalchemy = [
+    {file = "pylint_flask_sqlalchemy-0.1.0-py3-none-any.whl", hash = "sha256:f29ece24053ddfc48aadbe140fc578f08fb1850f0738f30913dfc5d9d47e2518"},
+    {file = "pylint_flask_sqlalchemy-0.1.0.tar.gz", hash = "sha256:2e06a638cf55aa17380cae75dec0ca8310b4a11e6cdf41e5bf808701ce1362ce"},
 ]
 pyparsing = [
     {file = "pyparsing-2.4.5-py2.py3-none-any.whl", hash = "sha256:20f995ecd72f2a1f4bf6b072b63b22e2eb457836601e76d6e5dfcd75436acc1f"},

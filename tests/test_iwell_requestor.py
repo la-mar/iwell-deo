@@ -3,18 +3,18 @@ import pytest
 import re
 from datetime import datetime
 
-# from requests_mock import ANY
+from requests_mock import ANY
 
 from collector.requestor import IWellRequestor
 from collector.endpoint import Endpoint
 
 
-@pytest.fixture()
+@pytest.fixture
 def iwell_requestor(conf, endpoint, mocker):
     yield IWellRequestor(conf.API_BASE_URL, endpoint=endpoint)
 
 
-@pytest.mark.usefixtures("mocker")
+# @pytest.mark.usefixtures("mocker")
 class TestIWellRequestor:
     def test_has_default_auth(self, iwell_requestor):
         # pylint: disable=anomalous-backslash-in-string

@@ -12,7 +12,7 @@ from collector.request import Request
 from collector.requestor import Requestor
 from collector.token_manager import TokenManager
 from config import TestingConfig
-import requests_mock
+
 
 # conf = TestingConfig()
 # endpoints = collector.endpoint.load_from_config(conf)
@@ -59,10 +59,10 @@ def requestor_simple(conf, endpoint_simple, functions):
     yield Requestor(conf.API_BASE_URL, endpoint_simple, functions)
 
 
-@pytest.fixture
-def mocker():
-    m = requests_mock.Mocker()
-    m.register_uri(
+@pytest.fixture(autouse=True)
+def mocker(requests_mock):
+
+    requests_mock.register_uri(
         "POST",
         "/v3/auth",
         json={
@@ -73,11 +73,9 @@ def mocker():
         },
     )
 
-    m.register_uri(
-        "GET", re.compile("https://api.example.com/v3/path/.*/subpath/.*"), json={}
-    )
-    m.register_uri("GET", ANY, json={})
-    yield m
+    requests_mock.register_uri("GET", re.compile("/v3/path/.*/subpath/.*"), json={})
+    requests_mock.register_uri("GET", ANY, json={})
+    # yield m
 
 
 @pytest.fixture
