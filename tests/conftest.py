@@ -59,7 +59,7 @@ def requestor_simple(conf, endpoint_simple, functions):
 
 
 @pytest.fixture
-def mocker(requests_mock):
+def mocker():
     m = requests_mock.Mocker()
     m.register_uri(
         "POST",
