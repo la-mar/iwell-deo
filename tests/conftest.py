@@ -58,7 +58,7 @@ def requestor_simple(conf, endpoint_simple, functions):
     yield Requestor(conf.API_BASE_URL, endpoint_simple, functions)
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def mocker(requests_mock):
     requests_mock.register_uri(
         "POST",
