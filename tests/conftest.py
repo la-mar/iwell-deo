@@ -60,7 +60,8 @@ def requestor_simple(conf, endpoint_simple, functions):
 
 @pytest.fixture
 def mocker(requests_mock):
-    requests_mock.register_uri(
+    m = requests_mock.Mocker()
+    m.register_uri(
         "POST",
         "/v3/auth",
         json={
@@ -71,10 +72,11 @@ def mocker(requests_mock):
         },
     )
 
-    requests_mock.register_uri(
+    m.register_uri(
         "GET", re.compile("https://api.example.com/v3/path/.*/subpath/.*"), json={}
     )
-    requests_mock.register_uri("GET", ANY, json={})
+    m.register_uri("GET", ANY, json={})
+    yield m
 
 
 @pytest.fixture
