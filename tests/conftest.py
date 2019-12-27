@@ -12,6 +12,7 @@ from collector.request import Request
 from collector.requestor import Requestor
 from collector.token_manager import TokenManager
 from config import TestingConfig
+import requests_mock
 
 # conf = TestingConfig()
 # endpoints = collector.endpoint.load_from_config(conf)
