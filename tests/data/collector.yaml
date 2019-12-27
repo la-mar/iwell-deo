@@ -10,7 +10,7 @@ endpoints:
     exclude: []
     normalize: false
     path: /path/{id}/subpath/{id2}/values
-    version: v1
+    version: v3
     mode: delta
   moderate:
     model: api.models.TankReading
@@ -27,7 +27,7 @@ endpoints:
     primary_keys: group_id
     normalize: false
     path: /well-groups/{group_id}/wells
-    version: v1
+    version: v3
     mode: delta
 
   simple:
@@ -42,7 +42,7 @@ endpoints:
     exclude: []
     normalize: false
     path: /wells
-    version: v1
+    version: v3
     mode: delta
 
   no_mappings:
@@ -50,7 +50,7 @@ endpoints:
     exclude: []
     normalize: false
     path: /wells
-    version: v1
+    version: v3
     mode: delta
 
   null_keys:
