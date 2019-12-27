@@ -10,11 +10,12 @@ from collector.endpoint import Endpoint
 
 
 @pytest.fixture
-def iwell_requestor(conf, endpoint, mocker):
+def iwell_requestor(conf, endpoint, requests_mock):
+    requests_mock.register_uri("GET", ANY, json={})
     yield IWellRequestor(conf.API_BASE_URL, endpoint=endpoint)
 
 
-# @pytest.mark.usefixtures("mocker")
+@pytest.mark.usefixtures("mocker")
 class TestIWellRequestor:
     def test_has_default_auth(self, iwell_requestor):
         # pylint: disable=anomalous-backslash-in-string
