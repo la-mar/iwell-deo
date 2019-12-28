@@ -11,11 +11,21 @@ from collector.endpoint import Endpoint
 
 @pytest.fixture
 def iwell_requestor(conf, endpoint, requests_mock):
+    requests_mock.register_uri(
+        "POST",
+        f"{conf.API_BASE_URL}{conf.API_TOKEN_PATH}",
+        json={
+            "access_token": "testtoken",
+            "expires_at": 1577149458,
+            "expires_in": 604800,
+            "token_type": "Bearer",
+        },
+    )
     requests_mock.register_uri("GET", ANY, json={})
     yield IWellRequestor(conf.API_BASE_URL, endpoint=endpoint)
 
 
-@pytest.mark.usefixtures("mocker")
+# @pytest.mark.usefixtures("requests_mock")
 class TestIWellRequestor:
     def test_has_default_auth(self, iwell_requestor):
         # pylint: disable=anomalous-backslash-in-string
@@ -36,40 +46,82 @@ class TestIWellRequestor:
         iwell_requestor.add_end(end=ts)
         assert iwell_requestor.params["end"] == ts.date().isoformat()
 
-    def test_constructor_kwargs_since(self, conf, endpoint):
+    def test_constructor_kwargs_since(self, conf, endpoint, requests_mock):
+        requests_mock.register_uri(
+            "POST",
+            f"{conf.API_BASE_URL}{conf.API_TOKEN_PATH}",
+            json={
+                "access_token": "testtoken",
+                "expires_at": 1577149458,
+                "expires_in": 604800,
+                "token_type": "Bearer",
+            },
+        )
         IWellRequestor(
             conf.API_BASE_URL,
             endpoint=endpoint,
             since=datetime(year=1970, month=1, day=1),
         )
 
-    def test_constructor_kwargs_start(self, conf, endpoint):
+    def test_constructor_kwargs_start(self, conf, endpoint, requests_mock):
+        requests_mock.register_uri(
+            "POST",
+            f"{conf.API_BASE_URL}{conf.API_TOKEN_PATH}",
+            json={
+                "access_token": "testtoken",
+                "expires_at": 1577149458,
+                "expires_in": 604800,
+                "token_type": "Bearer",
+            },
+        )
         IWellRequestor(
             conf.API_BASE_URL,
             endpoint=endpoint,
             start=datetime(year=1970, month=1, day=1),
         )
 
-    def test_constructor_kwargs_end(self, conf, endpoint):
+    def test_constructor_kwargs_end(self, conf, endpoint, requests_mock):
+        requests_mock.register_uri(
+            "POST",
+            f"{conf.API_BASE_URL}{conf.API_TOKEN_PATH}",
+            json={
+                "access_token": "testtoken",
+                "expires_at": 1577149458,
+                "expires_in": 604800,
+                "token_type": "Bearer",
+            },
+        )
         IWellRequestor(
             conf.API_BASE_URL,
             endpoint=endpoint,
             end=datetime(year=1970, month=1, day=1),
         )
 
-    def test_constructor_endpoint_mode_delta(self, conf, endpoint):
+    def test_constructor_endpoint_mode_delta(self, conf, endpoint, requests_mock):
+        requests_mock.register_uri(
+            "POST",
+            f"{conf.API_BASE_URL}{conf.API_TOKEN_PATH}",
+            json={
+                "access_token": "testtoken",
+                "expires_at": 1577149458,
+                "expires_in": 604800,
+                "token_type": "Bearer",
+            },
+        )
         r = IWellRequestor(conf.API_BASE_URL, endpoint=endpoint, mode="full",)
         assert (
             r.params["start"] == datetime(year=1970, month=1, day=1).date().isoformat()
         )
 
-    def test_queue_request(self, iwell_requestor):
+    def test_queue_request(self, iwell_requestor, requests_mock):
+        requests_mock.register_uri("GET", ANY, json={})
         iwell_requestor.enqueue_with_ids(id=1, id2=2)
         iwell_requestor.enqueue_with_ids(id=1, id2=2)
         iwell_requestor.enqueue_with_ids(id=1, id2=2)
         assert len(list(iwell_requestor.get_all())) == 3
 
-    def test_sync_model(self, iwell_requestor):
+    def test_sync_model(self, iwell_requestor, requests_mock):
+        requests_mock.register_uri("GET", ANY, json={})
         iwell_requestor.enqueue_with_ids(id=1, id2=2)
         iwell_requestor.enqueue_with_ids(id=1, id2=2)
         iwell_requestor.enqueue_with_ids(id=1, id2=2)
