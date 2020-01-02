@@ -92,6 +92,7 @@ class BaseConfig:
     FLASK_ENV = os.getenv("FLASK_ENV", "development")
     DEFAULT_COLLECTION_INTERVAL = {"hours": 1}
     ENV_NAME = os.getenv("ENV_NAME", socket.gethostname())
+    SECRET_KEY = os.getenv("SECRET_KEY", "test")
 
     """ Sentry """
     SENTRY_ENABLED = os.getenv("SENTRY_ENABLED", False)
@@ -155,12 +156,12 @@ class BaseConfig:
 
     """ API """
     API_CLIENT_TYPE = os.getenv("IWELL_CLIENT_TYPE", "legacy")
-    API_BASE_URL = os.getenv("IWELL_URL")
+    API_BASE_URL = os.getenv("IWELL_URL", "https://api.iwell.info/v1")
     API_CLIENT_ID = os.getenv("IWELL_CLIENT_ID")
     API_CLIENT_SECRET = os.getenv("IWELL_CLIENT_SECRET")
     API_USERNAME = os.getenv("IWELL_USERNAME")
     API_PASSWORD = os.getenv("IWELL_PASSWORD")
-    API_TOKEN_PATH = os.getenv("IWELL_TOKEN_PATH")
+    API_TOKEN_PATH = os.getenv("IWELL_TOKEN_PATH", "/oauth2/access-token")
     API_PAGESIZE = os.getenv("IWELL_PAGESIZE", 1000)
     API_HEADER_KEY = os.getenv("IWELL_HEADER_KEY", "API-HEADER-KEY")
     API_HEADER_PREFIX = os.getenv("IWELL_HEADER_PREFIX", "DEO")
@@ -223,7 +224,7 @@ class DevelopmentConfig(BaseConfig):
     """Development configuration"""
 
     DEBUG_TB_ENABLED = True
-    SECRET_KEY = os.getenv("SECRET_KEY", "test")
+    SECRET_KEY = os.getenv("SECRET_KEY", "dev")
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
 
@@ -237,6 +238,7 @@ class TestingConfig(BaseConfig):
     TOKEN_EXPIRATION_DAYS = 0
     TOKEN_EXPIRATION_SECONDS = 3
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SECRET_KEY = os.getenv("SECRET_KEY", "test")
 
     API_BASE_URL = "https://api.example.com/v3"
     API_CLIENT_ID = "test_client_id"

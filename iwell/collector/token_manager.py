@@ -1,6 +1,6 @@
 """ Manages access tokens for an api interface """
 from __future__ import annotations
-
+from typing import Optional, Dict, Callable
 import logging
 import urllib.parse
 
@@ -28,6 +28,8 @@ class TokenManager:
     username = None
     password = None
 
+    token: Optional[Dict] = None
+
     def __init__(
         self,
         client_type: str,
@@ -41,12 +43,12 @@ class TokenManager:
             kwargs.get("base_url", ""), kwargs.get("token_path", "")
         )
         self.headers = headers
-        self.cache = Yammler(cache or "./config/token.yaml")
         for key, value in kwargs.items():
             setattr(self, key, value)
 
     @property
-    def client_type(self):
+    def client(self) -> Callable:
+        """ lookup and return the appropriate callable based on the configured client type (self._client_type)"""
         client_map = {
             "legacy": self._get_access_token_legacy,
             "backend": self._get_access_token_backend,
@@ -65,11 +67,6 @@ class TokenManager:
 
         client = BackendApplicationClient(client_id=self.client_id)
         oauth = OAuth2Session(client=client)
-        # oauth.populate_token_attributes(
-        #     token_url=self.url,
-        #     auth=(self.client_id, self.client_secret),
-        #     headers=self.headers,
-        # )
         return dict(
             oauth.fetch_token(
                 token_url=self.url,
@@ -93,36 +90,29 @@ class TokenManager:
             )
         )
 
-    def _cache_token(self, token: dict):
-        """Save response token and token expiration date to configuration file.
-        Arguments:
-            response_token {dict} -- oauth response object
-        Returns:
-            str -- response token as string
-        """
-
-        self.cache["token"] = token
-        self.cache["token_expiration"] = datetime.utcfromtimestamp(token["expires_at"])
-        self.cache.dump()
-        return token
-
     @retry(Exception, tries=3, delay=5, backoff=2, logger=logger)
     def get_token_dict(self, force_refresh: bool = False) -> dict:
         """ Checks if saved token is still valid"""
-        token = self.cache.get("token")
-        expiration = self.cache.get("token_expiration")
 
-        if not force_refresh:
-            # if expiration date exists and is a datetime
-            if expiration is not None and isinstance(expiration, datetime):
-                # if current time is < time of expiration minus one day
-                if datetime.now() < expiration - timedelta(hours=1):
-
-                    return token  # current token is valid
+        if not force_refresh and not self.__class__.token_is_expired():
+            logger.info("Using existing token")
+            return self.__class__.token
 
         # Token isn't valid. Return new token
-        logger.info("Retrieved new token.")
-        return self._cache_token(self.client_type())
+        logger.info("Retrieved new token")
+        token = self.client()
+        self.__class__.token = token
+        return token
+
+    @classmethod
+    def token_is_expired(cls):
+        if cls.token is not None:
+            exp_ts = cls.token.get("expires_at", 0)
+            exp_dt = datetime.utcfromtimestamp(exp_ts)
+            if datetime.now() < exp_dt - timedelta(hours=1):
+                return False
+
+        return True
 
     def get_token(self, force_refresh=False):
         """Returns bearer authorization string for inclusion
@@ -142,10 +132,12 @@ if __name__ == "__main__":
 
     from config import get_active_config
 
+    logging.basicConfig()
+    logger.setLevel(20)
+
     conf = get_active_config()
     tm = TokenManager(**conf.api_params)
 
-    tm.url
     tm.get_token_dict()
-    list(tm.get_token_dict().keys())
-    tm.get_token()
+    d = tm.get_token_dict(force_refresh=True)
+    tm.client()
