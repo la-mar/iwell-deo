@@ -25,7 +25,6 @@ def iwell_requestor(conf, endpoint, requests_mock):
     yield IWellRequestor(conf.API_BASE_URL, endpoint=endpoint)
 
 
-# @pytest.mark.usefixtures("requests_mock")
 class TestIWellRequestor:
     def test_has_default_auth(self, iwell_requestor):
         # pylint: disable=anomalous-backslash-in-string
@@ -57,6 +56,7 @@ class TestIWellRequestor:
                 "token_type": "Bearer",
             },
         )
+        requests_mock.register_uri("GET", ANY, json={})
         IWellRequestor(
             conf.API_BASE_URL,
             endpoint=endpoint,
@@ -74,6 +74,7 @@ class TestIWellRequestor:
                 "token_type": "Bearer",
             },
         )
+        requests_mock.register_uri("GET", ANY, json={})
         IWellRequestor(
             conf.API_BASE_URL,
             endpoint=endpoint,
@@ -91,6 +92,7 @@ class TestIWellRequestor:
                 "token_type": "Bearer",
             },
         )
+        requests_mock.register_uri("GET", ANY, json={})
         IWellRequestor(
             conf.API_BASE_URL,
             endpoint=endpoint,
@@ -108,6 +110,7 @@ class TestIWellRequestor:
                 "token_type": "Bearer",
             },
         )
+        requests_mock.register_uri("GET", ANY, json={})
         r = IWellRequestor(conf.API_BASE_URL, endpoint=endpoint, mode="full",)
         assert (
             r.params["start"] == datetime(year=1970, month=1, day=1).date().isoformat()
