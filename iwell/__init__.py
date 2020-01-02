@@ -11,10 +11,11 @@ from celery import Celery
 
 from config import APP_SETTINGS
 import loggers
-import sentry
+
+# import sentry
 
 loggers.config()
-sentry.load()
+# sentry.load()
 
 
 # instantiate the extensions

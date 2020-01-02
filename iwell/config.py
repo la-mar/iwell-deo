@@ -246,6 +246,9 @@ class TestingConfig(BaseConfig):
     API_TOKEN_PATH = "/auth"
     API_DEFAULT_PAGESIZE = 100
 
+    SENTRY_ENABLED = True
+    SENTRY_DSN = "https://00000@sentry.io/12"
+
 
 class CIConfig(BaseConfig):
     pass

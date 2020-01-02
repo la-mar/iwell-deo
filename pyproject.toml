@@ -11,7 +11,6 @@ requests = "*"
 requests-oauthlib = "==1.0.0"
 pandas = "*"
 sqlalchemy = "==1.2.18"
-sentry-sdk = "*"
 oauthlib = "*"
 click = "*"
 psycopg2-binary = "^2.8"
@@ -33,6 +32,7 @@ datadog = "^0.31.0"
 celery = {version = "^4.3.0", extras = ["sqs"]}
 json_log_formatter = "^0.2.0"
 pylint_flask_sqlalchemy = "^0.1.0"
+sentry-sdk = "^0.13.5"
 
 
 [tool.poetry.dev-dependencies]

@@ -2,12 +2,13 @@ import logging
 
 from config import get_active_config
 
-conf = get_active_config()
+_conf = get_active_config()
 
 logger = logging.getLogger()
 
 
-def load():
+def load(conf=None):
+    conf = conf or _conf
     if str(conf.sentry_params.get("enabled")).lower() == "true":
         import sentry_sdk
         from sentry_sdk.integrations.logging import LoggingIntegration
@@ -60,3 +61,8 @@ def load():
 
         except Exception as e:
             logger.error(f"Failed to load Sentry configuration: {e}")
+            raise Exception(f"Failed to load Sentry integration -- {e}")
+
+
+if __name__ == "__main__":
+    load()

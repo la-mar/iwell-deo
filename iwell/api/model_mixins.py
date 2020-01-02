@@ -307,7 +307,6 @@ class DataFrameMixin(object):
             cls.s.flush()
             cls.s.commit()
         except Exception as e:
-            # TODO: Sentry
             logger.info(e)
             cls.s.rollback()
 
@@ -318,9 +317,7 @@ class DataFrameMixin(object):
             # Commit Updates
             cls.s.commit()
         except Exception as e:
-            # TODO: Add Sentry
             cls.s.rollback()
-            # cls.s.close()
             logger.info("Could not load updates")
             logger.info(e)
 
@@ -336,12 +333,10 @@ class DataFrameMixin(object):
                 insert_records.append(cls(**row))
             cls.s.add_all(insert_records)
 
-            # Commit Insertions
+            # Commit Inserts
             cls.s.commit()
         except Exception as e:
-            # TODO: Add Sentry
             cls.s.rollback()
-            # cls.s.close()
             logger.info("Could not load inserts")
             logger.info(e)
 
