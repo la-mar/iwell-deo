@@ -1,10 +1,11 @@
 import re
 
 
-class StringProcessor(str):
+class StringProcessor:
     re_ws = re.compile(r"\s+")
     re_dup_ws = re.compile(r"\s\s+")
     re_non_alphanum = re.compile(r"(?ui)\W")
+    re_non_num = re.compile(r"[^\d+]")
     replacement = "_"
     tolower = True
 
@@ -17,10 +18,16 @@ class StringProcessor(str):
         self.toupper = toupper
 
     def alphanum_only(self, s: str) -> str:
-        """ force replacement using space so whitespace can be deduped later
+        """ Replace all non-alphanumeric characters with whitespace. Whitespace is forced as a replacement so separators can optionally be inserted later.
         """
 
         return self.re_non_alphanum.sub(" ", s)
+
+    def numeric_only(self, s: str) -> str:
+        """ Replace all non-numeric characters with whitespace. Whitespace is forced as a replacement so separators can optionally be inserted later.
+        """
+
+        return self.re_non_num.sub(" ", s)
 
     def dedupe_whitespace(self, s: str) -> str:
         """ remove duplicated whitespaces
@@ -33,9 +40,10 @@ class StringProcessor(str):
         return self.re_ws.sub("", s)
 
     def fill_whitespace(self, s: str, replacement: str = None) -> str:
-        return s.replace(" ", replacement or self.replacement)
+        replacement = replacement if replacement is not None else self.replacement
+        return s.replace(" ", replacement)
 
-    def normalize(self, s: str, as_int: bool = False) -> str:
+    def normalize(self, s: str, int_compatable: bool = False) -> str:
         """Normalizes the given string. Operations performed on the string are:
                 - remove all non-alphanumeric characters
                 - squish sequential whitespace to a single space
@@ -43,10 +51,10 @@ class StringProcessor(str):
                 - strip leading and trailing whitespace
 
         Arguments:
-            string {str} -- a string to process
+            s {str} -- a string to process
 
         Keyword Arguments:
-            replacement {str} -- replacement for regex substitutions (default: {''})
+            int_compatable {bool} -- return an int parsable string. The string is NOT converted to an integer type.
 
         Returns:
             str -- the normalized string
@@ -58,7 +66,7 @@ class StringProcessor(str):
             s = self.dedupe_whitespace(s)
             s = str.strip(s)
 
-            if as_int:
+            if int_compatable:
                 s = self.remove_whitespace(s)
                 # dont actually convert to int to avoid the potential failure point during ingestion
             else:
@@ -70,12 +78,3 @@ class StringProcessor(str):
                     s = s.lower()
 
         return s
-
-
-if __name__ == "__main__":
-
-    sp = StringProcessor()
-
-    sp.normalize("  test               TEST   Test     ") == "test_test_test"
-
-    sp.normalize("1,232", as_int=True) == str(1232)
