@@ -37,8 +37,8 @@ module "worker_autoscaler" {
   min_capacity        = 1
   max_capacity        = 5
   queue1              = "iwell-celery"
-  scale_in_threshold  = 1000
-  scale_out_threshold = 3000
+  scale_in_threshold  = var.worker_scale_in_threshold
+  scale_out_threshold = var.worker_scale_out_threshold
 }
 
 resource "aws_ecs_service" "iwell_cron" {

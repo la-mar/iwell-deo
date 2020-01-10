@@ -11,3 +11,13 @@ variable "environment" {
 variable "service_name" {
   description = "Name of the service"
 }
+
+variable "worker_scale_in_threshold" {
+  description = "Threshold to trigger an autoscale-in activity, represented as number of messages in SQS"
+  type        = number
+}
+
+variable "worker_scale_out_threshold" {
+  description = "Threshold to trigger an autoscale-in activity, represented as number of messages in SQS"
+  type        = number
+}
