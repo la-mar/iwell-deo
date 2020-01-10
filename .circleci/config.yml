@@ -32,10 +32,6 @@ jobs:
             - /home/circleci/.cache/pypoetry/virtualenvs
 
       - run:
-          name: lint
-          command: poetry run pylint iwell --exit-zero --rcfile=.pylintrc
-
-      - run:
           name: CodeClimate before-build
           command: |
             curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter

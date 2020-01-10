@@ -38,7 +38,6 @@ sentry-sdk = "^0.13.5"
 [tool.poetry.dev-dependencies]
 black = { version = "*", allow-prereleases = true }
 mypy = "*"
-pylint = "*"
 ipython = "*"
 matplotlib = "*"
 pytest = "^5.2"
@@ -49,6 +48,7 @@ docker = "^4.1.0"
 boto3 = "^1.10.6"
 hypothesis = "^4.42.7"
 pylint_flask_sqlalchemy = "^0.1.0"
+flake8 = "^3.7.9"
 
 
 [tool.coverage.report]
