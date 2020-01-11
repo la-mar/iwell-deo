@@ -14,8 +14,8 @@ def sp():
 class TestStringProcessor:
     def test_sp_props(self, sp):
         assert sp.replacement == "_"
-        assert sp.tolower == True
-        assert sp.toupper == False
+        assert sp.tolower is True
+        assert sp.toupper is False
 
     def test_remove_special_chars(self, sp):
         s = sp.alphanum_only(f"test123{SPECIAL_CHARS}")
