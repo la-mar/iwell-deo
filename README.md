@@ -1,19 +1,23 @@
 # iwell-deo
+iwell-deo is a project aimed at automating the collection, validation, and aggregation of your operational oil & gas data from <a href="https://www.iwell.info/">iwell.info</a>.
 
 <div style="text-align:center;">
   <table >
     <tr>
-      <a href="https://codeclimate.com/github/la-mar/iwell-deo/maintainability"><img src="https://api.codeclimate.com/v1/badges/35d6fa7af6b035c48b1c/maintainability" /></a>
-      <a href="https://codeclimate.com/github/la-mar/iwell-deo/test_coverage"><img src="https://api.codeclimate.com/v1/badges/35d6fa7af6b035c48b1c/test_coverage" /></a>
       <a href="https://codecov.io/gh/la-mar/iwell-deo">
         <img src="https://codecov.io/gh/la-mar/iwell-deo/branch/master/graph/badge.svg" />
       </a>
-      <a href="(https://circleci.com/gh/la-mar/iwell-deo">
+      <a href="https://circleci.com/gh/la-mar/iwell-deo">
         <img src="https://circleci.com/gh/la-mar/iwell-deo.svg?style=svg" />
       </a>
+      <a href="https://hub.docker.com/r/driftwood/iwell">
+        <img src="https://img.shields.io/docker/pulls/driftwood/iwell.svg" />
+      </a>      
     </tr>
   </table>
 </div>
+
+Available on <a href="https://hub.docker.com/r/driftwood/iwell">DockerHub</a>!
 
 ## Getting Started
 
@@ -53,3 +57,8 @@ FLASK_ENV=development
 APP_SETTINGS=iwell.config.DevelopmentConfig
 SECRET_KEY=my_precious
 ```
+
+# TODO
+
+- add documentation
+- finish unit tests
