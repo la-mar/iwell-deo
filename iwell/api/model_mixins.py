@@ -243,34 +243,6 @@ class DataFrameMixin(object):
             func.count(cls.__table__.c[cls.primary_key_names()[0]])
         ).first()
 
-    # @classmethod
-    # def tz_convert(
-    #     cls, ts: datetime, as_ts: bool = True, as_utc: bool = False
-    # ) -> pd.Timestamp:
-
-    #     if isinstance(ts, (datetime, date)):
-    #         ts = pd.Timestamp(ts)
-
-    #     has_tz = ts.tz is not None
-
-    #     try:
-    #         if has_tz:
-    #             is_utc = ts.tz._utcoffset == 0
-    #             if is_utc:
-    #                 ts = ts.tz_convert("US/Central")
-    #         else:
-    #             ts = ts.tz_localize("US/Central")
-    #     except Exception as e:
-    #         logger.debug(f"Error normalizing timezone for value {ts}: {e}")
-
-    #     if as_utc:
-    #         ts = ts.tz_convert("utc")
-
-    #     if not as_ts:
-    #         ts = ts.to_pydatetime()
-
-    #     return ts
-
     @classproperty
     def date_columns(cls):
         return [

@@ -7,7 +7,7 @@ from requests_mock import ANY
 
 import util
 
-expected_url = "https://api.example.com/v3/path/to/endpoint"
+`expected_url = "https://api.example.com/v3/path/to/endpoint"`
 
 
 class TestTokenManager:
