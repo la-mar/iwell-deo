@@ -321,7 +321,8 @@ endpoints:
       aliases:
         <<: *default_aliases
         note_time: noted_at
-    exclude: []
+    exclude:
+      - is_pumper_comment
     normalize: false
     version: v1
     tasks:
