@@ -4,20 +4,17 @@ from __future__ import annotations
 from typing import Dict, List, Union, Optional
 from datetime import datetime, date
 import logging
+from timeit import default_timer as timer
 
 
 import pandas as pd
 from sqlalchemy.sql import func
+from sqlalchemy.dialects.postgresql.dml import Insert
+from sqlalchemy.exc import IntegrityError
 
 from iwell import db
-
-
-class classproperty(object):
-    def __init__(self, f):
-        self.f = f
-
-    def __get__(self, obj, owner):
-        return self.f(owner)
+import util
+import util.deco
 
 
 class TimestampMixin(object):
@@ -38,7 +35,7 @@ class DataFrameMixin(object):
     and upsert operations.
     """
 
-    @classproperty
+    @util.deco.classproperty
     def s(self):
         return db.session
 
@@ -243,7 +240,7 @@ class DataFrameMixin(object):
             func.count(cls.__table__.c[cls.primary_key_names()[0]])
         ).first()
 
-    @classproperty
+    @util.deco.classproperty
     def date_columns(cls):
         return [
             colname
@@ -440,15 +437,90 @@ class DataFrameMixin(object):
         return inserts
 
     @classmethod
-    def core_insert(cls, df):
-        records = cls.orient(cls.nan_to_none(df))
+    def core_insert(
+        cls,
+        df: pd.DataFrame,
+        size: int = None,
+        exclude_cols: list = None,
+        update_on_conflict: bool = True,
+        ignore_on_conflict: bool = False,
+    ) -> Dict[str, int]:
 
-        cls.s.bind.engine.execute(cls.__table__.insert(), [i for i in records])
-        cls.persist()
-        logger.info(
-            f"{cls.__table__.name}.core_insert: inserted {len(records)} records"
-        )
-        return len(records)
+        records = cls.orient(cls.nan_to_none(df))
+        op_name = "core_insert"
+        affected: int = 0
+        size = size or len(records)
+        exclude_cols = exclude_cols or []
+        for chunk in util.chunks(records, size):
+            ts = timer()
+            chunk = list(chunk)
+            stmt = Insert(cls).values(chunk)
+
+            # update these columns when a conflict is encountered
+            if ignore_on_conflict:
+                final_stmt = stmt.on_conflict_do_nothing(
+                    constraint=cls.__table__.primary_key
+                )
+                op_name = op_name + "_ignore_on_conflict"
+            elif update_on_conflict:
+                on_conflict_update_cols = [
+                    c.name
+                    for c in cls.__table__.c
+                    if c not in list(cls.__table__.primary_key.columns)
+                    and c.name not in exclude_cols
+                ]
+                op_name = op_name + "_update_on_conflict"
+                # append on conflict clause to insert statement
+                final_stmt = stmt.on_conflict_do_update(
+                    constraint=cls.__table__.primary_key,
+                    set_={
+                        k: getattr(stmt.excluded, k) for k in on_conflict_update_cols
+                    },
+                )
+
+            else:
+                final_stmt = stmt
+            try:
+                cls.s.bind.engine.execute(final_stmt)
+                cls.persist()
+                exc_time = round(timer() - ts, 2)
+                n = len(chunk)
+                affected += n
+                logger.info(
+                    f"{cls.__table__.name}.{op_name}: {n} records ({exc_time}s) ({affected}/{len(records)})"
+                )
+            except IntegrityError as ie:
+                logger.debug(f"{cls.__table__.name}.{op_name}: IntegrityError")
+
+                # fragment and reprocess
+                if len(records) > 1:
+                    first_half = records[: len(records) // 2]
+                    second_half = records[len(records) // 2 :]
+                    logger.debug(
+                        f"{cls.__table__.name}.{op_name}: fragmenting original query -- original={len(records)}, first_fragment={len(first_half)}, second_fragment={len(second_half)}"
+                    )
+                    cls.core_insert(
+                        records=first_half,
+                        size=len(first_half) // 4,
+                        update_on_conflict=update_on_conflict,
+                        ignore_on_conflict=ignore_on_conflict,
+                    )
+                    cls.core_insert(
+                        records=second_half,
+                        size=len(second_half) // 4,
+                        update_on_conflict=update_on_conflict,
+                        ignore_on_conflict=ignore_on_conflict,
+                    )
+            except Exception as e:
+                logger.error(e.args[0])
+                # import json
+                # from util.jsontools import ObjectEncoder
+
+                # with open(f"log/{datetime.now()}.json", "w") as f:
+                #     chunk.append({"err": e})
+                #     json.dump(chunk, f, cls=ObjectEncoder, indent=4)
+
+        return {"affected": affected, "operation": op_name}
 
     @classmethod
     def nan_to_none(cls, df):

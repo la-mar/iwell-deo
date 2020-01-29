@@ -73,7 +73,7 @@ class IWellCollector(Collector):
         }
         return keys
 
-    def collect(self, response: requests.Response) -> Dict[str, str]:
+    def collect(self, response: requests.Response) -> Dict[str, int]:
         if not response.ok:
             logger.warning(
                 f"Invalid status code in response: ({response.status_code}: {response.reason}){response.url}"
@@ -89,7 +89,9 @@ class IWellCollector(Collector):
 
         if not df.empty:
             try:
-                return self.model.bulk_merge(df)
+                # return self.model.bulk_merge(df)
+
+                return self.model.core_insert(df)
             except KeyError as ke:
                 # TODO: Special message if missing key is a primary key in the model
                 logger.error(
