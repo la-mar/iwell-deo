@@ -60,7 +60,7 @@ def log(message):
 @celery.task
 def post_heartbeat():
     """ Sync model from source to data warehouse"""
-    return metrics.send(f"{project}.heartbeat", 1)
+    return metrics.post(f"{project}.heartbeat", 1)
 
 
 @celery.task(bind=True, max_retries=2, ignore_result=True)
@@ -89,9 +89,9 @@ def _collect_request(request: Request, endpoint: Endpoint):
     # capture_result(endpoint, result)
     if affected:
         metrics.post(
-            endpoint,
+            endpoint.model.__table__.name,
             affected,
-            tags={"model": endpoint.model.__name__, "operation": operation},
+            tags={"model": endpoint.model.__table__.name, "operation": operation},
         )
     return result
 
