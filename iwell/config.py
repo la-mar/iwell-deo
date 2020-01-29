@@ -22,6 +22,7 @@ _mssql_aliases = ["mssql", "sql server"]
 
 APP_SETTINGS = os.getenv("APP_SETTINGS", "iwell.config.DevelopmentConfig")
 FLASK_APP = os.getenv("FLASK_APP", "iwell.manage.py")
+ENVIRONMENT_MAP = {"production": "prod", "staging": "stage", "development": "dev"}
 
 
 def make_config_path(path: str, filename: str) -> str:
@@ -106,6 +107,11 @@ class BaseConfig:
     DATADOG_ENABLED = os.getenv("DATADOG_ENABLED", False)
     DATADOG_API_KEY = os.getenv("DATADOG_API_KEY", None)
     DATADOG_APP_KEY = os.getenv("DATADOG_APP_KEY", None)
+    DATADOG_DEFAULT_TAGS = {
+        "environment": ENVIRONMENT_MAP.get(FLASK_ENV, FLASK_ENV),
+        "service_name": project,
+        "service_version": version,
+    }
 
     """ Config """
     CONFIG_BASEPATH = "./config"
@@ -165,7 +171,7 @@ class BaseConfig:
     API_PAGESIZE = os.getenv("IWELL_PAGESIZE", 1000)
     API_HEADER_KEY = os.getenv("IWELL_HEADER_KEY", "API-HEADER-KEY")
     API_HEADER_PREFIX = os.getenv("IWELL_HEADER_PREFIX", "DEO")
-    API_SYNC_WINDOW_MINUTES = os.getenv("IWELL_SYNC_WINDOW_MINUTES", 1440 * 7)
+    API_SYNC_WINDOW_MINUTES = os.getenv("IWELL_SYNC_WINDOW_MINUTES", 1440)  # 1 day
 
     @property
     def show(self):
@@ -193,6 +199,27 @@ class BaseConfig:
             key.lower().replace("sentry_", ""): getattr(self, key)
             for key in dir(self)
             if key.startswith("SENTRY_")
+        }
+
+    @classmethod
+    def with_prefix(cls, kw: str):
+        """ Return all parameters that begin with the given string.
+
+            Example: kw = "collector"
+
+                Returns:
+                    {
+                        "base_url": "example.com/api",
+                        "path": "path/to/data",
+                        "endpoints": {...}
+                    }
+        """
+        if not kw.endswith("_"):
+            kw = kw + "_"
+        return {
+            key.lower().replace(kw.lower(), ""): getattr(cls, key)
+            for key in dir(cls)
+            if key.startswith(kw.upper())
         }
 
     @property

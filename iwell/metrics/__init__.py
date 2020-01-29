@@ -1,3 +1,5 @@
+# flake8: noqa
 from metrics.metrics import *
 
-load_datadog()  # type: ignore
+""" Load datadog on import """
+load()  # type: ignore

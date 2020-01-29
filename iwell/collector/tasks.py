@@ -84,8 +84,15 @@ def _collect_request(request: Request, endpoint: Endpoint):
                 f"GET {response.url} returned unexpected response code: {response.status_code}"
             )
     result = c.collect(response)
-    capture_result(endpoint, result)
-    post_metric(endpoint, result)
+    affected = result.get("affected")
+    operation = result.get("operation")
+    # capture_result(endpoint, result)
+    if affected:
+        metrics.post(
+            endpoint,
+            affected,
+            tags={"model": endpoint.model.__name__, "operation": operation},
+        )
     return result
 
 
@@ -136,16 +143,16 @@ def capture_result(endpoint: Endpoint, result: dict) -> None:
         IntegrationLog.persist()  # type: ignore
 
 
-def post_metric(endpoint: Endpoint, result: dict) -> None:
-    for k, v in result.items():
-        try:
-            name = f"{project}.{endpoint.name}.{k}"
-            points = v
-            metrics.send(name, points)
-        except Exception as e:
-            logger.debug(
-                "Failed to post metric: name=%s, points=%s, error=%s", name, points, e
-            )
+# def post_metric(endpoint: Endpoint, result: dict) -> None:
+#     for k, v in result.items():
+#         try:
+#             name = f"{project}.{endpoint.name}.{k}"
+#             points = v
+#             metrics.post(name, points)
+#         except Exception as e:
+#             logger.debug(
+#                 "Failed to post metric: name=%s, points=%s, error=%s", name, points, e
+#             )
 
 
 @task_postrun.connect
