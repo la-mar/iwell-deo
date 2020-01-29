@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, List, Union, Generator
+from typing import Dict, List, Union, Generator, Optional
 import logging
 from datetime import datetime, timedelta, date
 
@@ -22,9 +22,9 @@ conf = get_active_config()
 class Requestor(object):
     window_timedelta = timedelta(days=1)
     sync_epoch = datetime(year=1970, month=1, day=1)
-    functions: Dict[str, str] = {}
-    headers: Dict[str, str] = {}
-    params: Dict[str, str] = {}
+    functions: Optional[Dict[str, str]] = None
+    headers: Optional[Dict[str, str]] = None
+    params: Optional[Dict[str, str]] = None
 
     def __init__(
         self,
@@ -35,11 +35,11 @@ class Requestor(object):
         params: dict = None,
     ):
         self.token_manager = TokenManager.from_app_config(conf)
-        self.headers = headers or self.headers
-        self.params = params or self.params
+        self.headers = headers or {}
+        self.params = params or {}
         self.base_url = base_url
         self.endpoint = endpoint
-        self.functions = functions or self.functions
+        self.functions = functions or {}
         self._session = None
         self.requests: list = []
         self.responses: list = []
@@ -188,7 +188,8 @@ class IWellRequestor(Requestor):
         if self.mode == "full":
             self.add_start(datetime(year=1970, month=1, day=1))
         elif self.mode == "sync":
-            self.add_start(datetime.now() - timedelta(minutes=self.sync_interval))
+            # self.add_start(datetime.now() - timedelta(minutes=self.sync_interval))
+            self.add_since(self.determine_query_window().get("since"))
 
     def add_since(self, since: Union[date, datetime], **kwargs) -> None:
         """Limits records to those updated after the specified time"""
@@ -248,11 +249,11 @@ class IWellRequestor(Requestor):
     def determine_query_window(self) -> dict:
         # TODO: Implement start and end bounds
         since = None
-        if self.mode == "delta":
-            since = self.last_sync
-        elif self.mode == "window":
-            since = datetime.now() - (self.window_timedelta or self.window_timedelta)
-        elif self.mode == "all":
+        if self.mode in ["delta", "sync"]:
+            since = datetime.now() - (self.endpoint.timedelta or self.window_timedelta)
+        # elif self.mode == "window":
+        #     since = datetime.now() - (self.window_timedelta or self.window_timedelta)
+        elif self.mode == "full":
             since = self.sync_epoch
 
         return {"since": since, "start": None, "end": None}
@@ -305,39 +306,36 @@ if __name__ == "__main__":
     # dt = datetime(year=1970, month=1, day=1)
     # ts = int(dt.timestamp())
 
-    endpoint = endpoints["complex"]
-    r = IWellRequestor(url, endpoint)
+    endpoint = endpoints["field_values"]
+    # endpoint.mode
+    r = IWellRequestor(url, endpoint, mode="sync")
     c = IWellCollector(endpoint)
 
-    req = r.enqueue_with_ids(well_id=19683, field_id=3051)
-    # req = r.enqueue_with_ids(tank_id=22999, reading_id=9315516)
+    # # req = r.enqueue_with_ids(well_id=20338, field_id=3051)
+    # req = r.enqueue_with_ids(well_id=17588, field_id=2657)
 
-    # GET /v1/tanks/22999/readings/9315516/run-tickets start=2019-10-26
+    # resp = req.get()
 
-    # req.params.update({"start": "2019-10-29"})
-    # req.params.update({"since": "2019-10-31"})
-    # req.params = {"start": "2019-10-29"}
-    # req.params = {"since": "2019-10-29"}
-    resp = req.get()
-    # resp.json()
-    c.transform(resp.json()["data"])
-    c.collect(resp)
-    # well_id: 17588
-    # meter_id: 5392
+    # df = c.transform(resp.json()["data"])
+    # df.to_dict(orient="records")
+    # c.collect(resp)
 
-    # req = next(r.sync_model())
-    # response = response.get()
     responses = []
     for req in r.sync_model():
         responses.append(req.get())
 
-    response = responses[0]
-    # self = c
-    # responses[0].json()
-    [x.status_code for x in responses]
-    [len(x.text) for x in responses]
-    # [len(x.json()["data"]) for x in responses]
-    [x.ok for x in responses]
-
     for resp in responses:
         c.collect(resp)
+
+    # df = pd.DataFrame()
+    # for resp in responses:
+    #     df = df.append(c.transform(resp.json()["data"]))
+
+    # df.id.min()
+    # df.updated_by.unique()
+
+    # 66, 877, 733
+
+    # 66, 739, 528
+
+    # df.describe()

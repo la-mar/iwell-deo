@@ -17,7 +17,7 @@ cc-run-local:
 	circleci local execute -c process.yml --job build-image -e DOCKER_LOGIN=${DOCKER_LOGIN} -e DOCKER_PASSWORD=${DOCKER_PASSWORD}
 
 run-tests:
-	pytest --cov=iwell tests/ --cov-report xml:./coverage/python/coverage.xml --log-cli-level debug
+	export APP_SETTINGS=iwell.config.TestingConfig && pytest --cov=iwell tests/ --cov-report xml:./coverage/python/coverage.xml --log-cli-level debug
 
 smoke-test:
 	docker run --entrypoint iwell driftwood/iwell:${COMMIT_HASH} test smoke-test

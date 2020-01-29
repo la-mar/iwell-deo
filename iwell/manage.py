@@ -89,6 +89,9 @@ def ipython_embed():
 @cli.command()
 @click.argument("endpoint")
 @click.option(
+    "--mode", "-m", help="Set to download records updated after the specified time",
+)
+@click.option(
     "--since",
     "-s",
     type=click.DateTime(formats=["%Y-%m-%d"]),
@@ -115,10 +118,15 @@ def ipython_embed():
     count=True,
     default=2,
 )
-def sync_endpoint(endpoint, since, from_, to, verbose):
+def sync_endpoint(endpoint, mode, since, from_, to, verbose):
     "Run a one-off task to synchronize an endpoint"
     print(conf)
-    collector.tasks._sync_endpoint(endpoint, since=since, start=from_, end=to)
+    kwargs = dict(since=since, start=from_, end=to,)
+
+    if mode:
+        kwargs.update(dict(mode=mode))
+
+    collector.tasks._sync_endpoint(endpoint, **kwargs)
 
 
 @cli.command()

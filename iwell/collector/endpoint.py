@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Dict, List, Union, Any
 import logging
+import datetime as dt
 from pydoc import locate
 
 from attrdict import AttrDict
@@ -13,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class Endpoint(object):
+    timedelta = {"days": 1}
+
     def __init__(
         self,
         name: str,
@@ -27,6 +30,8 @@ class Endpoint(object):
         normalize: bool = False,
         updated_column: str = "updated_at",
         enabled: bool = True,
+        timedelta: Dict = None,
+        mode: str = None,
         **kwargs,
     ):
 
@@ -44,6 +49,8 @@ class Endpoint(object):
         self.normalize = normalize
         self.options = options or []
         self.enabled = enabled
+        self.timedelta = dt.timedelta(**(timedelta or self.timedelta))  # type: ignore
+        self.mode = mode
 
     def __repr__(self):
         return f"{self.version}{self.path}"
@@ -129,11 +136,11 @@ if __name__ == "__main__":
     config = get_active_config()
     endpoints = config.endpoints
     # [x for x in endpoints.items()]
-    load_from_config(config)
+    # endpoints = load_from_config(config)
 
     # e = Endpoint("test", **{"model": "test"})
     e = Endpoint(name="test", **endpoints.wells)
     e.depends_on
     e._dependency_map
     e.enabled
-
+    e.timedelta
