@@ -1,9 +1,14 @@
+SHELL := /bin/zsh
 COMMIT_HASH    := $$(git log -1 --pretty=%h)
 DATE := $$(date +"%Y-%m-%d")
 CTX:=.
 AWS_ACCOUNT_ID:=$$(aws-vault exec ${ENV} -- aws sts get-caller-identity | jq .Account -r)
 IMAGE_NAME:=driftwood/iwell
 DOCKERFILE:=Dockerfile
+APP_VERSION=$$(grep -o '\([0-9]\+.[0-9]\+.[0-9]\+\)' pyproject.toml | head -n1)
+
+test-appversion:
+	@echo $$(pyappversion)
 
 cc-expand:
 	# show expanded configuration
@@ -23,7 +28,7 @@ smoke-test:
 	docker run --entrypoint iwell driftwood/iwell:${COMMIT_HASH} test smoke-test
 
 cov:
-	pytest --cov iwell --cov-report html:./coverage/coverage.html --log-level info --log-cli-level debug
+	export APP_SETTINGS=iwell.config.TestingConfig && pytest --cov iwell --cov-report html:./coverage/coverage.html --log-level info --log-cli-level debug
 
 view-cov:
 	open -a "Google Chrome" ./coverage/coverage.html/index.html
@@ -66,13 +71,18 @@ build: login
 	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${COMMIT_HASH}
 	docker push ${IMAGE_NAME}:${COMMIT_HASH}
 
+push-version: login
+	@echo "Building docker image: ${IMAGE_NAME}:${APP_VERSION}"
+	docker build  -f ${DOCKERFILE} ${CTX} -t ${IMAGE_NAME}:${APP_VERSION}
+	docker push ${IMAGE_NAME}:${APP_VERSION}
+
+
 all:
 	make build login push
 	# make iwell-redis-deo build login push
 
 deploy: ssm-update
 	# Update SSM parameters from local dotenv and deploy a new version of the service to ECS
-	${eval AWS_ACCOUNT_ID=$(shell echo ${AWS_ACCOUNT_ID})}
 	@echo ${AWS_ACCOUNT_ID}
 	export AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID} && aws-vault exec ${ENV} -- poetry run python scripts/deploy.py
 
