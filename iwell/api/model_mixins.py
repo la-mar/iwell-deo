@@ -487,17 +487,22 @@ class DataFrameMixin(object):
                 n = len(chunk)
                 affected += n
                 logger.info(
-                    f"{cls.__table__.name}.{op_name}: {n} records ({exc_time}s) ({affected}/{len(records)})"
+                    f"{cls.__table__.name}.{op_name}: {n} records ({exc_time}s) ({affected}/{len(records)})",
+                    extra={"model": cls.__table__.name},
                 )
             except IntegrityError as ie:
-                logger.debug(f"{cls.__table__.name}.{op_name}: IntegrityError")
+                logger.debug(
+                    f"{cls.__table__.name}.{op_name}: IntegrityError",
+                    extra={"model": cls.__table__.name},
+                )
 
                 # fragment and reprocess
                 if len(records) > 1:
                     first_half = records[: len(records) // 2]
                     second_half = records[len(records) // 2 :]
                     logger.debug(
-                        f"{cls.__table__.name}.{op_name}: fragmenting original query -- original={len(records)}, first_fragment={len(first_half)}, second_fragment={len(second_half)}"
+                        f"{cls.__table__.name}.{op_name}: fragmenting original query -- original={len(records)}, first_fragment={len(first_half)}, second_fragment={len(second_half)}",
+                        extra={"model": cls.__table__.name},
                     )
                     cls.core_insert(
                         records=first_half,
@@ -512,7 +517,7 @@ class DataFrameMixin(object):
                         ignore_on_conflict=ignore_on_conflict,
                     )
             except Exception as e:
-                logger.error(e.args[0])
+                logger.error(e.args[0], extra={"model": cls.__table__.name})
                 # import json
                 # from util.jsontools import ObjectEncoder
 
