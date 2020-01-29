@@ -61,7 +61,7 @@ class Transformer(object):
         try:
             if len(self.exclude) > 0:
                 logger.debug(f"Dropping {len(self.exclude)} columns: {self.exclude}")
-            df = df.drop(columns=self.exclude)
+            df = df.drop(columns=[c for c in self.exclude if c in df.columns])
         except Exception as e:
             msg = f"Failed attempting to drop columns -- {e}"
             self.errors.append(msg)
