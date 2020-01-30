@@ -314,49 +314,45 @@ if __name__ == "__main__":
     # dt = datetime(year=1970, month=1, day=1)
     # ts = int(dt.timestamp())
 
-    endpoint = endpoints["run_tickets"]
+    endpoint = endpoints["production"]
     endpoint.since_offset = timedelta(days=365)
     endpoint.start_offset = None  # timedelta(days=1)
     # endpoint.mode
-    r = IWellRequestor(url, endpoint, mode="sync")
+    r = IWellRequestor(url, endpoint, mode="full")
     c = IWellCollector(endpoint)
 
     # req = r.enqueue_with_ids(well_id=20338, field_id=3051)  # field_values
     # req = r.enqueue_with_ids(tank_id=17928)  # tank_readings
-    req = r.enqueue_with_ids(tank_id=17928, reading_id=7272486)  # tank_readings
+    # req = r.enqueue_with_ids(well_id=20336)  # production
+
+    # req = r.enqueue_with_ids(tank_id=17928, reading_id=7272486)  # tank_readings
     # req.params.update(
     #     {"start": (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")}
     # )
     # req.params["since"] = int(float(req.params["since"]))
-    req.params
-    resp = req.get()
+    # req.params
+    # resp = req.get()
 
-    df = c.transform(resp.json()["data"])
-    df
-    df.shape
+    # df = c.transform(resp.json()["data"])
+    # df
+    # df.shape
+    # df.produced_at.min()
+    # # c.collect(resp)
+
+    responses = []
+    for req in r.sync_model():
+        responses.append(req.get())
+
+    for resp in responses:
+        c.collect(resp)
+
+    df = pd.DataFrame()
+    for resp in responses:
+        df = df.append(c.transform(resp.json()["data"]))
+
     df.iwell_updated_at.min()
 
-    # df.to_dict(orient="records")
-    # c.collect(resp)
-
-    # responses = []
-    # for req in r.sync_model():
-    #     # req.params.update(
-    #     #     {"start": (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")}
-    #     # )
-    #     # req.params["since"] = int(float(req.params["since"]))
-    #     responses.append(req.get())
-
-    # # for resp in responses:
-    # #     c.collect(resp)
-
-    # df = pd.DataFrame()
-    # for resp in responses:
-    #     df = df.append(c.transform(resp.json()["data"]))
-
-    # df
-
     # df.shape
-    ts = resp.request.path_url.split("=")[-1]
-    pd.Timestamp(datetime.now()) - endpoint.timedelta < df.iwell_updated_at.min()
-    pd.Timestamp(datetime.now()) - df.iwell_updated_at.min()
+    # ts = resp.request.path_url.split("=")[-1]
+    # pd.Timestamp(datetime.now()) - endpoint.timedelta < df.iwell_updated_at.min()
+    # pd.Timestamp(datetime.now()) - df.iwell_updated_at.min()
