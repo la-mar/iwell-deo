@@ -99,7 +99,7 @@ class IWellCollector(Collector):
                 )
 
         else:
-            logger.info(f"{self.endpoint}: empty dataframe")
+            logger.debug(f"{self.endpoint}: empty dataframe")
 
         # TODO: On IntegrityError, queue a task to sync the model containing the foreign key
         return {}

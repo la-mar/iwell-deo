@@ -314,15 +314,16 @@ if __name__ == "__main__":
     # dt = datetime(year=1970, month=1, day=1)
     # ts = int(dt.timestamp())
 
-    endpoint = endpoints["tank_readings"]
-    endpoint.timedelta = timedelta(hours=24)
-    endpoint.start_offset = timedelta(days=1)
+    endpoint = endpoints["run_tickets"]
+    endpoint.since_offset = timedelta(days=365)
+    endpoint.start_offset = None  # timedelta(days=1)
     # endpoint.mode
     r = IWellRequestor(url, endpoint, mode="sync")
     c = IWellCollector(endpoint)
 
     # req = r.enqueue_with_ids(well_id=20338, field_id=3051)  # field_values
-    req = r.enqueue_with_ids(tank_id=17928)  # tank_readings
+    # req = r.enqueue_with_ids(tank_id=17928)  # tank_readings
+    req = r.enqueue_with_ids(tank_id=17928, reading_id=7272486)  # tank_readings
     # req.params.update(
     #     {"start": (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")}
     # )
@@ -333,7 +334,7 @@ if __name__ == "__main__":
     df = c.transform(resp.json()["data"])
     df
     df.shape
-    df.reading_at.min()
+    df.iwell_updated_at.min()
 
     # df.to_dict(orient="records")
     # c.collect(resp)
@@ -356,6 +357,6 @@ if __name__ == "__main__":
     # df
 
     # df.shape
-    # ts = responses[0].request.path_url.split("=")[-1]
-    # pd.Timestamp(datetime.utcnow()) - endpoint.timedelta < df.iwell_updated_at.min()
-    # pd.Timestamp(datetime.utcnow()) - df.iwell_updated_at.min()
+    ts = resp.request.path_url.split("=")[-1]
+    pd.Timestamp(datetime.now()) - endpoint.timedelta < df.iwell_updated_at.min()
+    pd.Timestamp(datetime.now()) - df.iwell_updated_at.min()

@@ -94,7 +94,7 @@ endpoints:
       sync:
         cron:
           minute: 0
-  tank_readings: # requires 'start' instead of 'since'
+  tank_readings: # requires 'start' instead of 'since' parameter
     <<: *default_status
     model: api.models.TankReading
     path: /tanks/{tank_id}/readings
@@ -211,7 +211,7 @@ endpoints:
         <<: *default_sync
       full:
         <<: *default_full
-  run_tickets:
+  run_tickets:  # 'since' parameter doesn't appear to work
     <<: *default_status
     model: api.models.RunTicket
     path: /tanks/{tank_id}/readings/{reading_id}/run-tickets
@@ -231,7 +231,7 @@ endpoints:
     tasks:
       sync:
         cron:
-          minute: '*/30'
+          minute: 0
       full:
         <<: *default_full
   well_fields:
