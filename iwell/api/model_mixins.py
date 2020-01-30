@@ -518,13 +518,6 @@ class DataFrameMixin(object):
                     )
             except Exception as e:
                 logger.error(e.args[0], extra={"model": cls.__table__.name})
-                # import json
-                # from util.jsontools import ObjectEncoder
-
-                # with open(f"log/{datetime.now()}.json", "w") as f:
-                #     chunk.append({"err": e})
-                #     json.dump(chunk, f, cls=ObjectEncoder, indent=4)
-
         return {"affected": affected, "operation": op_name}
 
     @classmethod

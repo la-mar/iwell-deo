@@ -43,15 +43,6 @@ def hr():
     return "-" * get_terminal_columns()
 
 
-# @cli.command("urlmap")
-# def urlmap():
-#     """Prints out all routes"""
-#     click.echo("{:50s} {:40s} {}".format("Endpoint", "Methods", "Route"))
-#     for route in app.url_map.iter_rules():
-#         methods = ",".join(route.methods)
-#         click.echo("{:50s} {:40s} {}".format(route.endpoint, methods, route))
-
-
 @cli.command()
 def ipython_embed():
     """Runs a ipython shell in the app context."""
@@ -86,7 +77,7 @@ def ipython_embed():
     IPython.embed(banner1=banner, user_ns=ctx)
 
 
-@cli.command()
+@run_cli.command()
 @click.argument("endpoint")
 @click.option(
     "--mode", "-m", help="Set to download records updated after the specified time",
@@ -118,7 +109,7 @@ def ipython_embed():
     count=True,
     default=2,
 )
-def sync_endpoint(endpoint, mode, since, from_, to, verbose):
+def endpoint(endpoint, mode, since, from_, to, verbose):
     "Run a one-off task to synchronize an endpoint"
     print(conf)
     kwargs = dict(since=since, start=from_, end=to,)
@@ -126,12 +117,16 @@ def sync_endpoint(endpoint, mode, since, from_, to, verbose):
     if mode:
         kwargs.update(dict(mode=mode))
 
-    collector.tasks._sync_endpoint(endpoint, **kwargs)
+    if endpoint != "all":
+        collector.tasks._sync_endpoint(endpoint, **kwargs)
+
+    for name in load_from_config(conf).keys():
+        collector.tasks._sync_endpoint(name, **kwargs)
 
 
 @cli.command()
 def endpoints():
-    tpl = "{name:>25} {value:<50}\n"
+    tpl = "{name:>20} {value:<50}"
     for name, ep in load_from_config(conf).items():
         click.secho(tpl.format(name=f"{name}:", value=str(ep)))
 
@@ -139,8 +134,6 @@ def endpoints():
 @run_cli.command()
 @click.argument("celery_args", nargs=-1, type=click.UNPROCESSED)
 def worker(celery_args):
-    # from celery_queue.worker import celery
-
     cmd = ["celery", "-E", "-A", "celery_queue.worker:celery", "worker",] + list(
         celery_args
     )
@@ -150,8 +143,6 @@ def worker(celery_args):
 @run_cli.command(context_settings=dict(ignore_unknown_options=True))
 @click.argument("celery_args", nargs=-1, type=click.UNPROCESSED)
 def cron(celery_args):
-    # from celery_queue.worker import celery
-
     cmd = ["celery", "-A", "celery_queue.worker:celery", "beat",] + list(celery_args)
     subprocess.call(cmd)
 
@@ -159,8 +150,6 @@ def cron(celery_args):
 @run_cli.command(context_settings=dict(ignore_unknown_options=True))
 @click.argument("celery_args", nargs=-1, type=click.UNPROCESSED)
 def monitor(celery_args):
-    # from celery_queue.worker import celery
-
     cmd = ["celery", "-A", "celery_queue.worker:celery", "flower",] + list(celery_args)
     subprocess.call(cmd)
 

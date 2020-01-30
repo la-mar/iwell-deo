@@ -20,7 +20,7 @@ conf = get_active_config()
 
 
 class Requestor(object):
-    window_timedelta = timedelta(days=1)
+    window_timedelta = timedelta(days=30)
     sync_epoch = datetime(year=1970, month=1, day=1)
     functions: Optional[Dict[str, str]] = None
     headers: Optional[Dict[str, str]] = None
@@ -159,7 +159,6 @@ class Requestor(object):
 class IWellRequestor(Requestor):
     custom_header_key = conf.API_HEADER_KEY
     custom_header_prefix = conf.API_HEADER_PREFIX
-    sync_interval = conf.API_SYNC_WINDOW_MINUTES
 
     def __init__(
         self,
@@ -188,20 +187,24 @@ class IWellRequestor(Requestor):
         if self.mode == "full":
             self.add_start(datetime(year=1970, month=1, day=1))
         elif self.mode == "sync":
-            # self.add_start(datetime.now() - timedelta(minutes=self.sync_interval))
-            self.add_since(self.determine_query_window().get("since"))
+            query = self.determine_query_window()
+            self.add_since(query.get("since"))
+            self.add_start(query.get("start"))
 
-    def add_since(self, since: Union[date, datetime], **kwargs) -> None:
+    def add_since(self, since: datetime, **kwargs) -> None:
         """Limits records to those updated after the specified time"""
-        ts = int(datetime.fromordinal(since.toordinal()).timestamp())
-        self.add_param("since", ts)
+        if "since" in self.endpoint.options:
+            ts = since.timestamp()
+            self.add_param("since", ts)
 
     def add_start(self, start: datetime, **kwargs) -> None:
         """Filters records based on their recording date (e.g when the reading occurred), NOT when the record was changed in the system"""
-        self.add_param("start", start.strftime("%Y-%m-%d"))
+        if "start" in self.endpoint.options:
+            self.add_param("start", start.strftime("%Y-%m-%d"))
 
     def add_end(self, end: datetime, **kwargs) -> None:
-        self.add_param("end", end.strftime("%Y-%m-%d"))
+        if "end" in self.endpoint.options:
+            self.add_param("end", end.strftime("%Y-%m-%d"))
 
     def add_auth(self) -> None:
         self.headers.update({"Authorization": self.get_token(force_refresh=True)})
@@ -233,9 +236,9 @@ class IWellRequestor(Requestor):
             query = self.model.query.with_entities(
                 *[c.label(aliases[idx]) for idx, c in enumerate(columns)]
             )
-            if since:
-                # hack to get query access to the model via the first column in the columns set
-                query.filter(columns[0].table.c[updated_column_name] >= since)
+            # if since:
+            #     # hack to get query access to the model via the first column in the columns set
+            #     query.filter(columns[0].table.c[updated_column_name] >= since)
 
             df = pd.read_sql(query.statement, query.session.bind)
             records = df.to_dict(orient="records")
@@ -247,16 +250,21 @@ class IWellRequestor(Requestor):
         pass
 
     def determine_query_window(self) -> dict:
-        # TODO: Implement start and end bounds
+        # TODO: Implement end bound
         since = None
+        start = None
         if self.mode in ["delta", "sync"]:
-            since = datetime.now() - (self.endpoint.timedelta or self.window_timedelta)
-        # elif self.mode == "window":
-        #     since = datetime.now() - (self.window_timedelta or self.window_timedelta)
+            since = datetime.now() - (
+                self.endpoint.since_offset or self.window_timedelta
+            )
+            start = datetime.now() - (
+                self.endpoint.start_offset or self.window_timedelta
+            )
         elif self.mode == "full":
             since = self.sync_epoch
+            start = self.sync_epoch
 
-        return {"since": since, "start": None, "end": None}
+        return {"since": since, "start": start, "end": None}
 
     def enqueue_with_ids(self, headers: dict = None, params: dict = None, **kwargs):
         """adds id vars as headers to the outgoing request so they can be retrieved from the response at collection time """
@@ -306,36 +314,48 @@ if __name__ == "__main__":
     # dt = datetime(year=1970, month=1, day=1)
     # ts = int(dt.timestamp())
 
-    endpoint = endpoints["field_values"]
+    endpoint = endpoints["tank_readings"]
+    endpoint.timedelta = timedelta(hours=24)
+    endpoint.start_offset = timedelta(days=1)
     # endpoint.mode
     r = IWellRequestor(url, endpoint, mode="sync")
     c = IWellCollector(endpoint)
 
-    # # req = r.enqueue_with_ids(well_id=20338, field_id=3051)
-    # req = r.enqueue_with_ids(well_id=17588, field_id=2657)
+    # req = r.enqueue_with_ids(well_id=20338, field_id=3051)  # field_values
+    req = r.enqueue_with_ids(tank_id=17928)  # tank_readings
+    # req.params.update(
+    #     {"start": (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")}
+    # )
+    # req.params["since"] = int(float(req.params["since"]))
+    req.params
+    resp = req.get()
 
-    # resp = req.get()
+    df = c.transform(resp.json()["data"])
+    df
+    df.shape
+    df.reading_at.min()
 
-    # df = c.transform(resp.json()["data"])
     # df.to_dict(orient="records")
     # c.collect(resp)
 
-    responses = []
-    for req in r.sync_model():
-        responses.append(req.get())
+    # responses = []
+    # for req in r.sync_model():
+    #     # req.params.update(
+    #     #     {"start": (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")}
+    #     # )
+    #     # req.params["since"] = int(float(req.params["since"]))
+    #     responses.append(req.get())
 
-    for resp in responses:
-        c.collect(resp)
+    # # for resp in responses:
+    # #     c.collect(resp)
 
     # df = pd.DataFrame()
     # for resp in responses:
     #     df = df.append(c.transform(resp.json()["data"]))
 
-    # df.id.min()
-    # df.updated_by.unique()
+    # df
 
-    # 66, 877, 733
-
-    # 66, 739, 528
-
-    # df.describe()
+    # df.shape
+    # ts = responses[0].request.path_url.split("=")[-1]
+    # pd.Timestamp(datetime.utcnow()) - endpoint.timedelta < df.iwell_updated_at.min()
+    # pd.Timestamp(datetime.utcnow()) - df.iwell_updated_at.min()

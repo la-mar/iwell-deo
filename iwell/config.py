@@ -171,7 +171,13 @@ class BaseConfig:
     API_PAGESIZE = os.getenv("IWELL_PAGESIZE", 1000)
     API_HEADER_KEY = os.getenv("IWELL_HEADER_KEY", "API-HEADER-KEY")
     API_HEADER_PREFIX = os.getenv("IWELL_HEADER_PREFIX", "DEO")
-    API_SYNC_WINDOW_MINUTES = os.getenv("IWELL_SYNC_WINDOW_MINUTES", 1440)  # 1 day
+    API_DEFAULT_SYNC_WINDOW_MINUTES = os.getenv(
+        "IWELL_DEFAULT_SYNC_WINDOW_MINUTES", 10
+    )  # 1440 = 1 day
+
+    API_DEFAULT_SYNC_START_OFFSET_DAYS = os.getenv(
+        "IWELL_DEFAULT_SYNC_START_OFFSET_DAYS", 1
+    )
 
     @property
     def show(self):

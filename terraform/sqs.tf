@@ -1,7 +1,7 @@
 resource "aws_sqs_queue" "celery" {
   name                       = "iwell-celery"
   delay_seconds              = 0
-  message_retention_seconds  = 360
+  message_retention_seconds  = 3600
   receive_wait_time_seconds  = 0
   visibility_timeout_seconds = 120
 

@@ -61,13 +61,16 @@ def post(
         points {Union[int, float, List[Tuple]]} -- metric value(s)
     """
     try:
-        name = f"{project}.{name}".lower()
+        # name = f"{project}.{name}".lower()
+        name = name.lower()
+        tags = (
+            to_tags(conf.DATADOG_DEFAULT_TAGS)
+            + to_tags(tags or [])
+            + to_tags({"service_name": {project}})
+        )
         if datadog:
             result = datadog.api.Metric.send(
-                metric=name,
-                points=points,
-                type=str(metric_type).lower(),
-                tags=to_tags(conf.DATADOG_DEFAULT_TAGS) + to_tags(tags or []),
+                metric=name, points=points, type=str(metric_type).lower(), tags=tags,
             )
             if result.get("status") == "ok":
                 logger.debug(
@@ -103,7 +106,7 @@ def post_event(title: str, text: str, tags: Union[Dict, List, str] = None):
 
 def post_heartbeat():
     """ Send service heartbeat to Datadog """
-    return post("heartbeat", 1, metric_type="gauge")
+    return post(name="heartbeat", points=1, metric_type="gauge")
 
 
 def to_tags(values: Union[Dict, List, str], sep: str = ",") -> List[str]:

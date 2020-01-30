@@ -1,22 +1,17 @@
 default_schedule: &default_schedule
   # seconds: 15
   cron:
-    minute: "*/30"
+    minute: "*/15"
 
 job_defaults:
   sync: &default_sync
     mode: sync
-    seconds: 60
-  # hourly:
-  #   mode:
+    seconds: 600
   full: &default_full
     mode: full
     cron:
       minute: 0
       hour: 0
-
-
-
 
 default_aliases: &default_aliases
   created_at: iwell_created_at
@@ -38,9 +33,9 @@ endpoints:
     version: v1
     tasks:
       sync:
-        mode: sync
-        cron:
-          minute: "*/10"
+        <<: *default_sync
+      full:
+        <<: *default_full
 
   wells:
     enabled: true
@@ -78,8 +73,7 @@ endpoints:
     version: v1
     tasks:
       sync:
-        cron:
-          minute: 0
+        <<: *default_sync
       full:
         <<: *default_full
   fields:
@@ -99,13 +93,13 @@ endpoints:
     tasks:
       sync:
         cron:
-          minute: "*/5"
-  tank_readings:
+          minute: 0
+  tank_readings: # requires 'start' instead of 'since'
     <<: *default_status
     model: api.models.TankReading
     path: /tanks/{tank_id}/readings
     options:
-      - since
+      # - since
       - start
       - end
     depends_on:
@@ -121,8 +115,7 @@ endpoints:
     version: v1
     tasks:
       sync:
-        cron:
-          minute: "*/5"
+        <<: *default_sync
   field_values:
     <<: *default_status
     model: api.models.FieldValue
@@ -192,8 +185,7 @@ endpoints:
     version: v1
     tasks:
       sync:
-        cron:
-          minute: '*/5'
+        <<: *default_sync
       full:
         <<: *default_full
   production:
@@ -216,12 +208,9 @@ endpoints:
     version: v1
     tasks:
       sync:
-        cron:
-          minute: '*/5'
+        <<: *default_sync
       full:
         <<: *default_full
-        # options:
-        #   since: 1970-01-01
   run_tickets:
     <<: *default_status
     model: api.models.RunTicket
@@ -242,7 +231,7 @@ endpoints:
     tasks:
       sync:
         cron:
-          minute: '*/5'
+          minute: '*/30'
       full:
         <<: *default_full
   well_fields:
@@ -315,6 +304,8 @@ endpoints:
     <<: *default_status
     model: api.models.WellNote
     path: /wells/{well_id}/notes
+    options:
+      - since
     depends_on:
       well_id: api.models.Well.id
     mappings:
@@ -327,14 +318,17 @@ endpoints:
     version: v1
     tasks:
       sync:
-        cron:
-          minute: "*/5"
+        <<: *default_sync
+      full:
+        <<: *default_full
   well_tanks:
     <<: *default_status
     model: api.models.WellTank
     path: /wells/{well_id}/tanks
     depends_on:
       well_id: api.models.Well.id
+    options:
+      - since
     mappings:
       aliases:
         <<: *default_aliases

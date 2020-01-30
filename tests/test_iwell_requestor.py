@@ -2,11 +2,14 @@
 import pytest
 import re
 from datetime import datetime
+import logging
 
 from requests_mock import ANY
 
 from collector.requestor import IWellRequestor
 from collector.endpoint import Endpoint
+
+logger = logging.getLogger(__name__)
 
 
 @pytest.fixture
@@ -33,7 +36,7 @@ class TestIWellRequestor:
     def test_add_since(self, iwell_requestor):
         ts = datetime(year=1970, month=1, day=1)
         iwell_requestor.add_since(since=ts)
-        assert iwell_requestor.params["since"] == str(int(ts.timestamp()))
+        assert iwell_requestor.params["since"] == str(ts.timestamp())
 
     def test_add_start(self, iwell_requestor):
         ts = datetime(year=1970, month=1, day=1)
@@ -112,6 +115,7 @@ class TestIWellRequestor:
         )
         requests_mock.register_uri("GET", ANY, json={})
         r = IWellRequestor(conf.API_BASE_URL, endpoint=endpoint, mode="full",)
+        logger.warning(r.params)
         assert (
             r.params["start"] == datetime(year=1970, month=1, day=1).date().isoformat()
         )

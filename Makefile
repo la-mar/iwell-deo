@@ -69,7 +69,12 @@ build: login
 	@echo "Building docker image: ${IMAGE_NAME}"
 	docker build  -f ${DOCKERFILE} ${CTX} -t ${IMAGE_NAME}
 	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${COMMIT_HASH}
+	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:dev
+
+push:
+	docker push ${IMAGE_NAME}:dev
 	docker push ${IMAGE_NAME}:${COMMIT_HASH}
+	docker push ${IMAGE_NAME}:latest
 
 push-version: login
 	@echo "Building docker image: ${IMAGE_NAME}:${APP_VERSION}"
@@ -81,7 +86,7 @@ all:
 	make build login push
 	# make iwell-redis-deo build login push
 
-deploy: ssm-update
+deploy:
 	# Update SSM parameters from local dotenv and deploy a new version of the service to ECS
 	@echo ${AWS_ACCOUNT_ID}
 	export AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID} && aws-vault exec ${ENV} -- poetry run python scripts/deploy.py

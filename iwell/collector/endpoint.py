@@ -9,12 +9,16 @@ from flask_sqlalchemy import Model
 from sqlalchemy import Column
 
 from api.models import *
+from config import get_active_config
 
 logger = logging.getLogger(__name__)
 
+conf = get_active_config()
+
 
 class Endpoint(object):
-    timedelta = {"days": 1}
+    since_offset = {"minutes": conf.API_DEFAULT_SYNC_WINDOW_MINUTES}
+    start_offset = {"days": conf.API_DEFAULT_SYNC_START_OFFSET_DAYS}
 
     def __init__(
         self,
@@ -30,8 +34,9 @@ class Endpoint(object):
         normalize: bool = False,
         updated_column: str = "updated_at",
         enabled: bool = True,
-        timedelta: Dict = None,
         mode: str = None,
+        since_offset: Dict = None,
+        start_offset: Dict = None,
         **kwargs,
     ):
 
@@ -49,8 +54,9 @@ class Endpoint(object):
         self.normalize = normalize
         self.options = options or []
         self.enabled = enabled
-        self.timedelta = dt.timedelta(**(timedelta or self.timedelta))  # type: ignore
+        self.since_offset = dt.timedelta(**(since_offset or self.since_offset))  # type: ignore
         self.mode = mode
+        self.start_offset = dt.timedelta(**(start_offset or self.start_offset))  # type: ignore
 
     def __repr__(self):
         return f"{self.version}{self.path}"

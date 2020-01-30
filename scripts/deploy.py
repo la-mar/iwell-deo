@@ -71,6 +71,7 @@ print(f"ENV: {ENV}")
 print(f"AWS_ACCOUNT_ID: {AWS_ACCOUNT_ID}")
 print(f"CLUSTER_NAME: {CLUSTER_NAME}")
 print(f"SERVICES: {SERVICES}")
+print(f"IMAGE_NAME: {IMAGE_NAME}")
 print("-" * 30 + "\n\n")
 
 

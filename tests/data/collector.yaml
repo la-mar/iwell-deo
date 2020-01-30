@@ -10,6 +10,10 @@ endpoints:
     exclude: []
     normalize: false
     path: /path/{id}/subpath/{id2}/values
+    options:
+      - start
+      - end
+      - since
     version: v3
     mode: delta
   moderate:
@@ -24,6 +28,10 @@ endpoints:
       - latest_production_time
       - is_active
       - alias
+    options:
+      - start
+      - end
+      - since
     primary_keys: group_id
     normalize: false
     path: /well-groups/{group_id}/wells
@@ -40,6 +48,10 @@ endpoints:
         type: well_type
         updated_at: iwell_updated_at
     exclude: []
+    options:
+      - start
+      - end
+      - since
     normalize: false
     path: /wells
     version: v3
