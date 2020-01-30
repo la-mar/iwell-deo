@@ -136,7 +136,8 @@ endpoints:
     version: v1
     tasks:
       sync:
-        <<: *default_sync
+        mode: sync
+        seconds: 60
       full:
         <<: *default_full
   meters:
@@ -208,7 +209,8 @@ endpoints:
     version: v1
     tasks:
       sync:
-        <<: *default_sync
+        mode: sync
+        seconds: 60
       full:
         <<: *default_full
   run_tickets:  # 'since' parameter doesn't appear to work
