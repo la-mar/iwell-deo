@@ -36,7 +36,6 @@ endpoints:
         <<: *default_sync
       full:
         <<: *default_full
-
   wells:
     enabled: true
     model: api.models.Well
@@ -116,14 +115,20 @@ endpoints:
     tasks:
       sync:
         <<: *default_sync
+      full:
+        mode: full
+        cron:
+          minute: 0
+          hour: 3
+          day_of_week: 0
   field_values:
     <<: *default_status
     model: api.models.FieldValue
     path: /wells/{well_id}/fields/{field_id}/values
     options:
       - since
-      - start
-      - end
+      # - start
+      # - end
     depends_on:
       field_id: api.models.WellField.field_id
       well_id: api.models.WellField.well_id
@@ -134,6 +139,8 @@ endpoints:
     exclude: []
     normalize: false
     version: v1
+    since_offset:
+      minutes: 60
     tasks:
       sync:
         mode: sync
@@ -190,7 +197,6 @@ endpoints:
       full:
         <<: *default_full
   production:
-    # <<: *default_status
     enabled: true
     model: api.models.Production
     path: /wells/{well_id}/production
@@ -234,8 +240,9 @@ endpoints:
       sync:
         cron:
           minute: 0
-      full:
-        <<: *default_full
+          hour: "*/6"
+      # full:
+      #   <<: *default_full
   well_fields:
     <<: *default_status
     model: api.models.WellField
