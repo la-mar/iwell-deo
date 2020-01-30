@@ -124,7 +124,7 @@ def setup_periodic_tasks(sender, **kwargs):
     tasks = tasks_from_app_config(conf)
     for task in tasks:
         if task.enabled:
-            logger.warning("Registering periodic task: %s", task.task_name)
+            logger.debug("Registering periodic task: %s", task.task_name)
             sender.add_periodic_task(
                 task.schedule,
                 sync_endpoint.s(task.model_name, mode=task.mode, **task.options),
