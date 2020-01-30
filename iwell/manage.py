@@ -119,9 +119,9 @@ def endpoint(endpoint, mode, since, from_, to, verbose):
 
     if endpoint != "all":
         collector.tasks._sync_endpoint(endpoint, **kwargs)
-
-    for name in load_from_config(conf).keys():
-        collector.tasks._sync_endpoint(name, **kwargs)
+    else:
+        for name in load_from_config(conf).keys():
+            collector.tasks._sync_endpoint(name, **kwargs)
 
 
 @cli.command()
