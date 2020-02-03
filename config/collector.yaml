@@ -72,7 +72,9 @@ endpoints:
     version: v1
     tasks:
       sync:
-        <<: *default_sync
+        cron:
+          minute: 0
+          hour: "*/3"
       full:
         <<: *default_full
   fields:
@@ -101,6 +103,8 @@ endpoints:
       # - since
       - start
       - end
+    start_offset:
+      days: 7
     depends_on:
       tank_id: api.models.Tank.id
     mappings:
@@ -114,7 +118,7 @@ endpoints:
     version: v1
     tasks:
       sync:
-        <<: *default_sync
+        seconds: 3600
       full:
         mode: full
         cron:
