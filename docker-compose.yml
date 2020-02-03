@@ -1,25 +1,36 @@
 version: "3.7"
 
 x-defaults: &defaults
-  image: driftwood/iwell:0.1.0
-  build:
-    context: .
-    dockerfile: Dockerfile
+  image: driftwood/iwell
   restart: unless-stopped
-  environment:
-    - AWS_REGION
-    - AWS_ACCESS_KEY_ID
-    - AWS_SECRET_ACCESS_KEY
-    - AWS_SESSION_TOKEN
-    - AWS_SECURITY_TOKEN
+  # environment:
+  #   - AWS_REGION
+  #   - AWS_ACCESS_KEY_ID
+  #   - AWS_SECRET_ACCESS_KEY
+  #   - AWS_SESSION_TOKEN
+  #   - AWS_SECURITY_TOKEN
+  env_file: .env.compose
+  volumes:
+    - ./:/app
+  depends_on:
+    - redis
 
 services:
+  web:
+    <<: *defaults
+    # entrypoint: iwell run web
+    command: iwell run web -b 0.0.0.0:5005
+    ports:
+      - "5005:5005"
   worker:
     <<: *defaults
     user: celeryuser
     command: iwell run worker
-    # command: env
   # cron:
   #   <<: *defaults
   #   user: celeryuser
   #   command: iwell run cron --loglevel=DEBUG
+  redis:
+    image: redis
+    ports:
+      - 6379

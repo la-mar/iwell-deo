@@ -61,33 +61,48 @@ celery-beat:
 kubectl-proxy:
 	kubectl proxy --port=8080
 
+
 login:
 	docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
 
-build: login
-	# initiate a build of the dockerfile specified in the DOCKERFILE environment variable
+build:
 	@echo "Building docker image: ${IMAGE_NAME}"
-	docker build  -f ${DOCKERFILE} ${CTX} -t ${IMAGE_NAME}
+	docker build  -f Dockerfile . -t ${IMAGE_NAME}
 	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${COMMIT_HASH}
-	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:dev
+	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${APP_VERSION}
+	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:latest
 
-push:
+
+build-with-chamber:
+	@echo "Building docker image: ${IMAGE_NAME} (with chamber)"
+	docker build  -f Dockerfile.chamber . -t ${IMAGE_NAME}
+	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:chamber-dev
+	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:chamber-${COMMIT_HASH}
+	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:chamber-${APP_VERSION}
+	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:chamber-latest
+
+build-all: build-with-chamber build
+
+push: login
 	docker push ${IMAGE_NAME}:dev
 	docker push ${IMAGE_NAME}:${COMMIT_HASH}
 	docker push ${IMAGE_NAME}:latest
 
-push-version: login
-	@echo "Building docker image: ${IMAGE_NAME}:${APP_VERSION}"
-	docker build  -f ${DOCKERFILE} ${CTX} -t ${IMAGE_NAME}:${APP_VERSION}
-	docker push ${IMAGE_NAME}:${APP_VERSION}
+push-all: login push
+	docker push ${IMAGE_NAME}:chamber-dev
+	docker push ${IMAGE_NAME}:chamber-${COMMIT_HASH}
+	docker push ${IMAGE_NAME}:chamber-latest
 
+push-version:
+	# docker push ${IMAGE_NAME}:latest
+	@echo pushing: ${IMAGE_NAME}:${APP_VERSION}, ${IMAGE_NAME}:chamber-${APP_VERSION}
+	docker push ${IMAGE_NAME}:${APP_VERSION}
+	docker push ${IMAGE_NAME}:chamber-${APP_VERSION}
 
 all:
-	make build login push
-	# make iwell-redis-deo build login push
+	make build-all push-all
 
 deploy:
-	# Update SSM parameters from local dotenv and deploy a new version of the service to ECS
 	@echo ${AWS_ACCOUNT_ID}
 	export AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID} && aws-vault exec ${ENV} -- poetry run python scripts/deploy.py
 

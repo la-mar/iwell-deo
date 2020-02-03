@@ -131,8 +131,8 @@ endpoints:
     path: /wells/{well_id}/fields/{field_id}/values
     options:
       - since
-      # - start
-      # - end
+      - start
+      - end
     depends_on:
       field_id: api.models.WellField.field_id
       well_id: api.models.WellField.well_id
@@ -145,6 +145,8 @@ endpoints:
     version: v1
     since_offset:
       minutes: 60
+    # start_offset:
+    #   days:
     tasks:
       sync:
         mode: sync
@@ -199,7 +201,9 @@ endpoints:
     version: v1
     tasks:
       sync:
-        <<: *default_sync
+        cron:
+          minute: 0
+          hour: "*/1"
       full:
         <<: *default_full
   production:

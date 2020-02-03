@@ -159,6 +159,7 @@ class BaseConfig:
     CELERY_ENABLE_REMOTE_CONTROL = False  # required for sqs
     CELERY_SEND_EVENTS = False  # required for sqs
     CELERY_DEFAULT_QUEUE = "iwell-celery"  # sqs queue name
+    CELERY_RESULT_BACKEND = f"db+{SQLALCHEMY_DATABASE_URI}"
 
     """ API """
     API_CLIENT_TYPE = os.getenv("IWELL_CLIENT_TYPE", "legacy")

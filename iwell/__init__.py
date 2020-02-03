@@ -36,6 +36,8 @@ def create_app(script_info=None):
     migrate.init_app(app, db)
     celery.config_from_object(app.config)
 
+    configure_blueprints(app)
+
     # shell context for flask cli
     @app.shell_context_processor
     def ctx():  # pylint: disable=unused-variable
@@ -43,3 +45,11 @@ def create_app(script_info=None):
 
     return app
 
+
+def configure_blueprints(app):
+    pass
+    # avoids circular import
+    from api.resources.views import api as root
+
+    # register blueprints
+    app.register_blueprint(root.blueprint)
