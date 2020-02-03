@@ -52,6 +52,18 @@ data "terraform_remote_state" "ecs_cluster" {
   }
 }
 
+# Load shared ecs cluster
+data "terraform_remote_state" "web_cluster" {
+  backend = "remote"
+
+  config = {
+    organization = "deo"
+    workspaces = {
+      name = "ecs-web-cluster-${replace(var.environment, "stage", "dev")}" # remaps stage to use dev network
+    }
+  }
+}
+
 
 data "terraform_remote_state" "kms" {
   backend = "remote"

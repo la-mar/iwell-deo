@@ -1,12 +1,79 @@
 
 ### Task Definitions ###
 
+data "aws_ecs_task_definition" "iwell_web" {
+  task_definition = "iwell-cron"
+}
+
 data "aws_ecs_task_definition" "iwell_worker" {
   task_definition = "iwell-worker"
 }
 
 data "aws_ecs_task_definition" "iwell_cron" {
   task_definition = "iwell-cron"
+}
+
+resource "aws_security_group" "iwell_web" {
+  description = "Security group for ${var.service_name}"
+
+  vpc_id = data.terraform_remote_state.vpc.outputs.vpc_id
+  name   = "${var.service_name}-web-sg"
+  tags   = merge(local.tags, { Name = var.service_name })
+
+  ingress {
+    description = "All TCP Traffic"
+    protocol    = "tcp"
+    from_port   = var.service_port
+    to_port     = var.service_port
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    description = "All Traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+
+### ECS Services ###
+resource "aws_ecs_service" "iwell_web" {
+  name            = "iwell-web"
+  cluster         = data.terraform_remote_state.web_cluster.outputs.cluster_arn
+  task_definition = data.aws_ecs_task_definition.iwell_web.family
+
+  scheduling_strategy = "REPLICA"
+  ordered_placement_strategy {
+    type  = "spread"
+    field = "instanceId"
+  }
+  desired_count           = 1
+  enable_ecs_managed_tags = true
+  propagate_tags          = "TASK_DEFINITION"
+  tags                    = local.tags
+
+  # allow external changes without Terraform plan difference
+  lifecycle {
+    create_before_destroy = true
+    ignore_changes = [
+      desired_count,
+      task_definition,
+    ]
+  }
+
+  network_configuration {
+    subnets          = data.terraform_remote_state.vpc.outputs.private_subnets
+    security_groups  = [aws_security_group.iwell_web.id]
+    assign_public_ip = false
+  }
+
+  service_registries {
+    registry_arn   = aws_service_discovery_service.web.arn
+    container_name = "iwell-web"
+
+  }
 }
 
 ### ECS Services ###

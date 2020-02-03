@@ -21,3 +21,7 @@ variable "worker_scale_out_threshold" {
   description = "Threshold to trigger an autoscale-in activity, represented as number of messages in SQS"
   type        = number
 }
+
+variable "service_port" {
+  description = "Web service port"
+}
