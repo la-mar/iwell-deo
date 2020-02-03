@@ -53,7 +53,13 @@ if not any([ENV, AWS_ACCOUNT_ID, SERVICE_NAME, IMAGE_NAME, CLUSTER_NAME]):
     raise ValueError("One or more environment variables are missing")
 
 
-SERVICES: List[str] = ["iwell-worker", "iwell-cron"]
+# SERVICES: List[str] = ["iwell-worker", "iwell-cron"]
+
+SERVICES = [
+    {"cluster": "ecs-web-cluster", "service": "iwell-web"},
+    {"cluster": "ecs-collector-cluster", "service": "iwell-worker"},
+    {"cluster": "ecs-collector-cluster", "service": "iwell-cron"},
+]
 
 IMAGES = [
     {"name": SERVICE_NAME, "dockerfile": "Dockerfile", "build_context": "."},
@@ -90,6 +96,27 @@ def get_task_definition(
     task_iam_role_arn: str = "ecsTaskExecutionRole",
 ):
     defs = {
+        "iwell-web": {
+            "containerDefinitions": [
+                {
+                    "name": "iwell-web",
+                    "command": ["iwell", "run", "web", "-b 0.0.0.0:80",],
+                    "memoryReservation": 128,
+                    "cpu": 128,
+                    "image": IMAGE_NAME,
+                    "essential": True,
+                    "portMappings": [
+                        {"hostPort": 80, "containerPort": 80, "protocol": "tcp"}
+                    ],
+                },
+            ],
+            "executionRoleArn": "ecsTaskExecutionRole",
+            "family": f"{service_name}",
+            "networkMode": "awsvpc",
+            "taskRoleArn": task_iam_role_arn,
+            "tags": tags,
+            # "cpu": "256",  # from 128 CPU units (0.125 vCPUs) and 10240 CPU units (10 vCPUs)
+        },
         "iwell-worker": {
             "containerDefinitions": [
                 {
@@ -99,7 +126,6 @@ def get_task_definition(
                     "cpu": 512,
                     "image": IMAGE_NAME,
                     "essential": True,
-                    "environment": transform_envs(envs),
                 },
             ],
             "executionRoleArn": "ecsTaskExecutionRole",
@@ -118,7 +144,6 @@ def get_task_definition(
                     "cpu": 256,
                     "image": IMAGE_NAME,
                     "essential": True,
-                    "environment": transform_envs(envs),
                 },
             ],
             "executionRoleArn": "ecsTaskExecutionRole",
@@ -193,8 +218,12 @@ class AWSClient:
         return self._ecs or self.get_client("ecs")
 
     def get_latest_revision(self, task_name: str):
-        response = self.ecs.describe_task_definition(taskDefinition=task_name)
-        return response["taskDefinition"]["revision"]
+        try:
+            response = self.ecs.describe_task_definition(taskDefinition=task_name)
+            result = response["taskDefinition"]["revision"]
+        except:
+            result = "???"
+        return result
 
 
 client = AWSClient()
@@ -203,7 +232,9 @@ client = AWSClient()
 results = []
 
 
-for service in SERVICES:
+for item in SERVICES:
+    cluster = item["cluster"]
+    service = item["service"]
     s = f"{service:>20}:"
     prev_rev_num = client.get_latest_revision(service)
     cdef = get_task_definition(
@@ -219,17 +250,15 @@ for service in SERVICES:
 
     rev_num = client.get_latest_revision(service)
     s += "\t" + f"updated revision: {prev_rev_num} -> {rev_num}"
-    results.append((service, prev_rev_num, rev_num))
+    results.append((cluster, service, prev_rev_num, rev_num))
     print(s)
 
-for service, prev_rev_num, rev_num in results:
+for cluster, service, prev_rev_num, rev_num in results:
     response = client.ecs.update_service(
-        cluster=CLUSTER_NAME,
+        cluster=cluster,
         service=service,
         forceNewDeployment=True,
         taskDefinition=f"{service}:{rev_num}",
     )
-    print(f"{service:>20}: updated service on cluster {CLUSTER_NAME}")
-
-
+    print(f"{service:>20}: updated service on cluster {cluster}")
 print("\n\n")
