@@ -172,7 +172,9 @@ endpoints:
     version: v1
     tasks:
       sync:
-        <<: *default_sync
+        cron:
+          minute: 0
+          hour: "*/3"
       full:
         <<: *default_full
   meter_readings:
