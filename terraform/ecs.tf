@@ -2,7 +2,7 @@
 ### Task Definitions ###
 
 data "aws_ecs_task_definition" "iwell_web" {
-  task_definition = "iwell-cron"
+  task_definition = "iwell-web"
 }
 
 data "aws_ecs_task_definition" "iwell_worker" {
