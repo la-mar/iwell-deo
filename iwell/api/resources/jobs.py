@@ -34,3 +34,8 @@ class RunJob(Resource):
             {"status": "success", "job_id": async_result.id,},
             200,
         )
+
+
+# class ListEndpoints(Resource):
+#     def get(self):
+#         list(load_from_config(conf).keys():)

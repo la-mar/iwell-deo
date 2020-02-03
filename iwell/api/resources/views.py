@@ -9,3 +9,6 @@ api = Api(blueprint)
 
 api.add_resource(r.HealthCheck, "/health")
 api.add_resource(r.RunJob, "/<endpoint>")
+api.add_resource(r.DescribeEndpoint, "/<endpoint>/describe")
+api.add_resource(r.ListEndpoints, "/endpoints")
+api.add_resource(r.DescribeEndpoints, "/endpoints/describe")
