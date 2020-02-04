@@ -36,7 +36,7 @@ def load_config(path: str) -> AttrDict:
         return AttrDict(yaml.safe_load(f))
 
 
-def get_active_config() -> AttrDict:
+def get_active_config() -> BaseConfig:
     return globals()[APP_SETTINGS.replace("iwell.config.", "")]()
 
 
@@ -263,6 +263,9 @@ class DevelopmentConfig(BaseConfig):
     DEBUG_TB_ENABLED = True
     SECRET_KEY = os.getenv("SECRET_KEY", "dev")
     SQLALCHEMY_TRACK_MODIFICATIONS = True
+    CONFIG_BASEPATH = "./config"
+    COLLECTOR_CONFIG_PATH = make_config_path(CONFIG_BASEPATH, "collector.dev.yaml")
+    COLLECTOR_CONFIG = load_config(COLLECTOR_CONFIG_PATH)
 
 
 class TestingConfig(BaseConfig):

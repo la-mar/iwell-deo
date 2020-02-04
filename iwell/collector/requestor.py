@@ -313,7 +313,7 @@ if __name__ == "__main__":
     # dt = datetime(year=1970, month=1, day=1)
     # ts = int(dt.timestamp())
 
-    endpoint = endpoints["production"]
+    endpoint = endpoints["well_groups"]
     endpoint.since_offset = timedelta(days=365)
     endpoint.start_offset = None  # timedelta(days=1)
     # endpoint.mode

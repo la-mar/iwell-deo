@@ -5,6 +5,7 @@ import itertools
 
 from util.stringprocessor import StringProcessor
 from util.jsontools import DateTimeEncoder
+from util.itertools import query
 
 
 def urljoin(base: str = "", path: str = "") -> str:

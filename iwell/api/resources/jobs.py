@@ -1,12 +1,16 @@
 from typing import Tuple
 import logging
 
+import boto3
 from flask_restful import Resource
 from flask import request
 
 import collector.tasks
 from config import get_active_config
 from collector.endpoint import load_from_config
+import util.sqs
+
+__all__ = ["RunJob", "JobCount"]
 
 
 logger = logging.getLogger(__name__)
@@ -40,6 +44,10 @@ class RunJob(Resource):
         )
 
 
-# class ListEndpoints(Resource):
-#     def get(self):
-#         list(load_from_config(conf).keys():)
+class JobCount(Resource):
+    def get(self):
+
+        queue_name = conf.CELERY_DEFAULT_QUEUE
+        message_count = util.sqs.get_message_count(queue_name)
+
+        return {"queue": queue_name, "count": message_count}

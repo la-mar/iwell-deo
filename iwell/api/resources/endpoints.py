@@ -108,9 +108,10 @@ if __name__ == "__main__":
 
     app = create_app()
     app.app_context().push()
-    endpoint = "wells"
+    endpoint = "well_groups"
 
     ep = endpoints[endpoint]
     task = sync_tasks[endpoint]
 
     describe_endpoint(endpoint)
+
