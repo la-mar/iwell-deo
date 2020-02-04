@@ -293,6 +293,14 @@ version = "*"
 toml = ["toml"]
 
 [[package]]
+category = "main"
+description = "A Python library that converts cron expressions into human readable strings."
+name = "cron-descriptor"
+optional = false
+python-versions = "*"
+version = "1.2.24"
+
+[[package]]
 category = "dev"
 description = "Composable style cycles"
 name = "cycler"
@@ -479,6 +487,14 @@ eventlet = ["eventlet (>=0.9.7)"]
 gevent = ["gevent (>=0.13)"]
 setproctitle = ["setproctitle"]
 tornado = ["tornado (>=0.2)"]
+
+[[package]]
+category = "main"
+description = "python humanize utilities"
+name = "humanize"
+optional = false
+python-versions = "*"
+version = "0.5.1"
 
 [[package]]
 category = "dev"
@@ -1355,7 +1371,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["pathlib2", "contextlib2", "unittest2"]
 
 [metadata]
-content-hash = "1dc9b18f7137be47911ac9d60c11cf9a293c271ed19362285afe330a56b4689d"
+content-hash = "e7b36861f085fe512428ceeee8d9c7d91eb1a806ace0e6c2b1f0d73221cbef27"
 python-versions = "^3.7"
 
 [metadata.files]
@@ -1474,6 +1490,9 @@ coverage = [
     {file = "coverage-5.0.1-cp39-cp39m-win_amd64.whl", hash = "sha256:b7dbc5e8c39ea3ad3db22715f1b5401cd698a621218680c6daf42c2f9d36e205"},
     {file = "coverage-5.0.1.tar.gz", hash = "sha256:5ac71bba1e07eab403b082c4428f868c1c9e26a21041436b4905c4c3d4e49b08"},
 ]
+cron-descriptor = [
+    {file = "cron_descriptor-1.2.24.tar.gz", hash = "sha256:b0d4d1637d7f26e322c0fb4018aea6028b5ba5ea2e8c228231e2870cbfcef2c0"},
+]
 cycler = [
     {file = "cycler-0.10.0-py2.py3-none-any.whl", hash = "sha256:1d8a5ae1ff6c5cf9b93e8811e581232ad8920aeec647c37316ceac982b08cb2d"},
     {file = "cycler-0.10.0.tar.gz", hash = "sha256:cd7b2d1018258d7247a71425e9f26463dfb444d411c39569972f4ce586b0c9d8"},
@@ -1529,6 +1548,9 @@ flower = [
 gunicorn = [
     {file = "gunicorn-20.0.4-py2.py3-none-any.whl", hash = "sha256:cd4a810dd51bf497552cf3f863b575dabd73d6ad6a91075b65936b151cbf4f9c"},
     {file = "gunicorn-20.0.4.tar.gz", hash = "sha256:1904bb2b8a43658807108d59c3f3d56c2b6121a701161de0ddf9ad140073c626"},
+]
+humanize = [
+    {file = "humanize-0.5.1.tar.gz", hash = "sha256:a43f57115831ac7c70de098e6ac46ac13be00d69abbf60bdcac251344785bb19"},
 ]
 hypothesis = [
     {file = "hypothesis-4.57.1-py3-none-any.whl", hash = "sha256:94f0910bc87e0ae8c098f4ada28dfdc381245e0c8079c674292b417dbde144b5"},

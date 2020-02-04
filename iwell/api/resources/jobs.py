@@ -16,7 +16,11 @@ conf = get_active_config()
 
 class RunJob(Resource):
     def post(self, endpoint: str):
-        mode = request.args.get("mode", "sync")
+        mode = request.args.get("mode")
+        if not mode and request.json:
+            mode = request.json.get("mode", "sync")
+        if not mode:
+            mode = "sync"
 
         kwargs = {}
         if mode:
@@ -31,7 +35,7 @@ class RunJob(Resource):
         logger.warning(f"Submitted job {endpoint} mode={mode}")
 
         return (
-            {"status": "success", "job_id": async_result.id,},
+            {"status": "success", "job_id": async_result.id, "mode": mode},
             200,
         )
 

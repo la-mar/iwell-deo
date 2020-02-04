@@ -13,7 +13,7 @@ conf = TestingConfig()
 # endpoints = config.endpoints
 # functions = config.functions
 
-from celery_queue.worker import Task, tasks_from_app_config
+from celery_queue.task import Task
 from celery.schedules import crontab
 
 

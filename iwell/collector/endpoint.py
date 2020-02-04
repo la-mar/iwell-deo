@@ -19,6 +19,7 @@ conf = get_active_config()
 class Endpoint(object):
     since_offset = {"minutes": conf.API_DEFAULT_SYNC_WINDOW_MINUTES}
     start_offset = {"days": conf.API_DEFAULT_SYNC_START_OFFSET_DAYS}
+    mode = "sync"
 
     def __init__(
         self,
@@ -55,7 +56,7 @@ class Endpoint(object):
         self.options = options or []
         self.enabled = enabled
         self.since_offset = dt.timedelta(**(since_offset or self.since_offset))  # type: ignore
-        self.mode = mode
+        self.mode = mode or self.mode
         self.start_offset = dt.timedelta(**(start_offset or self.start_offset))  # type: ignore
 
     def __repr__(self):

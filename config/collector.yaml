@@ -124,7 +124,7 @@ endpoints:
         cron:
           minute: 0
           hour: 3
-          day_of_week: 0
+          # day_of_week: 0
   field_values:
     <<: *default_status
     model: api.models.FieldValue

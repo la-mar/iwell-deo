@@ -10,6 +10,8 @@ import tomlkit
 import yaml
 from attrdict import AttrDict
 from sqlalchemy.engine.url import URL
+from pytz import timezone
+
 
 """ Optional Pandas display settings"""
 pd.options.display.max_rows = None
@@ -179,6 +181,7 @@ class BaseConfig:
     API_DEFAULT_SYNC_START_OFFSET_DAYS = os.getenv(
         "IWELL_DEFAULT_SYNC_START_OFFSET_DAYS", 90
     )
+    API_TIMEZONE = timezone("US/Central")
 
     @property
     def show(self):

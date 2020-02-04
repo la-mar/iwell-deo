@@ -310,7 +310,6 @@ if __name__ == "__main__":
     endpoints = load_from_config(conf)
     functions = conf.functions
     url = conf.API_BASE_URL
-
     # dt = datetime(year=1970, month=1, day=1)
     # ts = int(dt.timestamp())
 
