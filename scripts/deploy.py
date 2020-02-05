@@ -101,8 +101,8 @@ def get_task_definition(
                 {
                     "name": "iwell-web",
                     "command": ["iwell", "run", "web", "-b 0.0.0.0:80",],
-                    "memoryReservation": 128,
-                    "cpu": 128,
+                    "memoryReservation": 256,
+                    "cpu": 256,
                     "image": IMAGE_NAME,
                     "essential": True,
                     "portMappings": [
