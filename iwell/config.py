@@ -143,6 +143,7 @@ class BaseConfig:
         "database": DATABASE_NAME,
     }
     SQLALCHEMY_DATABASE_URI = str(make_url(DATABASE_URL_PARAMS))
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEFAULT_EXCLUSIONS = ["updated_at", "inserted_at"]
 
     """ Celery """
@@ -262,7 +263,7 @@ class DevelopmentConfig(BaseConfig):
 
     DEBUG_TB_ENABLED = True
     SECRET_KEY = os.getenv("SECRET_KEY", "dev")
-    SQLALCHEMY_TRACK_MODIFICATIONS = True
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     CONFIG_BASEPATH = "./config"
     COLLECTOR_CONFIG_PATH = make_config_path(CONFIG_BASEPATH, "collector.dev.yaml")
     COLLECTOR_CONFIG = load_config(COLLECTOR_CONFIG_PATH)
@@ -300,8 +301,8 @@ class ProductionConfig(BaseConfig):
     """Production configuration"""
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    CELERYD_PREFETCH_MULTIPLIER = 8
-    CELERYD_CONCURRENCY = 12
+    CELERYD_PREFETCH_MULTIPLIER = 25
+    CELERYD_CONCURRENCY = 4
     LOG_FORMAT = "json"
 
 
