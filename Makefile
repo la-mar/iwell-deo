@@ -135,4 +135,5 @@ compose:
 	# run docker-compose using aws-vault session credentials
 	aws-vault exec prod -- docker-compose up
 
-
+secret-key:
+	python3 -c 'import secrets; print(secrets.token_urlsafe(256));'
