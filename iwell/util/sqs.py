@@ -1,7 +1,7 @@
 from typing import Union
 
 import boto3
-from util.itertools import query
+from util.itertools_ import query
 
 
 def get_message_count(queue_name: str) -> Union[int, None]:
