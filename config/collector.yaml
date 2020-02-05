@@ -203,7 +203,7 @@ endpoints:
       sync:
         cron:
           minute: 0
-          hour: "*/1"
+          hour: "*/4"
       full:
         <<: *default_full
   production:
