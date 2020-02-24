@@ -106,6 +106,8 @@ module "worker_autoscaler" {
   queue1              = "iwell-celery"
   scale_in_threshold  = var.worker_scale_in_threshold
   scale_out_threshold = var.worker_scale_out_threshold
+  scale_in_cooldown   = var.worker_scale_in_cooldown
+  scale_out_cooldown  = var.worker_scale_out_cooldown
 }
 
 resource "aws_ecs_service" "iwell_cron" {

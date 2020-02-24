@@ -22,6 +22,16 @@ variable "worker_scale_out_threshold" {
   type        = number
 }
 
+variable "worker_scale_in_cooldown" {
+  description = "Cooldown, in seconds, between triggering scale in events"
+  type        = number
+}
+
+variable "worker_scale_out_cooldown" {
+  description = "Cooldown, in seconds, between triggering scale out events"
+  type        = number
+}
+
 variable "service_port" {
   description = "Web service port"
 }
