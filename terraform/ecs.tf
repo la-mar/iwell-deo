@@ -101,7 +101,7 @@ module "worker_autoscaler" {
   source              = "./service_target_tracking"
   cluster_name        = data.terraform_remote_state.ecs_cluster.outputs.cluster_name
   service_name        = aws_ecs_service.iwell_worker.name
-  min_capacity        = 1
+  min_capacity        = 2
   max_capacity        = 5
   queue1              = "iwell-celery"
   scale_in_threshold  = var.worker_scale_in_threshold
