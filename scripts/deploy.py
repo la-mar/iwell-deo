@@ -140,8 +140,8 @@ def get_task_definition(
                 {
                     "name": "iwell-cron",
                     "command": ["iwell", "run", "cron"],
-                    "memoryReservation": 256,
-                    "cpu": 256,
+                    "memoryReservation": 512,
+                    "cpu": 384,
                     "image": IMAGE_NAME,
                     "essential": True,
                 },
