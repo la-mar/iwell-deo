@@ -62,11 +62,10 @@ def setup_periodic_tasks(sender, **kwargs):
             logger.warning("Task %s is DISABLED -- skipping", task.task_name)
 
     sender.add_periodic_task(
-        30, post_heartbeat, name="heartbeat",
+        60, post_heartbeat.s(), name="heartbeat",
     )
 
 
 @after_setup_logger.connect
 def setup_loggers(logger, *args, **kwargs):  # pylint: disable=unused-argument
     loggers.config(logger=logger)
-

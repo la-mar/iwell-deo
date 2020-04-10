@@ -26,10 +26,10 @@ services:
     <<: *defaults
     user: celeryuser
     command: iwell run worker
-  # cron:
-  #   <<: *defaults
-  #   user: celeryuser
-  #   command: iwell run cron --loglevel=DEBUG
+  cron:
+    <<: *defaults
+    user: celeryuser
+    command: iwell run cron --loglevel=DEBUG
   redis:
     image: redis
     ports:
