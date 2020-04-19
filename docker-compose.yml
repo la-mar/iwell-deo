@@ -29,7 +29,7 @@ services:
   cron:
     <<: *defaults
     user: celeryuser
-    command: iwell run cron --loglevel=DEBUG
+    command: iwell run cron --loglevel=DEBUG --pidfile=
   redis:
     image: redis
     ports:
