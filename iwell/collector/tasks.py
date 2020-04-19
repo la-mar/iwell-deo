@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from celery.signals import task_postrun, setup_logging
 from celery.utils.log import get_task_logger
 from flask_sqlalchemy import Model
+import numpy as np
 
 
 # it is important that this celery instance is t`he same as the primary flask app and NOT a new instance from celery_worker.py
@@ -25,6 +26,28 @@ endpoints = load_from_config(conf)
 
 
 logger = get_task_logger(__name__)
+
+
+def log_transform(
+    x: float, vs: float = 1, hs: float = 1, ht: float = 0, vt: float = 0, mod: float = 1
+) -> float:
+    """ Default parameters yield the untransformed natural log curve.
+
+        f(x) = (vs * ln(hs * (x - ht)) + vt) + (x/mod)
+
+        vs = vertical stretch or compress
+        hs = horizontal stretch or compress
+        ht = horizontal translation
+        vt = vertical translation
+        mod = modulate growth of curve W.R.T x
+
+     """
+
+    return np.round((vs * np.log(hs * (x + ht)) + vt) + (x / mod), 2)
+
+
+def spread_countdown(x: float, vs: float = None, hs: float = None) -> float:
+    return log_transform(x=x, vs=vs or 25, hs=hs or 0.25, ht=4, vt=0, mod=4)
 
 
 @celery.task(bind=True)
@@ -106,11 +129,17 @@ def _sync_endpoint(endpoint_name: str, celery: bool = False, **kwargs):
     requestor = IWellRequestor(conf.API_BASE_URL, endpoint, **kwargs)
     errors: List[str] = []
     if endpoint.enabled:
-        for req in requestor.sync_model():
+        for idx, req in enumerate(requestor.sync_model()):
             logger.debug(f"Sending request to {req}")
             try:
                 if celery:
-                    result = collect_request.apply_async((req, endpoint))
+                    countdown = spread_countdown(idx, vs=200)
+                    logger.warning(
+                        f"scheduling task: req={req} endpoint={endpoint} countdown={countdown}"  # noqa
+                    )
+                    result = collect_request.apply_async(
+                        (req, endpoint), countdown=countdown
+                    )
                 else:
                     result = _collect_request(req, endpoint)
 
