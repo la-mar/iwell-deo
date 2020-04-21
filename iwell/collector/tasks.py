@@ -134,7 +134,7 @@ def _sync_endpoint(endpoint_name: str, celery: bool = False, **kwargs):
             try:
                 if celery:
                     countdown = spread_countdown(idx, vs=200)
-                    logger.warning(
+                    logger.info(
                         f"scheduling task: req={req} endpoint={endpoint} countdown={countdown}"  # noqa
                     )
                     result = collect_request.apply_async(

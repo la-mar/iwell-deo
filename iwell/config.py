@@ -155,7 +155,7 @@ class BaseConfig:
     )  # 10 minutes
     CELERY_TASK_SERIALIZER = "pickle"
     CELERY_ACCEPT_CONTENT = ["json", "pickle"]
-    CELERYD_MAX_TASKS_PER_CHILD = os.getenv("CELERYD_MAX_TASKS_PER_CHILD", 1000)
+    # CELERYD_MAX_TASKS_PER_CHILD = os.getenv("CELERYD_MAX_TASKS_PER_CHILD", 1000)
     # CELERYD_MAX_MEMORY_PER_CHILD = os.getenv(
     #     "CELERYD_MAX_MEMORY_PER_CHILD", 24000
     # )  # 24MB
