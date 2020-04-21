@@ -53,15 +53,17 @@ def upgrade():
         $fun$;
 
 
-        create view vw_data_table_metrics as
-        select
-            'iwell' as schema_name,
-            split_part(table_name, '.', 1) as table_name,
-            table_name as qualified_table_name,
-            rowcount as table_rowcount,
-            updated_at_min as table_oldest,
-            updated_at_max as table_newest
-        from public.table_metrics('public') t(table_name varchar, rowcount bigint, updated_at_min timestamptz, updated_at_max timestamptz)order by updated_at_max desc;
+    create or replace view vw_data_table_metrics as
+    select
+        'public' as schema_name,
+        split_part(table_name, '.', 2) as table_name,
+        table_name as qualified_table_name,
+        rowcount as table_rowcount,
+        (EXTRACT(epoch FROM now() - updated_at_max)/60)::int as min_since_last_update,
+        updated_at_min as table_oldest,
+        updated_at_max as table_newest
+    from public.table_metrics('public') t(table_name varchar, rowcount bigint, updated_at_min timestamptz, updated_at_max timestamptz)order by updated_at_max desc;
+
 
     """
     )
