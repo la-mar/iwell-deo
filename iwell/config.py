@@ -155,10 +155,10 @@ class BaseConfig:
     )  # 10 minutes
     CELERY_TASK_SERIALIZER = "pickle"
     CELERY_ACCEPT_CONTENT = ["json", "pickle"]
-    # CELERYD_MAX_TASKS_PER_CHILD = os.getenv("CELERYD_MAX_TASKS_PER_CHILD", 1000)
-    # CELERYD_MAX_MEMORY_PER_CHILD = os.getenv(
-    #     "CELERYD_MAX_MEMORY_PER_CHILD", 24000
-    # )  # 24MB
+    CELERYD_MAX_TASKS_PER_CHILD = os.getenv("CELERYD_MAX_TASKS_PER_CHILD", 1000)
+    CELERYD_MAX_MEMORY_PER_CHILD = os.getenv(
+        "CELERYD_MAX_MEMORY_PER_CHILD", 250000
+    )  # 240MB
     CELERY_ENABLE_REMOTE_CONTROL = False  # required for sqs
     CELERY_SEND_EVENTS = False  # required for sqs
     CELERY_DEFAULT_QUEUE = "iwell-celery"  # sqs queue name
