@@ -299,9 +299,9 @@ if __name__ == "__main__":
     from collector.endpoint import load_from_config
     from config import get_active_config
     from collector.collector import Collector, IWellCollector
+    import loggers
 
-    logging.basicConfig()
-    logger.setLevel(10)
+    loggers.config(level=10, formatter="layman")
 
     app = create_app()
     app.app_context().push()
@@ -313,7 +313,7 @@ if __name__ == "__main__":
     # dt = datetime(year=1970, month=1, day=1)
     # ts = int(dt.timestamp())
 
-    endpoint = endpoints["well_groups"]
+    endpoint = endpoints["production"]
     endpoint.since_offset = timedelta(days=365)
     endpoint.start_offset = None  # timedelta(days=1)
     # endpoint.mode
@@ -322,7 +322,7 @@ if __name__ == "__main__":
 
     # req = r.enqueue_with_ids(well_id=20338, field_id=3051)  # field_values
     # req = r.enqueue_with_ids(tank_id=17928)  # tank_readings
-    # req = r.enqueue_with_ids(well_id=20336)  # production
+    req = r.enqueue_with_ids(well_id=16677)  # production
 
     # req = r.enqueue_with_ids(tank_id=17928, reading_id=7272486)  # tank_readings
     # req.params.update(
@@ -330,7 +330,7 @@ if __name__ == "__main__":
     # )
     # req.params["since"] = int(float(req.params["since"]))
     # req.params
-    # resp = req.get()
+    resp = req.get()
 
     # df = c.transform(resp.json()["data"])
     # df

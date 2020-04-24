@@ -155,10 +155,10 @@ class BaseConfig:
     )  # 10 minutes
     CELERY_TASK_SERIALIZER = "pickle"
     CELERY_ACCEPT_CONTENT = ["json", "pickle"]
-    CELERYD_MAX_TASKS_PER_CHILD = os.getenv("CELERYD_MAX_TASKS_PER_CHILD", 1000)
+    # CELERYD_MAX_TASKS_PER_CHILD = os.getenv("CELERYD_MAX_TASKS_PER_CHILD", 1000)
     CELERYD_MAX_MEMORY_PER_CHILD = os.getenv(
-        "CELERYD_MAX_MEMORY_PER_CHILD", 250000
-    )  # 240MB
+        "CELERYD_MAX_MEMORY_PER_CHILD", 200000
+    )  # 200MB
     CELERY_ENABLE_REMOTE_CONTROL = False  # required for sqs
     CELERY_SEND_EVENTS = False  # required for sqs
     CELERY_DEFAULT_QUEUE = "iwell-celery"  # sqs queue name
@@ -301,7 +301,7 @@ class ProductionConfig(BaseConfig):
     """Production configuration"""
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    CELERYD_PREFETCH_MULTIPLIER = 25
+    CELERYD_PREFETCH_MULTIPLIER = 5
     CELERYD_CONCURRENCY = 4
     LOG_FORMAT = "json"
 

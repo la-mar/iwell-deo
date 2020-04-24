@@ -6,7 +6,7 @@ default_schedule: &default_schedule
 job_defaults:
   sync: &default_sync
     mode: sync
-    seconds: 600
+    seconds: 900
   full: &default_full
     mode: full
     cron:
@@ -33,7 +33,9 @@ endpoints:
     version: v1
     tasks:
       sync:
-        <<: *default_sync
+        cron:
+          minute: 0
+          hour: 0
       full:
         <<: *default_full
   wells:
@@ -53,7 +55,7 @@ endpoints:
     version: v1
     tasks:
       sync:
-        <<: *default_sync
+        seconds: 3600
       full:
         <<: *default_full
   tanks:
@@ -76,7 +78,10 @@ endpoints:
           minute: 0
           hour: "*/3"
       full:
-        <<: *default_full
+        mode: full
+        cron:
+          minute: 30
+          hour: 19
   fields:
     <<: *default_status
     model: api.models.Field
@@ -95,6 +100,11 @@ endpoints:
       sync:
         cron:
           minute: 0
+      full:
+        mode: full
+        cron:
+          minute: 40
+          hour: 19
   tank_readings: # requires 'start' instead of 'since' parameter
     <<: *default_status
     model: api.models.TankReading
@@ -122,9 +132,8 @@ endpoints:
       full:
         mode: full
         cron:
-          minute: 0
-          hour: 3
-          # day_of_week: 0
+          minute: 15
+          hour: 20
   field_values:
     <<: *default_status
     model: api.models.FieldValue
@@ -144,15 +153,18 @@ endpoints:
     normalize: false
     version: v1
     since_offset:
-      minutes: 60
+      minutes: 120
     # start_offset:
     #   days:
     tasks:
       sync:
         mode: sync
-        seconds: 60
+        seconds: 120
       full:
-        <<: *default_full
+        mode: full
+        cron:
+          minute: 15
+          hour: 20
   meters:
     <<: *default_status
     model: api.models.Meter
@@ -202,10 +214,14 @@ endpoints:
     tasks:
       sync:
         cron:
-          minute: 0
+          minute: 35
           hour: "*/4"
       full:
-        <<: *default_full
+        mode: full
+        cron:
+          minute: 45
+          hour: 5
+          day_of_week: 1
   production:
     enabled: true
     model: api.models.Production
@@ -223,12 +239,18 @@ endpoints:
         date: reported_date
     normalize: false
     version: v1
+    since_offset:
+      minutes: 120
     tasks:
       sync:
         mode: sync
-        seconds: 60
+        seconds: 120
       full:
-        <<: *default_full
+        mode: full
+        cron:
+          minute: 45
+          hour: 2
+          day_of_week: 0
   run_tickets:  # 'since' parameter doesn't appear to work
     <<: *default_status
     model: api.models.RunTicket
@@ -251,8 +273,13 @@ endpoints:
         cron:
           minute: 0
           hour: "*/6"
-      # full:
-      #   <<: *default_full
+      full:
+        mode: full
+        cron:
+          minute: 45
+          hour: 2
+          day_of_week: 1
+
   well_fields:
     <<: *default_status
     model: api.models.WellField
@@ -277,7 +304,13 @@ endpoints:
     tasks:
       sync:
         cron:
-          minute: 0
+          minute: 20
+      full:
+        mode: full
+        cron:
+          minute: 45
+          hour: 2
+          day_of_week: 2
   well_groups:
     <<: *default_status
     model: api.models.WellGroup
@@ -294,9 +327,13 @@ endpoints:
     tasks:
       sync:
         cron:
-          minute: 0
+          minute: 25
       full:
-        <<: *default_full
+        mode: full
+        cron:
+          minute: 45
+          hour: 2
+          day_of_week: 3
   well_group_wells:
     <<: *default_status
     model: api.models.WellGroupWell
@@ -318,7 +355,13 @@ endpoints:
     tasks:
       sync:
         cron:
-          minute: 0
+          minute: 15
+      full:
+        mode: full
+        cron:
+          minute: 45
+          hour: 2
+          day_of_week: 4
   well_notes:
     <<: *default_status
     model: api.models.WellNote
@@ -337,9 +380,13 @@ endpoints:
     version: v1
     tasks:
       sync:
-        <<: *default_sync
+        seconds: 450
       full:
-        <<: *default_full
+        mode: full
+        cron:
+          minute: 45
+          hour: 2
+          day_of_week: 5
   well_tanks:
     <<: *default_status
     model: api.models.WellTank
@@ -362,7 +409,13 @@ endpoints:
     tasks:
       sync:
         cron:
-          minute: 0
+          minute: 10
+      full:
+        mode: full
+        cron:
+          minute: 45
+          hour: 2
+          day_of_week: 6
 functions:
   since:
     alternatives: null

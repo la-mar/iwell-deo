@@ -1,3 +1,5 @@
+FROM segment/chamber:2.7.5 as build
+
 FROM python:3.7 as base
 
 LABEL "com.datadoghq.ad.logs"='[{"source": "python","service": "iwell"}]'
@@ -16,7 +18,7 @@ ENV PYTHONPATH=/app/iwell
 
 # Install Poetry & ensure it is in $PATH
 RUN pip install "poetry==$POETRY_VERSION"
-ENV PATH "/root/.poetry/bin:/opt/venv/bin:${PATH}"
+ENV PATH "/root/.poetry/bin:/opt/venv/bin:/:${PATH}"
 
 # copy only requirements to cache them in docker layer
 WORKDIR /app
@@ -36,3 +38,7 @@ COPY . /app
 # create unprivileged user
 RUN groupadd -r celeryuser && useradd -r -m -g celeryuser celeryuser
 RUN find /app ! -user celeryuser -exec chown celeryuser {} \;
+
+COPY --from=build /chamber /chamber
+
+# ENTRYPOINT ["/chamber", "exec", "iwell", "datadog", "--"]
