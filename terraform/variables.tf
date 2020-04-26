@@ -35,3 +35,13 @@ variable "worker_scale_out_cooldown" {
 variable "service_port" {
   description = "Web service port"
 }
+
+variable "worker_min_capacity" {
+  description = "Minimum number of autoscaled containers"
+  type        = number
+}
+
+variable "worker_max_capacity" {
+  description = "Maximum number of autoscaled containers"
+  type        = number
+}
