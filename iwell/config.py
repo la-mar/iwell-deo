@@ -107,8 +107,8 @@ class BaseConfig:
 
     """ Datadog """
     DATADOG_ENABLED = os.getenv("DATADOG_ENABLED", False)
-    DATADOG_API_KEY = os.getenv("DATADOG_API_KEY", None)
-    DATADOG_APP_KEY = os.getenv("DATADOG_APP_KEY", None)
+    DATADOG_API_KEY = os.getenv("DATADOG_API_KEY", os.getenv("DD_API_KEY", None))
+    DATADOG_APP_KEY = os.getenv("DATADOG_APP_KEY", os.getenv("DD_APP_KEY", None))
     DATADOG_DEFAULT_TAGS = {
         "environment": ENVIRONMENT_MAP.get(FLASK_ENV, FLASK_ENV),
         "service_name": project,
@@ -157,8 +157,9 @@ class BaseConfig:
     CELERY_ACCEPT_CONTENT = ["json", "pickle"]
     CELERYD_MAX_TASKS_PER_CHILD = int(os.getenv("CELERYD_MAX_TASKS_PER_CHILD", 100))
     CELERYD_MAX_MEMORY_PER_CHILD = int(
-        os.getenv("CELERYD_MAX_MEMORY_PER_CHILD", 10000)
-    )  # 100MB
+        os.getenv("CELERYD_MAX_MEMORY_PER_CHILD", 24000)
+    )  # 24MB
+
     CELERY_ENABLE_REMOTE_CONTROL = False  # required for sqs
     CELERY_SEND_EVENTS = False  # required for sqs
     CELERY_DEFAULT_QUEUE = "iwell-celery"  # sqs queue name
