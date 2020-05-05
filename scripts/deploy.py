@@ -143,7 +143,7 @@ def get_task_definition(
                         "worker",
                     ],
                     "memoryReservation": 512,
-                    "memory": 1024,
+                    # "memory": 512,
                     "cpu": 256,
                     "image": IMAGE_NAME,
                     "essential": True,
