@@ -7,6 +7,12 @@ IMAGE_NAME:=driftwood/iwell
 DOCKERFILE:=Dockerfile
 APP_VERSION=$$(grep -o '\([0-9]\+.[0-9]\+.[0-9]\+\)' pyproject.toml | head -n1)
 
+ssm:
+	chamber export ${SERVICE_NAME} | jq
+	chamber export ${SERVICE_NAME}-worker | jq
+	chamber export ${SERVICE_NAME}-cron | jq
+	chamber export ${SERVICE_NAME}-web | jq
+
 test-appversion:
 	@echo $$(pyappversion)
 
