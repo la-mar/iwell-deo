@@ -314,7 +314,7 @@ if __name__ == "__main__":
     # ts = int(dt.timestamp())
 
     endpoint = endpoints["production"]
-    endpoint.since_offset = timedelta(days=365)
+    endpoint.since_offset = timedelta(days=30)
     endpoint.start_offset = None  # timedelta(days=1)
     # endpoint.mode
     r = IWellRequestor(url, endpoint, mode="full")
@@ -322,7 +322,7 @@ if __name__ == "__main__":
 
     # req = r.enqueue_with_ids(well_id=20338, field_id=3051)  # field_values
     # req = r.enqueue_with_ids(tank_id=17928)  # tank_readings
-    req = r.enqueue_with_ids(well_id=16677)  # production
+    req = r.enqueue_with_ids(well_id=17417)  # production
 
     # req = r.enqueue_with_ids(tank_id=17928, reading_id=7272486)  # tank_readings
     # req.params.update(

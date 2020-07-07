@@ -2,16 +2,17 @@ SHELL := /bin/zsh
 COMMIT_HASH    := $$(git log -1 --pretty=%h)
 DATE := $$(date +"%Y-%m-%d")
 CTX:=.
+ENV:=deo-prod
 AWS_ACCOUNT_ID:=$$(aws-vault exec ${ENV} -- aws sts get-caller-identity | jq .Account -r)
 IMAGE_NAME:=driftwood/iwell
 DOCKERFILE:=Dockerfile
 APP_VERSION=$$(grep -o '\([0-9]\+.[0-9]\+.[0-9]\+\)' pyproject.toml | head -n1)
 
 ssm:
-	chamber export ${SERVICE_NAME} | jq
-	chamber export ${SERVICE_NAME}-worker | jq
-	chamber export ${SERVICE_NAME}-cron | jq
-	chamber export ${SERVICE_NAME}-web | jq
+	aws-vault exec ${ENV} -- chamber export ${SERVICE_NAME} | jq
+	aws-vault exec ${ENV} -- chamber export ${SERVICE_NAME}-worker | jq
+	aws-vault exec ${ENV} -- chamber export ${SERVICE_NAME}-cron | jq
+	aws-vault exec ${ENV} -- chamber export ${SERVICE_NAME}-web | jq
 
 test-appversion:
 	@echo $$(pyappversion)

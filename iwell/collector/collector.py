@@ -138,7 +138,7 @@ if __name__ == "__main__":
 
     config = get_active_config()
     endpoints = load_from_config(config)
-    endpoint = endpoints["field_values"]
+    endpoint = endpoints["production"]
 
     c = IWellCollector(endpoint)
     c.model
