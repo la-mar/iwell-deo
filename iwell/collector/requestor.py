@@ -316,27 +316,15 @@ if __name__ == "__main__":
     endpoint = endpoints["production"]
     endpoint.since_offset = timedelta(days=30)
     endpoint.start_offset = None  # timedelta(days=1)
-    # endpoint.mode
+    dir(endpoint)
     r = IWellRequestor(url, endpoint, mode="full")
     c = IWellCollector(endpoint)
 
     # req = r.enqueue_with_ids(well_id=20338, field_id=3051)  # field_values
     # req = r.enqueue_with_ids(tank_id=17928)  # tank_readings
-    req = r.enqueue_with_ids(well_id=17417)  # production
-
-    # req = r.enqueue_with_ids(tank_id=17928, reading_id=7272486)  # tank_readings
-    # req.params.update(
-    #     {"start": (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")}
-    # )
-    # req.params["since"] = int(float(req.params["since"]))
-    # req.params
-    resp = req.get()
-
-    # df = c.transform(resp.json()["data"])
-    # df
-    # df.shape
-    # df.produced_at.min()
-    # # c.collect(resp)
+    # req = r.enqueue_with_ids(well_id=17417)  # production
+    # resp = req.get()
+    # c.collect(resp)
 
     responses = []
     for req in r.sync_model():
@@ -344,14 +332,3 @@ if __name__ == "__main__":
 
     for resp in responses:
         c.collect(resp)
-
-    df = pd.DataFrame()
-    for resp in responses:
-        df = df.append(c.transform(resp.json()["data"]))
-
-    df.iwell_updated_at.min()
-
-    # df.shape
-    # ts = resp.request.path_url.split("=")[-1]
-    # pd.Timestamp(datetime.now()) - endpoint.timedelta < df.iwell_updated_at.min()
-    # pd.Timestamp(datetime.now()) - df.iwell_updated_at.min()

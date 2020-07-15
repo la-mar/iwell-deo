@@ -101,7 +101,7 @@ def _collect_request(request: Request, endpoint: Endpoint):
     # logger.warning(response)
     if not response.ok:
         if response.status_code == 404:
-            logger.info(f"{request}: Resource not found")
+            logger.warning(f"{request}: Resource not found")
         else:
             raise Exception(
                 f"GET {response.url} returned unexpected response code: {response.status_code}"

@@ -139,11 +139,11 @@ endpoints:
         mode: sync
         cron:
           minute: "*/12"
-      full:
-        mode: full
-        cron:
-          minute: 15
-          hour: 20
+      # full:
+      #   mode: full
+      #   cron:
+      #     minute: 15
+      #     hour: 20
   field_values:
     <<: *default_status
     model: api.models.FieldValue
@@ -172,11 +172,11 @@ endpoints:
         cron:
           minute: "*/21"
           # hour: 22
-      full:
-        mode: full
-        cron:
-          minute: 14
-          hour: 22
+      # full:
+      #   mode: full
+      #   cron:
+      #     minute: 14
+      #     hour: 22
   meters:
     <<: *default_status
     model: api.models.Meter
@@ -255,18 +255,18 @@ endpoints:
         date: reported_date
     normalize: false
     version: v1
-    since_offset:
-      minutes: 15
+    # since_offset:
+    #   minutes: 15
     tasks:
       sync:
         mode: sync
-        seconds: 900
+        seconds: 3600
       full:
         mode: full
         cron:
           minute: 45
           hour: 2
-          day_of_week: 0
+          # day_of_week: 0
   run_tickets:  # 'since' parameter doesn't appear to work
     <<: *default_status
     model: api.models.RunTicket
