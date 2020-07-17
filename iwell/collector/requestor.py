@@ -300,6 +300,7 @@ if __name__ == "__main__":
     from config import get_active_config
     from collector.collector import Collector, IWellCollector
     import loggers
+    from celery_queue.task import Task
 
     loggers.config(level=10, formatter="layman")
 
@@ -313,11 +314,18 @@ if __name__ == "__main__":
     # dt = datetime(year=1970, month=1, day=1)
     # ts = int(dt.timestamp())
 
+    tasks = Task.from_config(conf)
+
+    task = tasks[14]
+    dir(task)
+
     endpoint = endpoints["production"]
+    endpoint
     endpoint.since_offset = timedelta(days=30)
-    endpoint.start_offset = None  # timedelta(days=1)
+    endpoint.start_offset = timedelta(days=7)
     dir(endpoint)
-    r = IWellRequestor(url, endpoint, mode="full")
+    # r = IWellRequestor(url, endpoint, mode="full",)
+    r = IWellRequestor(url, endpoint, mode=task.mode, **task.options)
     c = IWellCollector(endpoint)
 
     # req = r.enqueue_with_ids(well_id=20338, field_id=3051)  # field_values

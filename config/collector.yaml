@@ -255,12 +255,12 @@ endpoints:
         date: reported_date
     normalize: false
     version: v1
-    # since_offset:
-    #   minutes: 15
+    since_offset:
+      days: 7
     tasks:
       sync:
         mode: sync
-        seconds: 3600
+        seconds: 900
       full:
         mode: full
         cron:
