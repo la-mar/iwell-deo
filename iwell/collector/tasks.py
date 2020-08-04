@@ -128,8 +128,9 @@ def sync_production(self):
     task = {t.qualified_name: t for t in Task.from_config(conf)}["production/sync"]
     r = IWellRequestor(conf.API_BASE_URL, endpoint, mode=task.mode, **task.options)
 
-    for req in r.sync_model():
-        collect_request.apply_async((req, endpoint))
+    for idx, req in enumerate(r.sync_model()):
+
+        collect_request.apply_async((req, endpoint), countdown=30 * idx)
 
 
 @celery.task(bind=True, rate_limit="100/s", ignore_result=True)
