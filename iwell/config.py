@@ -156,9 +156,9 @@ class BaseConfig:
     CELERY_TASK_SERIALIZER = "pickle"
     CELERY_ACCEPT_CONTENT = ["json", "pickle"]
     CELERYD_MAX_TASKS_PER_CHILD = int(os.getenv("CELERYD_MAX_TASKS_PER_CHILD", 100))
-    CELERYD_MAX_MEMORY_PER_CHILD = int(
-        os.getenv("CELERYD_MAX_MEMORY_PER_CHILD", 24000)
-    )  # 24MB
+    # CELERYD_MAX_MEMORY_PER_CHILD = int(
+    #     os.getenv("CELERYD_MAX_MEMORY_PER_CHILD", 24000)
+    # )  # 24MB
 
     CELERY_ENABLE_REMOTE_CONTROL = False  # required for sqs
     CELERY_SEND_EVENTS = False  # required for sqs
