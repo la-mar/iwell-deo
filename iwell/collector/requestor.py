@@ -321,7 +321,7 @@ if __name__ == "__main__":
 
     endpoint = endpoints["production"]
     endpoint
-    endpoint.since_offset = timedelta(days=30)
+    endpoint.since_offset = timedelta(days=7)
     endpoint.start_offset = timedelta(days=7)
     dir(endpoint)
     # r = IWellRequestor(url, endpoint, mode="full",)

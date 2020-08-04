@@ -19,6 +19,7 @@ from collector.requestor import IWellRequestor
 from collector.request import Request
 from collector.endpoint import Endpoint
 from config import get_active_config, project
+from celery_queue.task import Task
 import metrics
 
 conf = get_active_config()
@@ -116,6 +117,19 @@ def _collect_request(request: Request, endpoint: Endpoint):
             tags={"model": endpoint.model.__table__.name, "operation": operation},
         )
     return result
+
+
+@celery.task(bind=True, ignore_result=True)
+def sync_production(self):
+    endpoint = endpoints["production"]
+    endpoint.since_offset = timedelta(days=30)
+    endpoint.start_offset = timedelta(days=30)
+
+    task = {t.qualified_name: t for t in Task.from_config(conf)}["production/sync"]
+    r = IWellRequestor(conf.API_BASE_URL, endpoint, mode=task.mode, **task.options)
+
+    for req in r.sync_model():
+        collect_request.apply_async((req, endpoint))
 
 
 @celery.task(bind=True, rate_limit="100/s", ignore_result=True)

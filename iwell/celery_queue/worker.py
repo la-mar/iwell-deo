@@ -11,7 +11,7 @@ from celery.signals import after_setup_logger  # after_setup_task_logger
 from celery_queue.task import Task
 import loggers
 import collector.endpoint
-from collector.tasks import post_heartbeat, sync_endpoint
+from collector.tasks import post_heartbeat, sync_endpoint, sync_production
 from config import get_active_config
 from iwell import create_app
 
@@ -63,6 +63,10 @@ def setup_periodic_tasks(sender, **kwargs):
 
     sender.add_periodic_task(
         60, post_heartbeat.s(), name="heartbeat",
+    )
+
+    sender.add_periodic_task(
+        900, sync_production.s(), name="heartbeat",
     )
 
 
