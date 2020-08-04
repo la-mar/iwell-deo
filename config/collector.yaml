@@ -257,6 +257,8 @@ endpoints:
     version: v1
     since_offset:
       days: 7
+    start_offset:
+      days: 7
     tasks:
       sync:
         mode: sync
