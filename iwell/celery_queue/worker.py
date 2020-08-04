@@ -66,7 +66,7 @@ def setup_periodic_tasks(sender, **kwargs):
     )
 
     sender.add_periodic_task(
-        900, sync_production.s(), name="heartbeat",
+        900, sync_production.s(), name="sync_production",
     )
 
 
