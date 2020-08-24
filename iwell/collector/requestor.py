@@ -316,7 +316,7 @@ if __name__ == "__main__":
 
     tasks = Task.from_config(conf)
 
-    task = tasks[14]
+    task = tasks[15]
     dir(task)
 
     endpoint = endpoints["production"]

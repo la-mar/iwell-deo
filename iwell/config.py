@@ -302,8 +302,8 @@ class ProductionConfig(BaseConfig):
     """Production configuration"""
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    CELERYD_PREFETCH_MULTIPLIER = 5
-    CELERYD_CONCURRENCY = 4
+    # CELERYD_PREFETCH_MULTIPLIER = 5
+    # CELERYD_CONCURRENCY = 4
     LOG_FORMAT = "json"
 
 
