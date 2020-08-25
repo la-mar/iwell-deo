@@ -122,17 +122,23 @@ def _collect_request(request: Request, endpoint: Endpoint):
 @celery.task(bind=True, ignore_result=True)
 def sync_production(self):
     endpoint = endpoints["production"]
-    endpoint.since_offset = timedelta(days=30)
-    endpoint.start_offset = timedelta(days=30)
+    endpoint.since_offset = timedelta(days=7)
+    endpoint.start_offset = timedelta(days=7)
 
     task = {t.qualified_name: t for t in Task.from_config(conf)}["production/sync"]
     r = IWellRequestor(conf.API_BASE_URL, endpoint, mode=task.mode, **task.options)
 
-    logger.warning(f"syncing production: {req}")
     req = r.enqueue_with_ids(well_id=17417)  # dogwood
-    _collect_request(req, endpoint)
-    # for idx, req in enumerate(r.sync_model()):
-    #     collect_request.apply_async((req, endpoint), countdown=30 * idx)
+    logger.warning(f"sync_production: {req}")
+
+    c = IWellCollector(endpoint)
+    logger.warning(f"sync_production: collecting {req}")
+    response = req.get()
+    logger.warning(
+        f"sync_production response: {response}, records={len(response.json())}"
+    )
+    result = c.collect(response)
+    logger.warning(f"sync_production result: {result}")
 
 
 @celery.task(bind=True, rate_limit="100/s", ignore_result=True)
