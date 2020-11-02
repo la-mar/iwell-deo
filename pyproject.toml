@@ -43,7 +43,7 @@ black = { version = "*", allow-prereleases = true }
 mypy = "*"
 ipython = "*"
 matplotlib = "*"
-pytest = "^5.2"
+pytest = "^6.1"
 requests-mock = "^1.7"
 pytest-cov = "^2.8"
 coverage = {version = "^5.0", extras = ["toml"]}
